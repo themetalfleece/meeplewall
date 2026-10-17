@@ -13,6 +13,8 @@ import { ImageWorker } from './worker.ts';
 const HOLD_SECONDS = 60;
 const IDLE_MILLISECONDS = 2_000;
 const SOURCE_TIMEOUT_MILLISECONDS = 30_000;
+// BGG originals are a few megabytes at most; anything far larger is not a cover.
+const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 const HEALTH_CHECK_TIMEOUT_MILLISECONDS = 2_000;
 
 const logger = new JsonLogger({ write: (line) => process.stdout.write(line) });
@@ -38,6 +40,7 @@ async function main(): Promise<void> {
     holdSeconds: HOLD_SECONDS,
     idleMilliseconds: IDLE_MILLISECONDS,
     sourceTimeoutMilliseconds: SOURCE_TIMEOUT_MILLISECONDS,
+    maxSourceBytes: MAX_SOURCE_BYTES,
   });
 
   const healthServer = await HealthServer.start({

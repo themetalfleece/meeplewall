@@ -14,7 +14,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import { JsonLogger } from './logger.ts';
 import { createRevalidate } from './revalidate.ts';
-import { StubServer } from './testing/stub-server.ts';
+import { StubServer, type StubResponse } from './testing/stub-server.ts';
 import { resolveTestServices, TestServices } from './testing/test-services.ts';
 import { ImageWorker } from './worker.ts';
 
@@ -47,6 +47,7 @@ describe.skipIf(config === undefined)('ImageWorker against Postgres and minio', 
       holdSeconds: 60,
       idleMilliseconds,
       sourceTimeoutMilliseconds: 5_000,
+      maxSourceBytes: 32 * 1024 * 1024,
     });
   }
 
@@ -214,6 +215,56 @@ describe.skipIf(config === undefined)('ImageWorker against Postgres and minio', 
     expect((await readJob(job.id))?.status).toBe('ready');
     expect(await readAsset('thumb')).toBeDefined();
     expect(logLines.some((line) => line.includes('Revalidate failed with 500'))).toBe(true);
+  });
+
+  describe('when another worker takes the lease mid-job', () => {
+    /** Holds the source response until the lease has moved to another worker, then lets it through. */
+    async function processWhileLeaseIsTaken(response: Omit<StubResponse, 'waitFor'>) {
+      await addGame({ imageUrlRaw: stub.url(SOURCE_PATH) });
+      let releaseSource = () => {};
+      const sourceReleased = new Promise<void>((resolve) => {
+        releaseSource = resolve;
+      });
+      stub.route({ path: SOURCE_PATH, response: { ...response, waitFor: sourceReleased } });
+      const job = await enqueue('cover');
+
+      const processing = createWorker().processNextJob();
+      await expect.poll(() => stub.requestsTo(SOURCE_PATH).length).toBe(1);
+      await services.database
+        .update(imageJobs)
+        .set({ lockedBy: 'another-worker' })
+        .where(eq(imageJobs.id, job.id));
+      releaseSource();
+
+      return { job, outcome: await processing };
+    }
+
+    it('neither records the asset nor revalidates', async () => {
+      const { job, outcome } = await processWhileLeaseIsTaken({
+        status: 200,
+        body: sourceCover,
+        contentType: 'image/jpeg',
+      });
+
+      expect(outcome).toEqual({ jobId: job.id, status: 'lost' });
+      expect(await readJob(job.id)).toMatchObject({
+        status: 'processing',
+        lockedBy: 'another-worker',
+      });
+      expect(await readAsset('cover')).toBeUndefined();
+      expect(stub.requestsTo(REVALIDATE_PATH)).toHaveLength(0);
+    });
+
+    it('does not mark the job failed over the new holder', async () => {
+      const { job, outcome } = await processWhileLeaseIsTaken({ status: 404 });
+
+      expect(outcome).toEqual({ jobId: job.id, status: 'lost' });
+      expect(await readJob(job.id)).toMatchObject({
+        status: 'processing',
+        lockedBy: 'another-worker',
+        lastError: null,
+      });
+    });
   });
 
   it('finishes the job in hand when stopped, then returns', async () => {

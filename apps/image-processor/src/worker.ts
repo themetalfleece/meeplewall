@@ -13,6 +13,7 @@ import {
 import { processCover, type EncodedImage } from '@board-games/image-pipeline';
 import type { Storage } from '@board-games/storage';
 
+import { downloadSource } from './download-source.ts';
 import { describeError, type JsonLogger } from './logger.ts';
 import type { Revalidate } from './revalidate.ts';
 
@@ -34,13 +35,13 @@ export interface ImageWorkerOptions {
   idleMilliseconds: number;
   /** How long downloading a source image may take. Keep it well inside `holdSeconds`. */
   sourceTimeoutMilliseconds: number;
+  /** The largest source image it will download. */
+  maxSourceBytes: number;
 }
 
 // Keys are content-addressed, so a year-long immutable cache can never serve an outdated image.
 const CACHE_CONTROL = 'public, max-age=31536000, immutable';
 const KEY_SUFFIX: Record<ImageKind, string> = { cover: '', thumb: '.thumb' };
-// BGG originals are a few megabytes at most; anything far larger is not a cover.
-const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 
 /** The storage key for one processed image, with a digest of its bytes. */
 export function imageStorageKey({
@@ -55,31 +56,6 @@ export function imageStorageKey({
   const digest = createHash('sha256').update(data).digest('hex').slice(0, 16);
 
   return `covers/${bggGameId}.${digest}${KEY_SUFFIX[kind]}.webp`;
-}
-
-async function downloadSource({
-  sourceUrl,
-  timeoutMilliseconds,
-}: {
-  sourceUrl: string;
-  timeoutMilliseconds: number;
-}): Promise<Buffer> {
-  const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(timeoutMilliseconds) });
-  if (!response.ok) {
-    await response.body?.cancel();
-    throw new Error(`Source fetch failed with ${response.status}`);
-  }
-  if (Number(response.headers.get('content-length')) > MAX_SOURCE_BYTES) {
-    await response.body?.cancel();
-    throw new Error(`Source is larger than ${MAX_SOURCE_BYTES} bytes`);
-  }
-
-  const body = Buffer.from(await response.arrayBuffer());
-  if (body.byteLength > MAX_SOURCE_BYTES) {
-    throw new Error(`Source is larger than ${MAX_SOURCE_BYTES} bytes`);
-  }
-
-  return body;
 }
 
 /**
@@ -161,6 +137,7 @@ export class ImageWorker {
     const input = await downloadSource({
       sourceUrl,
       timeoutMilliseconds: this.#options.sourceTimeoutMilliseconds,
+      maxBytes: this.#options.maxSourceBytes,
     });
     const processed = await processCover({ input });
 

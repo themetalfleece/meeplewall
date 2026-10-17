@@ -30,4 +30,4 @@ SIGTERM or SIGINT stops the loop after the job in hand, closes the health server
 
 ## Tests
 
-`worker.e2e.test.ts` runs against the compose Postgres and minio in a throwaway database, with `src/testing/stub-server.ts` serving the cover and playing the revalidate route. It skips when a service is down, and fails instead under `CI`.
+`worker.e2e.test.ts` runs against the compose Postgres and minio in a throwaway database, with `src/testing/stub-server.ts` serving the cover and playing the revalidate route. It skips when a service is down, and fails instead under `CI`. Anything that needs only HTTP, such as the download caps in `download-source.test.ts`, stays in a plain suite against the stub.

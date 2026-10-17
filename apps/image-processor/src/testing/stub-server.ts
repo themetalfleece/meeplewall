@@ -14,6 +14,8 @@ export interface StubResponse {
   status: number;
   body?: Uint8Array | string;
   contentType?: string;
+  /** Extra headers, such as a `content-length` that does not match the body. */
+  headers?: Record<string, string>;
   /** Holds the response until this resolves, to keep a job in flight. */
   waitFor?: Promise<void>;
 }
@@ -103,7 +105,7 @@ export class StubServer {
       return;
     }
     await route.waitFor;
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = { ...route.headers };
     if (route.contentType !== undefined) {
       headers['content-type'] = route.contentType;
     }

@@ -26,6 +26,8 @@ Both services have healthchecks, so `docker compose ps` reports `healthy` once t
 
 Never `:latest` or another floating tag. Otherwise two machines can run different builds with no diff to explain it, and `docker compose pull` can swap the image under an existing volume. A new image starts on its latest stable release (see `.agents/skills/package-management/`), pinned exactly.
 
+A bare major such as `postgres:17` floats too. Postgres is pinned to minor and Debian release (`17.11-trixie`), because the plain `17.11` tag moves when the official image switches its base OS. Stay on the major the volume was initialised with: a major bump needs a dump and restore.
+
 ## minio comes from quay.io
 
 minio's Docker Hub namespace is gone, so the image is `quay.io/minio/minio`. Its newest published community image predates its newest source release, so "latest stable" for minio means the newest tag on quay.io, not the newest GitHub release.

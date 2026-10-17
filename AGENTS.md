@@ -53,13 +53,14 @@ Put it in the skill or nested `AGENTS.md` that owns the area. Put it here only i
 
 ## Before you finish
 
-All must pass. CI runs the first four, and formatting is a real gate:
+All must pass. CI runs the first five, and formatting is a real gate:
 
 ```bash
 pnpm format:write && pnpm format
 pnpm lint
 pnpm typecheck
 pnpm build
+pnpm test
 pnpm validate       # agent docs and links
 pnpm test:scripts   # tests for the agent doc scripts
 ```

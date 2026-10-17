@@ -9,6 +9,7 @@
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
     "build": "pnpm -r --if-present build",
+    "test": "pnpm -r --if-present test",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "validate": "node scripts/validate-agent-docs.mts",
@@ -18,6 +19,8 @@
   },
   "devDependencies": {
     "@board-games/config": "workspace:*",
-    "prettier": "^3.9.6"
+    "prettier": "catalog:dev",
+    "vite": "catalog:dev",
+    "vitest": "catalog:dev"
   }
 }

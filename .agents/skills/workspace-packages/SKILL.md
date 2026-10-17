@@ -28,7 +28,7 @@ description: >-
    That config makes `no-explicit-any`, the `no-unsafe-*` family and `consistent-type-assertions: never` errors. Fix the types instead of disabling a rule.
 
 3. Prettier re-exports `@board-games/config/prettier`, the same way as the root `prettier.config.mjs`.
-4. Name the scripts `lint`, `typecheck` and `build`. The typecheck script is `tsc --noEmit`. The base emits declarations and source maps on purpose, so a package that builds with `tsc` gets output; emit is switched off per invocation, never in the base.
+4. Name the scripts `lint`, `typecheck`, `build` and `test`. The test script is `vitest run`; the root `vitest.config.mts` lists every non-legacy workspace as a Vitest project, so `pnpm exec vitest` at the root runs them all. The typecheck script is `tsc --noEmit`. The base emits declarations and source maps on purpose, so a package that builds with `tsc` gets output; emit is switched off per invocation, never in the base.
 5. Add `@board-games/config` as a `workspace:*` dev dependency.
 
 ## Import boundary
@@ -41,9 +41,9 @@ Anything from outside the type system (an API response, a file, a database row, 
 
 ## CI
 
-`.github/workflows/ci.yml` runs, in order: `pnpm install --frozen-lockfile`, `pnpm format` (Prettier check), then `pnpm -r --if-present lint`, `typecheck` and `build`.
+`.github/workflows/ci.yml` runs, in order: `pnpm install --frozen-lockfile`, `pnpm format` (Prettier check), then `pnpm -r --if-present lint`, `typecheck`, `build` and `test`. The root `pnpm test` runs the same `test` recursion locally.
 
-`--if-present` means a package joins a gate only once it defines that script, so a new package does not need stubs. The flip side: a package with no `typecheck` script is silently unchecked. Every new package defines all three.
+`--if-present` means a package joins a gate only once it defines that script, so a new package does not need stubs. The flip side: a package with no `typecheck` script is silently unchecked. Every new package defines `lint`, `typecheck` and `build`, and adds `test` with its first test.
 
 `.github/workflows/deploy.yml` builds `web-legacy` and publishes `apps/web-legacy/dist` to GitHub Pages.
 
@@ -53,4 +53,8 @@ Anything from outside the type system (an API response, a file, a database row, 
 
 ## Versions
 
-New dependencies follow `package-management`. This repo does not use pnpm catalogs yet: manifests carry caret ranges directly. Moving to catalogs is its own task, so match the existing manifests until then.
+New dependencies follow `package-management`. Every third-party entry outside the frozen `apps/web-legacy` is a `catalog:` reference into `pnpm-workspace.yaml`. The shared lint and format tooling is in `catalog:dev` even though `packages/config` lists it under `dependencies`, because none of it ships.
+
+Vitest's `vite` peer binds to whatever copy the workspace already has, which is the legacy app's Vite 5. That is why the root depends on `vite` from `catalog:dev`. Run `pnpm peers check` after adding any tool with a `vite` peer.
+
+`injectWorkspacePackages: true` is set in `pnpm-workspace.yaml`. Changing a setting that alters the `node_modules` layout makes `pnpm install` purge `node_modules`, and without a TTY it aborts with `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`. Run `pnpm install --config.confirmModulesPurge=false` once.

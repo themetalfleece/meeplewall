@@ -9,7 +9,7 @@ name: board-games-dev
 
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17.11-trixie
     restart: unless-stopped
     environment:
       POSTGRES_USER: boardgames

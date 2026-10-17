@@ -23,7 +23,8 @@ jobs:
       # decorative and formatting drifts the first time someone forgets.
       - run: pnpm format
       # --if-present: a package participates in a gate only when it defines that
-      # script. Phases add lint/typecheck/build scripts as their packages land.
+      # script. Phases add lint/typecheck/build/test scripts as their packages land.
       - run: pnpm -r --if-present lint
       - run: pnpm -r --if-present typecheck
       - run: pnpm -r --if-present build
+      - run: pnpm -r --if-present test

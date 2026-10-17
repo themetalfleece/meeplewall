@@ -2,6 +2,24 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+# Hardlink workspace dependencies into the consumer so their peers resolve
+# through the host app instead of the package's own devDependency copy.
+injectWorkspacePackages: true
+
+# Third-party versions live here, never in a manifest. What each catalog means
+# is in .agents/skills/package-management/SKILL.md. The frozen apps/web-legacy
+# keeps its own ranges.
+catalogs:
+  dev:
+    '@eslint/js': ^10.0.1
+    eslint: ^10.8.0
+    eslint-config-prettier: ^10.1.8
+    prettier: ^3.9.6
+    typescript: ^6.0.3
+    typescript-eslint: ^8.65.0
+    vite: ^8.3.4
+    vitest: ^5.0.5
+
 # Dependencies whose install/postinstall build scripts are allowed to run.
 # esbuild fetches its platform binary (needed by Vite); sharp builds its
 # libvips bindings for the image pipeline.

@@ -50,6 +50,7 @@ An e2e suite holds **only** assertions that need the network. Anything assertabl
 - Chrome MCP: use the Chrome extension.
 - Playwright: launch with `channel: "chrome"` or the bundled Chromium. Never `channel: "msedge"`.
 - If Chrome is unavailable, stop and report it. Do not fall back to Edge.
+- A headless `--screenshot` window is at least about 500 pixels wide, whatever `--window-size` asks for, and a lone image is centred in it. Size the window to the content or the shot clips it.
 
 ## The gate
 

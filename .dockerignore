@@ -1,0 +1,10 @@
+# Build context for the images under infra/. The install resolves the whole workspace lockfile,
+# so every workspace keeps its package.json; everything heavy or secret stays out.
+.git
+.agents
+.claude
+.env*
+**/node_modules
+**/dist
+apps/web-legacy/*
+!apps/web-legacy/package.json

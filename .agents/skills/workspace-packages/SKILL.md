@@ -41,7 +41,7 @@ Anything from outside the type system (an API response, a file, a database row, 
 
 ## CI
 
-`.github/workflows/ci.yml` runs, in order: `pnpm install --frozen-lockfile`, `pnpm format` (Prettier check), then `pnpm -r --if-present lint`, `typecheck`, `build` and `test`. The root `pnpm test` runs the same `test` recursion locally.
+`.github/workflows/ci.yml` runs, in order: `pnpm install --frozen-lockfile`, `pnpm format` (Prettier check), then `pnpm -r --if-present lint`, `typecheck`, `build` and `test`, and finally builds each app image under `infra/`. The root `pnpm test` runs the same `test` recursion locally.
 
 `--if-present` means a package joins a gate only once it defines that script, so a new package does not need stubs. The flip side: a package with no `typecheck` script is silently unchecked. Every new package defines `lint`, `typecheck` and `build`, and adds `test` with its first test.
 

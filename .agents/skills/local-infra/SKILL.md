@@ -24,7 +24,11 @@ Both services have healthchecks, so `docker compose ps` reports `healthy` once t
 
 `minio-init` is a one-shot service: it waits for minio to be healthy, creates the `board-games` bucket if it is missing and makes its objects publicly readable, matching R2 behind its public URL. It exits once done, so `docker compose ps` does not list it. It reuses the minio image for the `mc` client bundled inside it, so there is no second image to pin. The `STORAGE_*` values in `.env.example` point at this bucket. CI runs `up -d --wait minio` and then `run --rm minio-init` from the same file.
 
-CI also runs `up -d --wait postgres` for the `packages/db` suites, so CI and local dev share one pinned Postgres image. If another project already holds port 5432 locally, run the same image on a spare port and point `DATABASE_URL` at it.
+CI also runs `up -d --wait postgres` for the `packages/db` and `apps/image-processor` suites, so CI and local dev share one pinned Postgres image. If another project already holds port 5432 locally, run the same image on a spare port and point `DATABASE_URL` at it. To let a container reach it, attach it to the compose network with the `postgres` alias: `docker run -d --network board-games-dev_default --network-alias postgres -p 5433:5432 -e POSTGRES_USER=boardgames -e POSTGRES_PASSWORD=boardgames -e POSTGRES_DB=boardgames postgres:17.11-trixie`.
+
+## App images
+
+Each deployable app has an `infra/Dockerfile.<app>`, built from the repo root. Its build context is filtered by the root `.dockerignore`, which keeps out `node_modules`, `dist`, `.env*` and the legacy app's assets. Do not use a per-Dockerfile `<name>.dockerignore`: only BuildKit reads it, and the classic builder then copies the local `node_modules` and the install fails.
 
 If `docker compose` reports `unknown shorthand flag: 'f'`, the compose CLI plugin is not registered in that shell. Docker Desktop on Windows also ships a standalone `docker-compose` binary that takes the same arguments.
 

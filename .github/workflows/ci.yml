@@ -27,8 +27,9 @@ jobs:
       - run: pnpm -r --if-present lint
       - run: pnpm -r --if-present typecheck
       - run: pnpm -r --if-present build
-      # The packages/db suites run against the compose Postgres, so CI and local dev share one
-      # pinned image. Under CI they fail rather than skip when it is unreachable.
+      # The packages/db and apps/image-processor suites run against the compose Postgres, so CI
+      # and local dev share one pinned image. Under CI they fail rather than skip when it is
+      # unreachable.
       - run: docker compose -f infra/docker-compose.yml up -d --wait postgres
       # The storage round trip runs against the compose minio. A job `services:` entry cannot
       # pass minio its `server` command, so the job reuses the compose file and its pinned image.
@@ -43,3 +44,5 @@ jobs:
           STORAGE_BUCKET: board-games
           STORAGE_PUBLIC_BASE_URL: http://localhost:9000/board-games
           STORAGE_FORCE_PATH_STYLE: 'true'
+      # The worker image must keep building from a clean checkout.
+      - run: docker build -f infra/Dockerfile.image-processor .

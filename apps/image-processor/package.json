@@ -1,0 +1,35 @@
+{
+  "name": "@board-games/image-processor",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "dev": "node --env-file-if-exists=../../.env.local src/main.ts"
+  },
+  "devDependencies": {
+    "@board-games/config": "workspace:*",
+    "@types/node": "catalog:dev",
+    "@types/pg": "catalog:",
+    "drizzle-orm": "catalog:",
+    "eslint": "catalog:dev",
+    "pg": "catalog:",
+    "sharp": "catalog:",
+    "typescript": "catalog:dev",
+    "vite": "catalog:dev",
+    "vitest": "catalog:dev"
+  },
+  "dependencies": {
+    "@board-games/db": "workspace:*",
+    "@board-games/image-pipeline": "workspace:*",
+    "@board-games/storage": "workspace:*",
+    "zod": "catalog:"
+  }
+}

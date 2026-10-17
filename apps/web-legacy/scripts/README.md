@@ -36,19 +36,12 @@ regenerable — consider git-ignoring them; only `public/textures/` (15 MB) ship
 
 ## BGG data source (important)
 
-BGG's documented **XML API is dead** — `boardgamegeek.com/xmlapi2/*` returns
-`401 Unauthorized` (needs login) as of 2025, even via a browser. We instead use
-BGG's own **undocumented JSON API at `api.geekdo.com`** (open), through a headless
-browser for Cloudflare cookies. Per game we pull `geekitems` (metadata),
-`dynamicinfo` (complexity/rating/rank) and the `boardgameversion` link list
-(physical dimensions).
+Step 4 reads BGG's open JSON API at `api.geekdo.com`; step 5 normalises the
+per-edition box dimensions and cross-checks them. The endpoints, their quirks,
+the rate limit, why XMLAPI2 is out and the box-size method now live in
+`.agents/skills/boardgamegeek/SKILL.md`; `packages/boardgamegeek` ports both steps.
 
-### Box dimensions
-Dimensions are per-edition and contributor-entered in **mixed units**.
-`5-enrich.js` normalizes to cm (max side >15 ⇒ cm, else inches×2.54),
-edition-matches to the owned copy (title size-variants like "Mini"/"XXL"; Greek
-editions for Greek titles), then cross-checks across editions (cluster → median,
-with an `agreement` score). Coverage: **196/210 real, 14 estimated** via a
+Box coverage from the last run: **196/210 real, 14 estimated** via a
 category/format fallback (`box.estimatedSize: true`).
 
 ## Notes / gotchas

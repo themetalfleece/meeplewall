@@ -3,7 +3,8 @@ name: testing
 description: >-
   Test conventions, what must be covered, and the rules for networked e2e
   suites. Read before writing or changing a test, before adding an exported
-  function that needs coverage, and before touching an e2e suite. Explains why a
+  function that needs coverage, before touching an e2e suite, and before any
+  browser test, smoke check or screenshot. Explains why a
   regression test must be seen to fail, why an e2e must never pass by doing
   nothing, and why fixtures come from the source of truth rather than literals.
 ---
@@ -41,6 +42,14 @@ An e2e suite holds **only** assertions that need the network. Anything assertabl
 **Fixtures come from the source of truth, never literals.** Resolve ids, URLs and config values from the same registry the app reads, so a config change that would break the app fails the suite instead of leaving it green against stale values.
 
 **An e2e must never pass by doing nothing.** A missing prerequisite (an unset credential, an unreachable service) uses `it.skip` so it reports as skipped. Never `return` early from a test body: the runner counts that as a pass.
+
+## Browsers
+
+**Use Google Chrome for every browser test, smoke test, screenshot and manual check. Never Microsoft Edge**, even though it is the Windows default.
+
+- Chrome MCP: use the Chrome extension.
+- Playwright: launch with `channel: "chrome"` or the bundled Chromium. Never `channel: "msedge"`.
+- If Chrome is unavailable, stop and report it. Do not fall back to Edge.
 
 ## The gate
 

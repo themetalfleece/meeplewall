@@ -1,0 +1,59 @@
+import { describe, expect, it } from 'vitest';
+
+import { SEED_GAMES } from '../dev/seed-data.ts';
+import { resolveTestServerUrl, useTestDatabase } from '../dev/test-database.ts';
+import { getGame, upsertGame } from './games.ts';
+
+const serverUrl = await resolveTestServerUrl();
+
+const [CATAN, CARCASSONNE] = SEED_GAMES;
+if (CATAN === undefined || CARCASSONNE === undefined) {
+  throw new Error('The seed data needs at least two games');
+}
+
+describe.skipIf(serverUrl === undefined)('games', () => {
+  const database = useTestDatabase(serverUrl);
+
+  describe('getGame', () => {
+    it('returns undefined for an unknown BGG id', async () => {
+      expect(await getGame(database(), { bggId: 999_999 })).toBeUndefined();
+    });
+
+    it('returns the stored game with its jsonb lists', async () => {
+      await upsertGame(database(), { game: CATAN });
+
+      const game = await getGame(database(), { bggId: CATAN.id });
+
+      expect(game).toMatchObject({ id: CATAN.id, name: CATAN.name, mechanics: CATAN.mechanics });
+    });
+  });
+
+  describe('upsertGame', () => {
+    it('defaults the category and mechanic lists to empty', async () => {
+      const saved = await upsertGame(database(), { game: { id: 1, name: 'Bare' } });
+
+      expect(saved).toMatchObject({ categories: [], mechanics: [], year: null });
+    });
+
+    it('updates an existing game in place and bumps updatedAt', async () => {
+      const first = await upsertGame(database(), { game: CARCASSONNE });
+
+      const second = await upsertGame(database(), {
+        game: { id: CARCASSONNE.id, name: 'Carcassonne (renamed)' },
+      });
+
+      expect(second.name).toBe('Carcassonne (renamed)');
+      expect(second.createdAt).toEqual(first.createdAt);
+      expect(second.updatedAt.getTime()).toBeGreaterThan(first.updatedAt.getTime());
+    });
+
+    it('keeps fields the update leaves undefined', async () => {
+      await upsertGame(database(), { game: CARCASSONNE });
+
+      const updated = await upsertGame(database(), { game: { id: CARCASSONNE.id, name: 'X' } });
+
+      expect(updated.year).toBe(CARCASSONNE.year);
+      expect(updated.boxWidthMm).toBe(CARCASSONNE.boxWidthMm);
+    });
+  });
+});

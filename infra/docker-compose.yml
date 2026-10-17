@@ -2,10 +2,16 @@
 # Postgres is the app's cache/store; minio is a local stand-in for Cloudflare R2
 # (S3-compatible API on :9000, web console on :9001).
 #
-#   docker compose -f infra/docker-compose.yml up -d postgres minio
+#   docker compose -f infra/docker-compose.yml up -d postgres minio minio-init
 #
 # Both services expose healthchecks so `up` reports `healthy` once ready.
+# minio-init runs once, creates the public-read bucket, then exits.
 name: board-games-dev
+
+# Pulled from quay.io because MinIO's Docker Hub namespace no longer exists.
+# This is the newest community image they published; later source releases
+# have no container build.
+x-minio-image: &minio-image quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
 
 services:
   postgres:
@@ -26,10 +32,7 @@ services:
       retries: 12
 
   minio:
-    # Pulled from quay.io because MinIO's Docker Hub namespace no longer exists.
-    # This is the newest community image they published; later source releases
-    # have no container build.
-    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    image: *minio-image
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -45,6 +48,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
+
+  # Creates the bucket the app uploads to and lets anyone read its objects, as
+  # R2 does behind its public URL. Reuses the minio image for its bundled mc.
+  minio-init:
+    image: *minio-image
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - >-
+        mc alias set local http://minio:9000 minioadmin minioadmin &&
+        mc mb --ignore-existing local/board-games &&
+        mc anonymous set download local/board-games
 
 volumes:
   postgres-data:

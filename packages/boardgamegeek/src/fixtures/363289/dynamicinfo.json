@@ -1,0 +1,77 @@
+{
+  "item": {
+    "rankinfo": [
+      {
+        "prettyname": "Board Game Rank",
+        "shortprettyname": "Overall Rank",
+        "veryshortprettyname": "Overall",
+        "subdomain": null,
+        "rankobjecttype": "subtype",
+        "rankobjectid": 1,
+        "browsesubtype": "boardgame",
+        "rank": "0",
+        "baverage": "6.30511"
+      },
+      {
+        "prettyname": "Thematic Rank",
+        "shortprettyname": "Thematic Rank",
+        "veryshortprettyname": "Thematic",
+        "subdomain": "thematic",
+        "rankobjecttype": "family",
+        "rankobjectid": 5496,
+        "browsesubtype": "boardgame",
+        "rank": "0",
+        "baverage": "6.60096"
+      },
+      {
+        "prettyname": "Family Game Rank",
+        "shortprettyname": "Family Rank",
+        "veryshortprettyname": "Family ",
+        "subdomain": "familygames",
+        "rankobjecttype": "family",
+        "rankobjectid": 5499,
+        "browsesubtype": "boardgame",
+        "rank": "0",
+        "baverage": "6.49073"
+      }
+    ],
+    "polls": {
+      "userplayers": {
+        "best": [{ "min": 2, "max": 4 }],
+        "recommended": [{ "min": 2, "max": 5 }],
+        "totalvotes": "37"
+      },
+      "playerage": "10+",
+      "languagedependence": "Extensive use of text - massive conversion needed to be playable",
+      "subdomain": "",
+      "boardgameweight": { "averageweight": 2.0416666666666665, "votes": "24" }
+    },
+    "stats": {
+      "usersrated": "1363",
+      "average": "7.71713",
+      "baverage": "6.30511",
+      "stddev": "1.1563",
+      "avgweight": "2.0417",
+      "numweights": "24",
+      "numgeeklists": "176",
+      "numtrading": "42",
+      "numwanting": "106",
+      "numwish": "562",
+      "numowned": "2887",
+      "numprevowned": "231",
+      "numcomments": "261",
+      "numwishlistcomments": "58",
+      "numhasparts": "0",
+      "numwantparts": "0",
+      "numpreordered": "23",
+      "numwanttoplay": "244",
+      "numwanttobuy": "146",
+      "views": "163775",
+      "playmonth": "2026-07",
+      "numplays": "11261",
+      "numplays_month": "62",
+      "numfans": 116
+    },
+    "relatedcounts": { "news": 1, "blogs": 20, "weblink": 4, "podcast": 0 }
+  }
+}

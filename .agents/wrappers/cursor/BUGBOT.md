@@ -32,6 +32,8 @@ New and changed behaviour needs coverage, and the test has to exercise the behav
 
 A test that returns early from its body instead of using `it.skip` passes while doing nothing. Flag it.
 
+Browser automation uses Chrome. A Playwright `channel: "msedge"` (or any Edge launch) is a violation; `channel: "chrome"` and the bundled Chromium are fine.
+
 ## This repo
 
 - **`pnpm` only.** An `npm` or `yarn` command, or a `package-lock.json` or `yarn.lock`, is a violation.

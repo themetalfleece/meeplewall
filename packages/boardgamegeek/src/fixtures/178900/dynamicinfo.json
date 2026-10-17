@@ -1,0 +1,72 @@
+{
+  "item": {
+    "rankinfo": [
+      {
+        "prettyname": "Board Game Rank",
+        "shortprettyname": "Overall Rank",
+        "veryshortprettyname": "Overall",
+        "subdomain": null,
+        "rankobjecttype": "subtype",
+        "rankobjectid": 1,
+        "browsesubtype": "boardgame",
+        "rank": "161",
+        "baverage": "7.42714"
+      },
+      {
+        "prettyname": "Party Game Rank",
+        "shortprettyname": "Party Rank",
+        "veryshortprettyname": "Party ",
+        "subdomain": "partygames",
+        "rankobjecttype": "family",
+        "rankobjectid": 5498,
+        "browsesubtype": "boardgame",
+        "rank": "6",
+        "baverage": "7.43742"
+      }
+    ],
+    "polls": {
+      "userplayers": {
+        "best": [
+          { "min": 6, "max": 6 },
+          { "min": 8, "max": 8 }
+        ],
+        "recommended": [
+          { "min": 4, "max": 8 },
+          { "min": 9, "max": null }
+        ],
+        "totalvotes": "1437"
+      },
+      "playerage": "10+",
+      "languagedependence": "Unplayable in another language",
+      "subdomain": "",
+      "boardgameweight": { "averageweight": 1.254041570438799, "votes": "2598" }
+    },
+    "stats": {
+      "usersrated": "104627",
+      "average": "7.52414",
+      "baverage": "7.42714",
+      "stddev": "1.30147",
+      "avgweight": "1.254",
+      "numweights": "2598",
+      "numgeeklists": "10262",
+      "numtrading": "1493",
+      "numwanting": "359",
+      "numwish": "8010",
+      "numowned": "181630",
+      "numprevowned": "8838",
+      "numcomments": "13646",
+      "numwishlistcomments": "1174",
+      "numhasparts": "27",
+      "numwantparts": "20",
+      "numpreordered": "169",
+      "numwanttoplay": "3470",
+      "numwanttobuy": "2930",
+      "views": "3301940",
+      "playmonth": "2026-07",
+      "numplays": "668588",
+      "numplays_month": "1001",
+      "numfans": 3583
+    },
+    "relatedcounts": { "news": 24, "blogs": 1202, "weblink": 141, "podcast": 158 }
+  }
+}

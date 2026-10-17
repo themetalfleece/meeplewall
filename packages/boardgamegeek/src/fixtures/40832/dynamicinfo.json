@@ -1,0 +1,66 @@
+{
+  "item": {
+    "rankinfo": [
+      {
+        "prettyname": "Board Game Rank",
+        "shortprettyname": "Overall Rank",
+        "veryshortprettyname": "Overall",
+        "subdomain": null,
+        "rankobjecttype": "subtype",
+        "rankobjectid": 1,
+        "browsesubtype": "boardgame",
+        "rank": "3132",
+        "baverage": "6.00935"
+      },
+      {
+        "prettyname": "Family Game Rank",
+        "shortprettyname": "Family Rank",
+        "veryshortprettyname": "Family ",
+        "subdomain": "familygames",
+        "rankobjecttype": "family",
+        "rankobjectid": 5499,
+        "browsesubtype": "boardgame",
+        "rank": "999",
+        "baverage": "6.12182"
+      }
+    ],
+    "polls": {
+      "userplayers": {
+        "best": [{ "min": 3, "max": 3 }],
+        "recommended": [{ "min": 2, "max": 4 }],
+        "totalvotes": "45"
+      },
+      "playerage": "8+",
+      "languagedependence": "No necessary in-game text",
+      "subdomain": "",
+      "boardgameweight": { "averageweight": 1.4841269841269842, "votes": "126" }
+    },
+    "stats": {
+      "usersrated": "1846",
+      "average": "6.68525",
+      "baverage": "6.00935",
+      "stddev": "1.25408",
+      "avgweight": "1.4841",
+      "numweights": "126",
+      "numgeeklists": "568",
+      "numtrading": "74",
+      "numwanting": "56",
+      "numwish": "191",
+      "numowned": "3009",
+      "numprevowned": "454",
+      "numcomments": "485",
+      "numwishlistcomments": "44",
+      "numhasparts": "2",
+      "numwantparts": "1",
+      "numpreordered": "9",
+      "numwanttoplay": "146",
+      "numwanttobuy": "49",
+      "views": "127791",
+      "playmonth": "2026-07",
+      "numplays": "8920",
+      "numplays_month": "20",
+      "numfans": 40
+    },
+    "relatedcounts": { "news": 1, "blogs": 36, "weblink": 13, "podcast": 1 }
+  }
+}

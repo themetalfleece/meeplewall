@@ -1,0 +1,57 @@
+{
+  "40832": {
+    "title": "Κέλτες",
+    "size": {
+      "w": 9.3,
+      "h": 12,
+      "d": 1.8
+    },
+    "source": "bgg-greek-edition",
+    "agreement": 1,
+    "versionsWithDimensions": 4
+  },
+  "178900": {
+    "title": "Codenames",
+    "size": {
+      "w": 16.2,
+      "h": 23.2,
+      "d": 5
+    },
+    "source": "bgg-median",
+    "agreement": 0.98,
+    "versionsWithDimensions": 33
+  },
+  "324937": {
+    "title": "Wiz-War (9th Edition)",
+    "size": {
+      "w": 26.5,
+      "h": 26.5,
+      "d": 5.5
+    },
+    "source": "estimated",
+    "agreement": 0,
+    "versionsWithDimensions": 0
+  },
+  "363289": {
+    "title": "Fantasy Realms: Deluxe Edition",
+    "size": {
+      "w": 9.4,
+      "h": 19.3,
+      "d": 13.4
+    },
+    "source": "bgg-variant:deluxe",
+    "agreement": 0.71,
+    "versionsWithDimensions": 2
+  },
+  "423432": {
+    "title": "Skull Queen",
+    "size": {
+      "w": 11,
+      "h": 16,
+      "d": 4.3
+    },
+    "source": "bgg-median",
+    "agreement": 0.75,
+    "versionsWithDimensions": 2
+  }
+}

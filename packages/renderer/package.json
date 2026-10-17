@@ -1,0 +1,50 @@
+{
+  "name": "@board-games/renderer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/GameBox/index.d.ts",
+      "default": "./dist/GameBox/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "react": "catalog:peers"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "three": "catalog:"
+  },
+  "devDependencies": {
+    "@board-games/config": "workspace:*",
+    "@types/react": "catalog:dev",
+    "@types/react-dom": "catalog:dev",
+    "@types/three": "catalog:dev",
+    "eslint": "catalog:dev",
+    "jsdom": "catalog:dev",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:dev",
+    "vite": "catalog:dev",
+    "vitest": "catalog:dev"
+  }
+}

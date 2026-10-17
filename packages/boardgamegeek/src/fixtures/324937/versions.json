@@ -1,0 +1,87 @@
+{
+  "items": [
+    {
+      "yearpublished": "2023",
+      "linkednameid": "1897692",
+      "productcode": "",
+      "length": "0",
+      "width": "0",
+      "depth": "0",
+      "weight": "0",
+      "releasedate": "2023-07-00",
+      "releasestatus": "unreleased",
+      "overridedate": "",
+      "name": "Wiz-War (9th Edition) (English edition)",
+      "postdate": "2020-11-19 10:46:53",
+      "linkid": "12944672",
+      "linktype": "boardgameversion",
+      "objecttype": "version",
+      "objectid": "537230",
+      "itemstate": "approved",
+      "rep_imageid": "5799068",
+      "linkedname": "Wiz-War (9th Edition)",
+      "subtype": "boardgameversion",
+      "links": {
+        "boardgamepublisher": [
+          {
+            "name": "Steve Jackson Games",
+            "sortindex": "1",
+            "linkid": "12944673",
+            "linktype": "boardgamepublisher",
+            "gltstamp": "2020-11-19 10:46:53",
+            "objecttype": "company",
+            "objectid": "19",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgamepublisher/19/steve-jackson-games",
+            "canonical_link": "https://boardgamegeek.com/boardgamepublisher/19/steve-jackson-games"
+          }
+        ],
+        "boardgameartist": [
+          {
+            "name": "Phil Foglio",
+            "sortindex": "6",
+            "linkid": "12944674",
+            "linktype": "boardgameartist",
+            "gltstamp": "2020-11-19 10:46:53",
+            "objecttype": "person",
+            "objectid": "616",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgameartist/616/phil-foglio",
+            "canonical_link": "https://boardgamegeek.com/boardgamedesigner/616/phil-foglio"
+          }
+        ],
+        "languages": [
+          {
+            "name": "English",
+            "sortindex": "1",
+            "linkid": "12944675",
+            "linktype": "language",
+            "gltstamp": "2020-11-19 10:46:53",
+            "objecttype": "property",
+            "objectid": "2184",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/language/2184/english",
+            "canonical_link": "https://boardgamegeek.com/language/2184/english"
+          }
+        ]
+      },
+      "href": "/boardgameversion/537230/english-edition",
+      "versionname": "English edition",
+      "images": {
+        "thumb": "https://cf.geekdo-images.com/bMcEMM5qurvnJxcosswjWg__small/img/Tjj681UWYL-zhdmd6KaUSvguHQY=/fit-in/200x150/filters:strip_icc()/pic5799068.jpg",
+        "micro": "https://cf.geekdo-images.com/bMcEMM5qurvnJxcosswjWg__micro/img/5b5KizNKwkq35GBLs_BpG22GF6k=/fit-in/64x64/filters:strip_icc()/pic5799068.jpg",
+        "square": "https://cf.geekdo-images.com/bMcEMM5qurvnJxcosswjWg__square/img/z0FFFay4wXYyq59-74xD2UGT1Oc=/75x75/filters:strip_icc()/pic5799068.jpg",
+        "tallthumb": "https://cf.geekdo-images.com/bMcEMM5qurvnJxcosswjWg__tallthumb/img/pm5nCZDIv7AgXybqPKiUaNHMBys=/fit-in/75x125/filters:strip_icc()/pic5799068.jpg",
+        "previewthumb": "https://cf.geekdo-images.com/bMcEMM5qurvnJxcosswjWg__previewthumb/img/XUtlYcWLlc3PBoJ95Ca_Lap-mmw=/fit-in/300x320/filters:strip_icc()/pic5799068.jpg",
+        "square200": "https://cf.geekdo-images.com/bMcEMM5qurvnJxcosswjWg__square200/img/5FepQgLtZh9SowfM0CNuXvBvo0w=/200x200/filters:strip_icc()/pic5799068.jpg",
+        "original": "https://cf.geekdo-images.com/bMcEMM5qurvnJxcosswjWg__original/img/Qpbm-L1d7fSMkfZaTX-5bLdchcg=/0x0/filters:format(jpeg)/pic5799068.jpg"
+      }
+    }
+  ]
+}

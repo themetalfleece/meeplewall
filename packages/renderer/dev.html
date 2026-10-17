@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Renderer regression harness</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        color-scheme: dark;
+        --pane-width: 760px;
+        --pane-height: 620px;
+        /* The practice page reserves 400px on the right for its info panel. */
+        --practice-panel: 400px;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #050506;
+        color: #b7b2a8;
+        font:
+          12px/1.4 system-ui,
+          sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      main {
+        display: flex;
+        gap: 24px;
+      }
+      figure {
+        margin: 0;
+      }
+      figcaption {
+        margin-bottom: 8px;
+      }
+      .pane {
+        width: var(--pane-width);
+        height: var(--pane-height);
+        overflow: hidden;
+        outline: 1px solid #1c1c1e;
+      }
+      .pane iframe {
+        width: calc(var(--pane-width) + var(--practice-panel));
+        height: 100%;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <figure>
+        <figcaption>Legacy practice page</figcaption>
+        <div class="pane">
+          <iframe id="legacy" title="Legacy practice page"></iframe>
+        </div>
+      </figure>
+      <figure>
+        <figcaption>packages/renderer</figcaption>
+        <div class="pane" id="renderer"></div>
+      </figure>
+    </main>
+    <script type="module" src="/src/dev/harness.ts"></script>
+  </body>
+</html>

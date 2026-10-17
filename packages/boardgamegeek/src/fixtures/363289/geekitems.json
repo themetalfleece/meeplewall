@@ -1,0 +1,396 @@
+{
+  "item": {
+    "itemid": 3141253,
+    "objecttype": "thing",
+    "objectid": 363289,
+    "label": "Board Game",
+    "labelpl": "Board Games",
+    "shortlabel": "Game",
+    "shortlabelpl": "Games",
+    "type": "things",
+    "id": "363289",
+    "href": "/boardgame/363289/fantasy-realms-deluxe-edition",
+    "canonical_link": "https://boardgamegeek.com/boardgame/363289/fantasy-realms-deluxe-edition",
+    "subtype": "boardgame",
+    "subtypes": ["boardgame", "boardgamecompilation", "boardgameimplementation"],
+    "versioninfo": { "gamepageorderurl": null, "shopifyitem": null },
+    "name": "Fantasy Realms: Deluxe Edition",
+    "alternatename": null,
+    "yearpublished": "2022",
+    "minplayers": "2",
+    "maxplayers": "7",
+    "minplaytime": "20",
+    "maxplaytime": "20",
+    "minage": "14",
+    "override_rankable": 0,
+    "reviews_restricted": 0,
+    "targetco_url": "",
+    "walmart_id": null,
+    "instructional_videoid": null,
+    "summary_videoid": null,
+    "playthrough_videoid": null,
+    "focus_videoid": null,
+    "howtoplay_videoid": null,
+    "bggstore_product": null,
+    "short_description": "Monarchs compete to construct the most prosperous kingdom in the realm!",
+    "links": {
+      "boardgamedesigner": [
+        {
+          "name": "Bruce Glassco",
+          "sortindex": "7",
+          "objecttype": "person",
+          "objectid": "3440",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamedesigner/3440/bruce-glassco",
+          "canonical_link": "https://boardgamegeek.com/boardgamedesigner/3440/bruce-glassco"
+        }
+      ],
+      "boardgamesolodesigner": [],
+      "boardgameartist": [
+        {
+          "name": "Anthony Cournoyer",
+          "sortindex": "9",
+          "objecttype": "person",
+          "objectid": "16503",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgameartist/16503/anthony-cournoyer",
+          "canonical_link": "https://boardgamegeek.com/boardgameartist/16503/anthony-cournoyer"
+        }
+      ],
+      "boardgamepublisher": [
+        {
+          "name": "WizKids (I)",
+          "sortindex": "1",
+          "objecttype": "company",
+          "objectid": "221",
+          "primarylink": 1,
+          "itemstate": "approved",
+          "href": "/boardgamepublisher/221/wizkids-i",
+          "canonical_link": "https://boardgamegeek.com/boardgamepublisher/221/wizkids-i"
+        },
+        {
+          "name": "Broadway Toys LTD",
+          "sortindex": "1",
+          "objecttype": "company",
+          "objectid": "9068",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamepublisher/9068/broadway-toys-ltd",
+          "canonical_link": "https://boardgamegeek.com/boardgamepublisher/9068/broadway-toys-ltd"
+        },
+        {
+          "name": "Don't Panic Games",
+          "sortindex": "1",
+          "objecttype": "company",
+          "objectid": "27389",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamepublisher/27389/dont-panic-games",
+          "canonical_link": "https://boardgamegeek.com/boardgamepublisher/27389/dont-panic-games"
+        }
+      ],
+      "boardgamedeveloper": [],
+      "boardgamegraphicdesigner": [
+        {
+          "name": "Richard (Errick) Dadisman",
+          "sortindex": "18",
+          "objecttype": "person",
+          "objectid": "136158",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamegraphicdesigner/136158/richard-errick-dadisman",
+          "canonical_link": "https://boardgamegeek.com/boardgamegraphicdesigner/136158/richard-errick-dadisman"
+        },
+        {
+          "name": "Daniel Solis",
+          "sortindex": "8",
+          "objecttype": "person",
+          "objectid": "5245",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamegraphicdesigner/5245/daniel-solis",
+          "canonical_link": "https://boardgamegeek.com/boardgamedesigner/5245/daniel-solis"
+        }
+      ],
+      "boardgamesculptor": [],
+      "boardgameeditor": [],
+      "boardgamewriter": [],
+      "boardgameinsertdesigner": [],
+      "boardgamehonor": [],
+      "boardgamecategory": [
+        {
+          "name": "Card Game",
+          "sortindex": "1",
+          "objecttype": "property",
+          "objectid": "1002",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamecategory/1002/card-game",
+          "canonical_link": "https://boardgamegeek.com/boardgamecategory/1002/card-game"
+        },
+        {
+          "name": "Fantasy",
+          "sortindex": "1",
+          "objecttype": "property",
+          "objectid": "1010",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamecategory/1010/fantasy",
+          "canonical_link": "https://boardgamegeek.com/boardgamecategory/1010/fantasy"
+        }
+      ],
+      "boardgamemechanic": [
+        {
+          "name": "End Game Bonuses",
+          "sortindex": "1",
+          "objecttype": "property",
+          "objectid": "2875",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamemechanic/2875/end-game-bonuses",
+          "canonical_link": "https://boardgamegeek.com/boardgamemechanic/2875/end-game-bonuses"
+        },
+        {
+          "name": "Hand Management",
+          "sortindex": "1",
+          "objecttype": "property",
+          "objectid": "2040",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamemechanic/2040/hand-management",
+          "canonical_link": "https://boardgamegeek.com/boardgamemechanic/2040/hand-management"
+        },
+        {
+          "name": "Open Drafting",
+          "sortindex": "1",
+          "objecttype": "property",
+          "objectid": "2041",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamemechanic/2041/open-drafting",
+          "canonical_link": "https://boardgamegeek.com/boardgamemechanic/2041/open-drafting"
+        },
+        {
+          "name": "Set Collection",
+          "sortindex": "1",
+          "objecttype": "property",
+          "objectid": "2004",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamemechanic/2004/set-collection",
+          "canonical_link": "https://boardgamegeek.com/boardgamemechanic/2004/set-collection"
+        }
+      ],
+      "boardgameexpansion": [],
+      "boardgameversion": [
+        {
+          "name": "Chinese edition",
+          "sortindex": "1",
+          "objecttype": "version",
+          "objectid": "779100",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgameversion/779100/chinese-edition",
+          "canonical_link": "https://boardgamegeek.com/boardgameversion/779100/chinese-edition"
+        },
+        {
+          "name": "English edition",
+          "sortindex": "1",
+          "objecttype": "version",
+          "objectid": "615654",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgameversion/615654/english-edition",
+          "canonical_link": "https://boardgamegeek.com/boardgameversion/615654/english-edition"
+        },
+        {
+          "name": "French edition",
+          "sortindex": "1",
+          "objecttype": "version",
+          "objectid": "742651",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgameversion/742651/french-edition",
+          "canonical_link": "https://boardgamegeek.com/boardgameversion/742651/french-edition"
+        }
+      ],
+      "expandsboardgame": [],
+      "boardgameintegration": [],
+      "contains": [
+        {
+          "name": "Fantasy Realms: Jester Promo Card",
+          "sortindex": "1",
+          "objecttype": "thing",
+          "objectid": "232120",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgame/232120/fantasy-realms-jester-promo-card",
+          "canonical_link": "https://boardgamegeek.com/boardgame/232120/fantasy-realms-jester-promo-card"
+        },
+        {
+          "name": "Fantasy Realms: Phoenix Promo Card",
+          "sortindex": "1",
+          "objecttype": "thing",
+          "objectid": "347476",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgame/347476/fantasy-realms-phoenix-promo-card",
+          "canonical_link": "https://boardgamegeek.com/boardgame/347476/fantasy-realms-phoenix-promo-card"
+        },
+        {
+          "name": "Fantasy Realms: The Cursed Hoard",
+          "sortindex": "1",
+          "objecttype": "thing",
+          "objectid": "315200",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgame/315200/fantasy-realms-the-cursed-hoard",
+          "canonical_link": "https://boardgamegeek.com/boardgame/315200/fantasy-realms-the-cursed-hoard"
+        }
+      ],
+      "containedin": [],
+      "reimplementation": [],
+      "reimplements": [
+        {
+          "name": "Fantasy Realms",
+          "sortindex": "1",
+          "objecttype": "thing",
+          "objectid": "223040",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgame/223040/fantasy-realms",
+          "canonical_link": "https://boardgamegeek.com/boardgame/223040/fantasy-realms"
+        }
+      ],
+      "boardgamefamily": [
+        {
+          "name": "Card Games: Draw and Discard",
+          "sortindex": "1",
+          "objecttype": "family",
+          "objectid": "24439",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamefamily/24439/card-games-draw-and-discard",
+          "canonical_link": "https://boardgamegeek.com/boardgamefamily/24439/card-games-draw-and-discard"
+        },
+        {
+          "name": "Creatures: Dragons",
+          "sortindex": "1",
+          "objecttype": "family",
+          "objectid": "7005",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamefamily/7005/creatures-dragons",
+          "canonical_link": "https://boardgamegeek.com/boardgamefamily/7005/creatures-dragons"
+        }
+      ],
+      "videogamebg": [],
+      "boardgamesubdomain": [
+        {
+          "name": "Family Games",
+          "sortindex": "1",
+          "objecttype": "family",
+          "objectid": "5499",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamesubdomain/5499/family-games",
+          "canonical_link": "https://boardgamegeek.com/boardgamesubdomain/5499/family-games"
+        },
+        {
+          "name": "Thematic Games",
+          "sortindex": "1",
+          "objecttype": "family",
+          "objectid": "5496",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/boardgamesubdomain/5496/thematic-games",
+          "canonical_link": "https://boardgamegeek.com/boardgamesubdomain/5496/thematic-games"
+        }
+      ],
+      "boardgameaccessory": [],
+      "cardset": [
+        {
+          "name": null,
+          "sortindex": null,
+          "objecttype": "family",
+          "objectid": "86835",
+          "primarylink": 0,
+          "itemstate": "approved",
+          "href": "/cardset/86835/",
+          "canonical_link": "https://boardgamegeek.com/cardset/86835/"
+        }
+      ]
+    },
+    "linkcounts": {
+      "boardgamedesigner": 1,
+      "boardgamesolodesigner": 0,
+      "boardgameartist": 1,
+      "boardgamepublisher": 3,
+      "boardgamedeveloper": 0,
+      "boardgamegraphicdesigner": 2,
+      "boardgamesculptor": 0,
+      "boardgameeditor": 0,
+      "boardgamewriter": 0,
+      "boardgameinsertdesigner": 0,
+      "boardgamehonor": 0,
+      "boardgamecategory": 2,
+      "boardgamemechanic": 4,
+      "boardgameexpansion": 0,
+      "boardgameversion": 3,
+      "expandsboardgame": 0,
+      "boardgameintegration": 0,
+      "contains": 3,
+      "containedin": 0,
+      "reimplementation": 0,
+      "reimplements": 1,
+      "boardgamefamily": 2,
+      "videogamebg": 0,
+      "boardgamesubdomain": 2,
+      "boardgameaccessory": 0,
+      "cardset": 1
+    },
+    "secondarynamescount": 0,
+    "alternatenamescount": 1,
+    "primaryname": {
+      "nameid": "2154520",
+      "name": "Fantasy Realms: Deluxe Edition",
+      "sortindex": "1",
+      "primaryname": "1",
+      "translit": "Fantasy Realms: Deluxe Edition"
+    },
+    "alternatenames": [{ "nameid": "2685192", "name": "幻想國度豪華版" }],
+    "description": "<p>Bruce Glassco&rsquo;s <em>Fantasy Realms</em> is a modern classic, and this new <em><strong>Deluxe Edition</strong></em> has updated every card with a sleek, intuitive graphic design. The base game cards have also been updated to include new art from Anthony Cournoyer to match his beloved work on The Cursed Hoard expansion, giving the entire game a fresh look!</p>\n\n<p>It includes:</p>\n\n<ul>\n    <li> The original base game with all new art and graphic design!</li>\n    <li> The Cursed Hoard, which includes two expansion modules, also with new graphic design!</li>\n    <li> The Jester and Phoenix cards, previously only available as promo cards!</li>\n    <li> 100+ art sleeves to protect all the included cards, plus some extras!</li>\n</ul>\n\n<p>In <em>Fantasy Realms</em>, you build your Realm, one card at a time, as you collect Beasts, Armies, Wizards, and more! Each card is unique and scores points based on the other cards in your hand. You start with seven cards, and each turn you&rsquo;ll draw a new card from the deck or discard, and discard one card from your hand, always trying to improve your Realm! Whoever&rsquo;s realm scores the most points is the winner!</p>\n\n<p><em>&mdash;description from the publisher</em></p>\n\n",
+    "wiki": "<span class='text-muted'>This page does not exist. You can edit this page to create it.</span>",
+    "website": {
+      "url": "https://wizkids.com/fantasy-realms-deluxe-edition/",
+      "title": "Fantasy Realms: Deluxe Edition Home Page"
+    },
+    "imageid": "6936185",
+    "images": {
+      "thumb": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__small/img/vmv_21hstpLTJIv5zIpFuV564kI=/fit-in/200x150/filters:strip_icc()/pic6936185.jpg",
+      "micro": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__micro/img/uxDhMXQEOM2IuI5eY1Cit1X0sWU=/fit-in/64x64/filters:strip_icc()/pic6936185.jpg",
+      "square": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__square/img/siXN1Lkl_cHu1dVGtCxbKdgDbsc=/75x75/filters:strip_icc()/pic6936185.jpg",
+      "tallthumb": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__tallthumb/img/Yj9P3fHFHfSME5P0TrYVhup_fkQ=/fit-in/75x125/filters:strip_icc()/pic6936185.jpg",
+      "previewthumb": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__previewthumb/img/6pXFQJfabahrWao9ojiH0RUJoDk=/fit-in/300x320/filters:strip_icc()/pic6936185.jpg",
+      "square200": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__square200/img/QOa3WvuzDVp6lfFT-I_HmCwexJk=/200x200/filters:strip_icc()/pic6936185.jpg",
+      "original": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__original/img/AHCjJZwV_p0L6ERgZeL5i7k6BVU=/0x0/filters:format(jpeg)/pic6936185.jpg"
+    },
+    "imagepagehref": "/image/6936185/fantasy-realms-deluxe-edition",
+    "imageurl": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__itemrep/img/Zq9DHnss2cr6Q28jHk-dql3YoYo=/fit-in/246x300/filters:strip_icc()/pic6936185.jpg",
+    "topimageurl": "https://cf.geekdo-images.com/VMpfBOnvAIajMm4kibPxhQ__itemheader/img/dkCEuL7DV9L3Xu1tDFiPLJ-u-C0=/800x450/filters:quality(30):strip_icc()/pic7742931.jpg",
+    "imageSets": {
+      "square100": {
+        "src": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__square100/img/tr-s4i_LqnGCexTvLtJGDZ-zMWE=/0x0:390x390/100x100/filters:strip_icc()/pic6936185.jpg",
+        "src@2x": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__square100@2x/img/MPT3XzrD8gj0Iz2t4HdTD8Kumzw=/0x0:390x390/200x200/filters:strip_icc()/pic6936185.jpg"
+      },
+      "mediacard": {
+        "src": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__mediacard/img/kM9kgAFlZLv-HDeSTe5UXO-Kevg=/0x0:390x219/288x162/filters:strip_icc()/pic6936185.jpg",
+        "src@2x": "https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__mediacard@2x/img/aw1RM8-WPtXayWPoh5zSBGjyjik=/0x0:390x219/576x324/filters:strip_icc()/pic6936185.jpg"
+      }
+    },
+    "itemstate": "approved",
+    "promoted_ad": null
+  }
+}

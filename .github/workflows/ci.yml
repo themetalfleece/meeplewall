@@ -27,4 +27,19 @@ jobs:
       - run: pnpm -r --if-present lint
       - run: pnpm -r --if-present typecheck
       - run: pnpm -r --if-present build
+      # The packages/db suites run against the compose Postgres, so CI and local dev share one
+      # pinned image. Under CI they fail rather than skip when it is unreachable.
+      - run: docker compose -f infra/docker-compose.yml up -d --wait postgres
+      # The storage round trip runs against the compose minio. A job `services:` entry cannot
+      # pass minio its `server` command, so the job reuses the compose file and its pinned image.
+      - run: docker compose -f infra/docker-compose.yml up -d --wait minio
+      - run: docker compose -f infra/docker-compose.yml run --rm minio-init
       - run: pnpm -r --if-present test
+        env:
+          DATABASE_URL: postgres://boardgames:boardgames@localhost:5432/boardgames
+          STORAGE_ENDPOINT: http://localhost:9000
+          STORAGE_ACCESS_KEY_ID: minioadmin
+          STORAGE_SECRET_ACCESS_KEY: minioadmin
+          STORAGE_BUCKET: board-games
+          STORAGE_PUBLIC_BASE_URL: http://localhost:9000/board-games
+          STORAGE_FORCE_PATH_STYLE: 'true'

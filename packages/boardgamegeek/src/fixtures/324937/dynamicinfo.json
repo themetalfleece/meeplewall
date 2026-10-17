@@ -1,0 +1,55 @@
+{
+  "item": {
+    "rankinfo": [
+      {
+        "prettyname": "Board Game Rank",
+        "shortprettyname": "Overall Rank",
+        "veryshortprettyname": "Overall",
+        "subdomain": null,
+        "rankobjecttype": "subtype",
+        "rankobjectid": 1,
+        "browsesubtype": "boardgame",
+        "rank": "11418",
+        "baverage": "5.56965"
+      }
+    ],
+    "polls": {
+      "userplayers": {
+        "best": [{ "min": 4, "max": 4 }],
+        "recommended": [{ "min": 3, "max": 5 }],
+        "totalvotes": "3"
+      },
+      "playerage": "12+",
+      "languagedependence": "Extensive use of text - massive conversion needed to be playable",
+      "subdomain": "",
+      "boardgameweight": { "averageweight": 2, "votes": "3" }
+    },
+    "stats": {
+      "usersrated": "148",
+      "average": "6.7652",
+      "baverage": "5.56965",
+      "stddev": "2.06243",
+      "avgweight": "2",
+      "numweights": "3",
+      "numgeeklists": "51",
+      "numtrading": "19",
+      "numwanting": "24",
+      "numwish": "124",
+      "numowned": "478",
+      "numprevowned": "43",
+      "numcomments": "68",
+      "numwishlistcomments": "11",
+      "numhasparts": "0",
+      "numwantparts": "0",
+      "numpreordered": "10",
+      "numwanttoplay": "63",
+      "numwanttobuy": "18",
+      "views": "91779",
+      "playmonth": "2026-07",
+      "numplays": "316",
+      "numplays_month": 0,
+      "numfans": 27
+    },
+    "relatedcounts": { "news": 2, "blogs": 8, "weblink": 1, "podcast": 0 }
+  }
+}

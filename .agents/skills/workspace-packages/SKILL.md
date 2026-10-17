@@ -51,9 +51,13 @@ Anything from outside the type system (an API response, a file, a database row, 
 
 `.prettierignore` leaves out the frozen legacy app, generated output, the original root planning docs (`/*.md` except `AGENTS.md`) and the shared agent baseline, which is formatted in its source repo and copied byte-identical. Everything else is in the gate, so run `pnpm format:write` before handing work over.
 
+Prettier rewrites a `\uXXXX` escape in a string literal into the literal character. To keep a forbidden character such as an em dash out of the source, build it with `String.fromCodePoint(0x2014)` instead.
+
 ## Versions
 
 New dependencies follow `package-management`. Every third-party entry outside the frozen `apps/web-legacy` is a `catalog:` reference into `pnpm-workspace.yaml`. The shared lint and format tooling is in `catalog:dev` even though `packages/config` lists it under `dependencies`, because none of it ships.
+
+To give a package a library the catalog already lists, write the `catalog:` reference into its `package.json` by hand and run `pnpm install`. `pnpm add --save-catalog-name=dev eslint` re-resolves the newest release and rewrites the existing catalog range for every package (it moved `typescript` across a major), which is an upgrade, not an addition.
 
 Vitest's `vite` peer binds to whatever copy the workspace already has, which is the legacy app's Vite 5. That is why the root depends on `vite` from `catalog:dev`. Run `pnpm peers check` after adding any tool with a `vite` peer.
 

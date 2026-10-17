@@ -8,6 +8,7 @@ apps/web-legacy/*
 **/node_modules/
 **/coverage/
 pnpm-lock.yaml
+packages/db/src/migrations/
 
 # Pre-existing root docs, left as originally authored. The leading slash keeps
 # this root-relative: nested markdown (package READMEs, ADRs) still gets

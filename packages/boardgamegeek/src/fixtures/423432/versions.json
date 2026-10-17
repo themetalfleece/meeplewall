@@ -1,0 +1,240 @@
+{
+  "items": [
+    {
+      "yearpublished": "2025",
+      "linkednameid": "2634904",
+      "productcode": "",
+      "length": "5.51181",
+      "width": "3.93701",
+      "depth": "1.85039",
+      "weight": "0.45856",
+      "releasedate": "2025-06-19",
+      "releasestatus": "released",
+      "overridedate": "",
+      "name": "스컬퀸 (Korean edition)",
+      "postdate": "2025-07-11 20:45:00",
+      "linkid": "19223088",
+      "linktype": "boardgameversion",
+      "objecttype": "version",
+      "objectid": "765295",
+      "itemstate": "approved",
+      "rep_imageid": "8983574",
+      "linkedname": "스컬퀸",
+      "subtype": "boardgameversion",
+      "links": {
+        "boardgamepublisher": [
+          {
+            "name": "Playte",
+            "sortindex": "1",
+            "linkid": "19223090",
+            "linktype": "boardgamepublisher",
+            "gltstamp": "2025-07-11 20:45:00",
+            "objecttype": "company",
+            "objectid": "50209",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgamepublisher/50209/playte",
+            "canonical_link": "https://boardgamegeek.com/boardgamepublisher/50209/playte"
+          },
+          {
+            "name": "Popcorn Games",
+            "sortindex": "1",
+            "linkid": "19223091",
+            "linktype": "boardgamepublisher",
+            "gltstamp": "2025-07-11 20:45:00",
+            "objecttype": "company",
+            "objectid": "41167",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgamepublisher/41167/popcorn-games",
+            "canonical_link": "https://boardgamegeek.com/boardgamepublisher/41167/popcorn-games"
+          },
+          {
+            "name": "Schmidt Spiele",
+            "sortindex": "1",
+            "linkid": "19223089",
+            "linktype": "boardgamepublisher",
+            "gltstamp": "2025-07-11 20:45:00",
+            "objecttype": "company",
+            "objectid": "38",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgamepublisher/38/schmidt-spiele",
+            "canonical_link": "https://boardgamegeek.com/boardgamepublisher/38/schmidt-spiele"
+          }
+        ],
+        "boardgameartist": [
+          {
+            "name": "Cinthya Álvarez",
+            "sortindex": "9",
+            "linkid": "19223092",
+            "linktype": "boardgameartist",
+            "gltstamp": "2025-07-11 20:45:00",
+            "objecttype": "person",
+            "objectid": "77480",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgameartist/77480/cinthya-alvarez",
+            "canonical_link": "https://boardgamegeek.com/boardgameartist/77480/cinthya-alvarez"
+          }
+        ],
+        "languages": [
+          {
+            "name": "Korean",
+            "sortindex": "1",
+            "linkid": "19223093",
+            "linktype": "language",
+            "gltstamp": "2025-07-11 20:45:00",
+            "objecttype": "property",
+            "objectid": "2195",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/language/2195/korean",
+            "canonical_link": "https://boardgamegeek.com/language/2195/korean"
+          }
+        ]
+      },
+      "href": "/boardgameversion/765295/korean-edition",
+      "versionname": "Korean edition",
+      "images": {
+        "thumb": "https://cf.geekdo-images.com/x1JQCb61PivmZ_4xe3OQOw__small/img/dQr0Nggr39h6xFKp5ndtpyfTXU0=/fit-in/200x150/filters:strip_icc()/pic8983574.jpg",
+        "micro": "https://cf.geekdo-images.com/x1JQCb61PivmZ_4xe3OQOw__micro/img/hRy8p3SENsVfV2YHOrn356yuelo=/fit-in/64x64/filters:strip_icc()/pic8983574.jpg",
+        "square": "https://cf.geekdo-images.com/x1JQCb61PivmZ_4xe3OQOw__square/img/GNJlepMnYFBpckd2KT8ygmgIbVI=/75x75/filters:strip_icc()/pic8983574.jpg",
+        "tallthumb": "https://cf.geekdo-images.com/x1JQCb61PivmZ_4xe3OQOw__tallthumb/img/iDnpzfd5VdVP73hikMB-DgZ1kds=/fit-in/75x125/filters:strip_icc()/pic8983574.jpg",
+        "previewthumb": "https://cf.geekdo-images.com/x1JQCb61PivmZ_4xe3OQOw__previewthumb/img/DxU5LBZaKnsfKUDGmN2RHfPuLa0=/fit-in/300x320/filters:strip_icc()/pic8983574.jpg",
+        "square200": "https://cf.geekdo-images.com/x1JQCb61PivmZ_4xe3OQOw__square200/img/Suh7ZQEU36LIBe8CQt4pk9shWsI=/200x200/filters:strip_icc()/pic8983574.jpg",
+        "original": "https://cf.geekdo-images.com/x1JQCb61PivmZ_4xe3OQOw__original/img/ZfgSy4tPj2tJXfkUuj6Z5FtyPGs=/0x0/filters:format(jpeg)/pic8983574.jpg"
+      }
+    },
+    {
+      "yearpublished": "2024",
+      "linkednameid": "2488289",
+      "productcode": "49456",
+      "length": "7.08661",
+      "width": "4.72441",
+      "depth": "1.5748",
+      "weight": "0.74296",
+      "releasedate": "2024-09-00",
+      "releasestatus": "released",
+      "overridedate": "",
+      "name": "Skull Queen (EN/FR/GE/IT edition)",
+      "postdate": "2024-06-17 08:42:00",
+      "linkid": "17968725",
+      "linktype": "boardgameversion",
+      "objecttype": "version",
+      "objectid": "718406",
+      "itemstate": "approved",
+      "rep_imageid": "8268132",
+      "linkedname": "Skull Queen",
+      "subtype": "boardgameversion",
+      "links": {
+        "boardgamepublisher": [
+          {
+            "name": "Schmidt Spiele",
+            "sortindex": "1",
+            "linkid": "17968726",
+            "linktype": "boardgamepublisher",
+            "gltstamp": "2024-06-17 08:42:00",
+            "objecttype": "company",
+            "objectid": "38",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgamepublisher/38/schmidt-spiele",
+            "canonical_link": "https://boardgamegeek.com/boardgamepublisher/38/schmidt-spiele"
+          }
+        ],
+        "boardgameartist": [
+          {
+            "name": "Cinthya Álvarez",
+            "sortindex": "9",
+            "linkid": "18430703",
+            "linktype": "boardgameartist",
+            "gltstamp": "2024-11-15 13:05:59",
+            "objecttype": "person",
+            "objectid": "77480",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/boardgameartist/77480/cinthya-alvarez",
+            "canonical_link": "https://boardgamegeek.com/boardgameartist/77480/cinthya-alvarez"
+          }
+        ],
+        "languages": [
+          {
+            "name": "English",
+            "sortindex": "1",
+            "linkid": "17968727",
+            "linktype": "language",
+            "gltstamp": "2024-06-17 08:42:00",
+            "objecttype": "property",
+            "objectid": "2184",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/language/2184/english",
+            "canonical_link": "https://boardgamegeek.com/language/2184/english"
+          },
+          {
+            "name": "French",
+            "sortindex": "1",
+            "linkid": "17968728",
+            "linktype": "language",
+            "gltstamp": "2024-06-17 08:42:00",
+            "objecttype": "property",
+            "objectid": "2187",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/language/2187/french",
+            "canonical_link": "https://boardgamegeek.com/language/2187/french"
+          },
+          {
+            "name": "German",
+            "sortindex": "1",
+            "linkid": "17968729",
+            "linktype": "language",
+            "gltstamp": "2024-06-17 08:42:00",
+            "objecttype": "property",
+            "objectid": "2188",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/language/2188/german",
+            "canonical_link": "https://boardgamegeek.com/language/2188/german"
+          },
+          {
+            "name": "Italian",
+            "sortindex": "1",
+            "linkid": "17968730",
+            "linktype": "language",
+            "gltstamp": "2024-06-17 08:42:00",
+            "objecttype": "property",
+            "objectid": "2193",
+            "primarylink": 0,
+            "itemstate": "approved",
+            "direction": "src",
+            "href": "/language/2193/italian",
+            "canonical_link": "https://boardgamegeek.com/language/2193/italian"
+          }
+        ]
+      },
+      "href": "/boardgameversion/718406/enfrgeit-edition",
+      "versionname": "EN/FR/GE/IT edition",
+      "images": {
+        "thumb": "https://cf.geekdo-images.com/BoCihTmlH9SQLT51BEOl_A__small/img/rcx6ciVZx4Yh6aEYrpAok2dibF8=/fit-in/200x150/filters:strip_icc()/pic8268132.jpg",
+        "micro": "https://cf.geekdo-images.com/BoCihTmlH9SQLT51BEOl_A__micro/img/shWlvN31SMMjMcsjuJ0hF8cmutA=/fit-in/64x64/filters:strip_icc()/pic8268132.jpg",
+        "square": "https://cf.geekdo-images.com/BoCihTmlH9SQLT51BEOl_A__square/img/TrT5H3ziC56cX_SdFkq4rbMB_38=/75x75/filters:strip_icc()/pic8268132.jpg",
+        "tallthumb": "https://cf.geekdo-images.com/BoCihTmlH9SQLT51BEOl_A__tallthumb/img/9yk9VLXg-sQdHPQ0a_1TKWKws5s=/fit-in/75x125/filters:strip_icc()/pic8268132.jpg",
+        "previewthumb": "https://cf.geekdo-images.com/BoCihTmlH9SQLT51BEOl_A__previewthumb/img/vvh7rhzlL7D3S69ibouw37POv6Y=/fit-in/300x320/filters:strip_icc()/pic8268132.jpg",
+        "square200": "https://cf.geekdo-images.com/BoCihTmlH9SQLT51BEOl_A__square200/img/r67kINH5MvvZ1sRHVWhyQygF9zE=/200x200/filters:strip_icc()/pic8268132.jpg",
+        "original": "https://cf.geekdo-images.com/BoCihTmlH9SQLT51BEOl_A__original/img/Ylu6kHDpE6yZ6Q0eNMuMoaWqjJM=/0x0/filters:format(jpeg)/pic8268132.jpg"
+      }
+    }
+  ]
+}

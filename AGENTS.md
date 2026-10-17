@@ -11,13 +11,14 @@ This file is always loaded, so it stays small. Long-form rules live in `.agents/
 | Adding or configuring a workspace package, CI         | `.agents/skills/workspace-packages/SKILL.md`  |
 | Postgres, minio, `infra/`                             | `.agents/skills/local-infra/SKILL.md`         |
 | Game data, BGG, covers, textures, the 3D box, porting | `.agents/skills/planning-docs/SKILL.md`       |
+| BoardGameGeek API, rate limit, box-size cross-check   | `.agents/skills/boardgamegeek/SKILL.md`       |
 | Comments, docs, any prose                             | `.agents/skills/writing-style/SKILL.md`       |
 | Any TypeScript                                        | `.agents/skills/typescript-style/SKILL.md`    |
 | A component directory or file layout                  | `.agents/skills/component-structure/SKILL.md` |
 | Anything Next.js                                      | `.agents/skills/nextjs/SKILL.md`              |
 | Rendering, memoisation, bundle size                   | `.agents/skills/react-performance/SKILL.md`   |
 | A library API you are unsure of                       | `.agents/skills/find-docs/SKILL.md`           |
-| Tests                                                 | `.agents/skills/testing/SKILL.md`             |
+| Tests, browser checks, screenshots                    | `.agents/skills/testing/SKILL.md`             |
 | Adding or upgrading a dependency                      | `.agents/skills/package-management/SKILL.md`  |
 | Environment variables, secrets                        | `.agents/skills/env-config/SKILL.md`          |
 

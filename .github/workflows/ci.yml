@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Prettier in check mode. Without this the shared prettier config is
+      # decorative and formatting drifts the first time someone forgets.
+      - run: pnpm format
+      # --if-present: a package participates in a gate only when it defines that
+      # script. Phases add lint/typecheck/build scripts as their packages land.
+      - run: pnpm -r --if-present lint
+      - run: pnpm -r --if-present typecheck
+      - run: pnpm -r --if-present build

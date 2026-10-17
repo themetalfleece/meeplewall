@@ -1,0 +1,10 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Dependencies whose install/postinstall build scripts are allowed to run.
+# esbuild fetches its platform binary (needed by Vite); sharp builds its
+# libvips bindings for the image pipeline.
+allowBuilds:
+  esbuild: true
+  sharp: true

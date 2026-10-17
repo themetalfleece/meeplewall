@@ -1,0 +1,28 @@
+{
+  "name": "@board-games/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./eslint": "./eslint.config.js",
+    "./prettier": "./prettier.config.js",
+    "./tsconfig.base.json": "./tsconfig.base.json"
+  },
+  "files": [
+    "eslint.config.js",
+    "prettier.config.js",
+    "tsconfig.base.json"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0"
+  }
+}

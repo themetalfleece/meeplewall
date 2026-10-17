@@ -1,28 +1,34 @@
 # dependencies
 node_modules/
 
-# build output (produced by the deploy workflow)
+# build output
 dist/
+build/
+.next/
+*.tsbuildinfo
 
 # local Claude Code settings (per-machine permissions)
 .claude/settings.local.json
+
+# env files
+.env
+.env.*
+!.env.example
 
 # OS / editor cruft
 .DS_Store
 *.log
 
+# --- legacy app (apps/web-legacy) regenerable data-pipeline caches ---
 # raw downloaded gallery candidate images (rebuildable cache); keep gallery.json
-scripts/gallery-cache/**/*-src.*
+apps/web-legacy/scripts/gallery-cache/**/*-src.*
 
 # vision deprojection working files
-scripts/gallery-cache/_deproj/
-
-scripts/gallery-cache/_deproj2/
-
-scripts/gallery-cache/_fronts/
-
-scripts/gallery-cache/_flaps/
-scripts/gallery-cache/_shapes/
-scripts/gallery-cache/_artcrop/
-scripts/gallery-cache/_backquads/
-scripts/cyl-src/bag-of-chips-atlas.png
+apps/web-legacy/scripts/gallery-cache/_deproj/
+apps/web-legacy/scripts/gallery-cache/_deproj2/
+apps/web-legacy/scripts/gallery-cache/_fronts/
+apps/web-legacy/scripts/gallery-cache/_flaps/
+apps/web-legacy/scripts/gallery-cache/_shapes/
+apps/web-legacy/scripts/gallery-cache/_artcrop/
+apps/web-legacy/scripts/gallery-cache/_backquads/
+apps/web-legacy/scripts/cyl-src/bag-of-chips-atlas.png

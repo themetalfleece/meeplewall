@@ -1,0 +1,1 @@
+../.agents/wrappers/cursor/BUGBOT.md

@@ -1,0 +1,36 @@
+# Never reformat the frozen legacy app or any generated output. Its AGENTS.md
+# is ours, so it stays in the gate.
+apps/web-legacy/*
+!apps/web-legacy/AGENTS.md
+**/dist/
+**/build/
+**/.next/
+**/node_modules/
+**/coverage/
+pnpm-lock.yaml
+
+# Pre-existing root docs, left as originally authored. The leading slash keeps
+# this root-relative: nested markdown (package READMEs, ADRs) still gets
+# formatted. AGENTS.md is ours, so it stays in the gate.
+/*.md
+!/AGENTS.md
+
+# The shared agent baseline is formatted in its source repo and copied
+# byte-identical, so a local reformat would make every upgrade a noisy diff.
+/.agents/README.md
+/.agents/skill-lock.json
+/.agents/roles/
+/.agents/wrappers/claude/
+/.agents/skills/agent-*/
+/.agents/skills/component-structure/
+/.agents/skills/env-config/
+/.agents/skills/find-docs/
+/.agents/skills/nextjs/
+/.agents/skills/package-management/
+/.agents/skills/react-performance/
+/.agents/skills/testing/
+/.agents/skills/typescript-style/
+/.agents/skills/writing-style/
+/scripts/agent-links*.mts
+/scripts/link-agent-config.mts
+/scripts/validate-agent-docs*.mts

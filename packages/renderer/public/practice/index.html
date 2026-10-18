@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3D box: practice</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0b0b0c;
+    color: #e9e6df;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+  }
+  #app { display: flex; height: 100vh; width: 100vw; }
+  #stage { position: relative; flex: 1 1 auto; min-width: 0; }
+  #stage canvas { display: block; width: 100%; height: 100%; }
+
+  #loading {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    color: #6b6862; font-size: 14px; letter-spacing: .04em; pointer-events: none;
+    transition: opacity .6s ease;
+  }
+
+  #dims {
+    position: absolute; left: 24px; bottom: 22px;
+    font-variant-numeric: tabular-nums; font-size: 12px; letter-spacing: .12em;
+    color: #7d7a73; text-transform: uppercase;
+  }
+  #hint {
+    position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: .16em; color: #55524c; text-transform: uppercase;
+  }
+
+  /* Info panel: Stripe Press detail-view feel */
+  #panel {
+    flex: 0 0 400px; max-width: 42vw;
+    padding: 64px 56px; overflow-y: auto;
+    border-left: 1px solid #1c1c1e;
+    background: linear-gradient(180deg, #101011, #0b0b0c);
+  }
+  .eyebrow { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #7a7770; margin-bottom: 22px; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 500; font-size: 34px; line-height: 1.12; letter-spacing: -.01em;
+    margin-bottom: 10px; color: #f4f1ea;
+  }
+  .byline { font-family: Georgia, serif; font-style: italic; font-size: 18px; color: #b7b2a8; margin-bottom: 30px; }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-bottom: 30px; }
+  .meta .k { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: #6f6c65; margin-bottom: 4px; }
+  .meta .v { font-size: 15px; color: #e4e0d8; font-variant-numeric: tabular-nums; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+  .chip { font-size: 12px; padding: 5px 11px; border: 1px solid #2a2a2c; border-radius: 999px; color: #b7b2a8; }
+  .desc { font-size: 15px; line-height: 1.62; color: #a9a49a; }
+  .desc p { margin-bottom: 14px; }
+  .footnote { margin-top: 30px; font-size: 11px; line-height: 1.6; color: #55524c; }
+
+  @media (max-width: 820px) {
+    #app { flex-direction: column; }
+    #stage { flex: 1 1 55%; }
+    #panel { flex: 1 1 45%; max-width: none; border-left: none; border-top: 1px solid #1c1c1e; padding: 32px 28px; }
+    h1 { font-size: 26px; }
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div id="loading">Loading…</div>
+    <div id="dims"></div>
+    <div id="hint">drag to rotate · scroll to zoom</div>
+  </div>
+  <aside id="panel"></aside>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+// ---- game data (single record from src/data/games.json) ----
+const GAME = {
+  title: "The Lord of the Rings: Fate of the Fellowship",
+  designers: ["Matt Leacock"],
+  year: 2025,
+  players: { min: 1, max: 5 },
+  playtime: { min: 60, max: 150 },
+  complexity: 3.1,
+  categories: ["Fantasy", "Novel-based", "Cooperative"],
+  box: { size: { w: 27, h: 31, d: 9 }, unit: "cm", sideColor: "#182828", edgeColor: "#0e1818" },
+  id: "the-lord-of-the-rings-fate-of-the-fellowship-436217",
+  cover: "/textures/the-lord-of-the-rings-fate-of-the-fellowship-436217/cover.webp",
+  coverAspect: 1417 / 1200,
+  textures: {
+    front:  "/textures/the-lord-of-the-rings-fate-of-the-fellowship-436217/cover.webp",
+    back:   "/textures/the-lord-of-the-rings-fate-of-the-fellowship-436217/back.webp",
+    spine:  "/textures/the-lord-of-the-rings-fate-of-the-fellowship-436217/spine.webp",
+    top:    "/textures/the-lord-of-the-rings-fate-of-the-fellowship-436217/top.webp",
+    bottom: "/textures/the-lord-of-the-rings-fate-of-the-fellowship-436217/bottom.webp",
+  },
+  description: "As members of The Fellowship and the allies who rise to aid them, you must embark on a journey that may either save or doom Middle-earth. Navigate a world beset by shadow, where every choice forges a new path. The threads of destiny weave together, and the fate of The Free Peoples lies in your valor. Work together to overcome the trials ahead, for only through unity can the One Ring be unmade and darkness driven from the land."
+};
+
+// ---------------- info panel ----------------
+(function renderPanel() {
+  const b = GAME.box.size;
+  const players = GAME.players.min === GAME.players.max ? `${GAME.players.max}` : `${GAME.players.min}–${GAME.players.max}`;
+  const time = GAME.playtime.min === GAME.playtime.max ? `${GAME.playtime.max}` : `${GAME.playtime.min}–${GAME.playtime.max}`;
+  document.getElementById('panel').innerHTML = `
+    <div class="eyebrow">Jason’s board games</div>
+    <h1>${GAME.title}</h1>
+    <div class="byline">${GAME.designers.join(', ')}</div>
+    <div class="meta">
+      <div><div class="k">Players</div><div class="v">${players}</div></div>
+      <div><div class="k">Play time</div><div class="v">${time} min</div></div>
+      <div><div class="k">Complexity</div><div class="v">${GAME.complexity.toFixed(1)} / 5</div></div>
+      <div><div class="k">Published</div><div class="v">${GAME.year}</div></div>
+    </div>
+    <div class="chips">${GAME.categories.map(c => `<span class="chip">${c}</span>`).join('')}</div>
+    <div class="desc"><p>${GAME.description}</p></div>
+    <div class="footnote">Practice render · box shown at true proportions
+      (${b.w} × ${b.h} × ${b.d} cm), oriented to the cover art. Front, back &amp; spine
+      are photographic (normalized to the front); top &amp; bottom are derived from
+      the cover art (no photo of either exists).</div>`;
+})();
+document.getElementById('dims').textContent = `${GAME.box.size.w} × ${GAME.box.size.h} × ${GAME.box.size.d} cm`;
+
+// ---------------- three.js scene ----------------
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0b0b0c');
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+camera.position.set(3.0, 2.1, 6.2);
+
+// environment for subtle reflections on the glossy cover
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// lights: soft studio key + cool rim, matching the dark Stripe look
+scene.add(new THREE.HemisphereLight('#cfd6e6', '#0a0a0b', 0.35));
+const key = new THREE.DirectionalLight('#fff6ec', 2.4);
+key.position.set(4, 7, 5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 1; key.shadow.camera.far = 30;
+key.shadow.camera.left = -6; key.shadow.camera.right = 6;
+key.shadow.camera.top = 6; key.shadow.camera.bottom = -6;
+key.shadow.bias = -0.0004; key.shadow.radius = 6;
+scene.add(key);
+const rim = new THREE.DirectionalLight('#8fb4ff', 1.0);
+rim.position.set(-5, 3, -4);
+scene.add(rim);
+// soft under-fill so the bottom face is legible when you orbit beneath the box
+const under = new THREE.DirectionalLight('#aeb6c6', 0.55);
+under.position.set(-1.5, -5, 2.5);
+scene.add(under);
+// camera-following highlight: keeps a specular lobe on whatever face you're
+// looking at, so the coated sheen reads from every side (not just the front).
+const followLight = new THREE.DirectionalLight('#fff6ec', 1.15);
+followLight.target.position.set(0, 0, 0);
+scene.add(followLight);
+scene.add(followLight.target);
+
+// ---- the box, at true proportions (cm / 10 = world units) ----
+// Orientation follows the COVER ART, not the raw dims: a landscape cover must
+// sit on a landscape face or the "cover-fit" crop slices the middle out of the
+// art. Sort the three dims descending [a >= b >= c] (c = thickness/depth), then
+// assign the long edge to whichever axis the cover's aspect calls for.
+const s = GAME.box.size;
+const [a, b, c] = [s.w, s.h, s.d].sort((x, y) => y - x);
+const landscape = GAME.coverAspect >= 1;
+const face = landscape ? { w: a, h: b, d: c } : { w: b, h: a, d: c };
+const W = face.w / 10, H = face.h / 10, D = face.d / 10;
+
+// ---- a tiling paper-grain bump map, generated procedurally -----------------
+// Fine fractal noise -> the surface catches light unevenly like coated card.
+function makePaperBump(size = 256) {
+  const rng = (() => { let s = 0x2f6e2b1; return () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff; })();
+  const base = new Float32Array(size * size);
+  for (let i = 0; i < base.length; i++) base[i] = rng();
+  const sample = (x, y) => base[((y % size) + size) % size * size + (((x % size) + size) % size)];
+  const smooth = (fx, fy) => {
+    const x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0;
+    const l = (a, b, t) => a + (b - a) * (t * t * (3 - 2 * t));
+    return l(l(sample(x0, y0), sample(x0 + 1, y0), tx), l(sample(x0, y0 + 1), sample(x0 + 1, y0 + 1), tx), ty);
+  };
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    let v = 0, amp = 0.5, freq = size / 8;
+    for (let o = 0; o < 4; o++) { v += smooth(x / size * freq, y / size * freq) * amp; freq *= 2; amp *= 0.5; }
+    const c = Math.max(0, Math.min(255, Math.round(v * 255)));
+    const i = (y * size + x) * 4; data[i] = data[i + 1] = data[i + 2] = c; data[i + 3] = 255;
+  }
+  const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(7, 7);
+  // trilinear mipmaps so the fine grain doesn't shimmer under minification/motion
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+// ---- one unified material for ALL faces (identical lighting everywhere) -----
+// Coated-cardboard look: matte-ish base roughness + a light clearcoat sheen.
+// Per-face artwork is injected by box-projection in onBeforeCompile below; the
+// bump map + a shader roughness jitter give the surface its imperfections.
+const fallbackTex = (hex) => {
+  const t = new THREE.DataTexture(new Uint8Array([...hex, 255]), 1, 1, THREE.RGBAFormat);
+  t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true; return t;
+};
+const hexToRGB = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const faceUniforms = {
+  tFront:  { value: fallbackTex(hexToRGB(GAME.box.sideColor)) },
+  tBack:   { value: fallbackTex(hexToRGB(GAME.box.edgeColor)) },
+  tSpine:  { value: fallbackTex(hexToRGB(GAME.box.sideColor)) },
+  tTop:    { value: fallbackTex(hexToRGB(GAME.box.sideColor)) },
+  tBottom: { value: fallbackTex(hexToRGB(GAME.box.edgeColor)) },
+  uHalf:   { value: new THREE.Vector3(W / 2, H / 2, D / 2) },
+};
+
+const boxMat = new THREE.MeshPhysicalMaterial({
+  color: '#ffffff', roughness: 0.6, metalness: 0.0,
+  clearcoat: 0.45, clearcoatRoughness: 0.34, envMapIntensity: 1.0,
+  bumpMap: makePaperBump(), bumpScale: 0.9,
+});
+
+boxMat.onBeforeCompile = (shader) => {
+  Object.assign(shader.uniforms, faceUniforms);
+  // pass object-space position + normal through to the fragment stage
+  shader.vertexShader = shader.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 vObjPos;\nvarying vec3 vObjNormal;')
+    .replace('#include <begin_vertex>', '#include <begin_vertex>\nvObjPos = transformed;')
+    .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\nvObjNormal = objectNormal;');
+
+  shader.fragmentShader = shader.fragmentShader
+    .replace('#include <common>', `#include <common>
+      uniform sampler2D tFront, tBack, tSpine, tTop, tBottom;
+      uniform vec3 uHalf;
+      varying vec3 vObjPos; varying vec3 vObjNormal;
+      float hash(vec3 p){ p = fract(p*0.3183099+0.1); p *= 17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
+      float vnoise(vec3 x){ vec3 i=floor(x), f=fract(x); f=f*f*(3.0-2.0*f);
+        return mix(mix(mix(hash(i+vec3(0,0,0)),hash(i+vec3(1,0,0)),f.x),
+                       mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+                   mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),
+                       mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z); }
+      // pick the face texture by dominant normal axis; project object pos to UV
+      vec4 boxAlbedo(){
+        vec3 n = normalize(vObjNormal); vec3 an = abs(n); vec3 p = vObjPos; vec2 uv;
+        if (an.z >= an.x && an.z >= an.y){          // front / back  (x,y plane)
+          uv = vec2(p.x/uHalf.x, p.y/uHalf.y)*0.5+0.5;
+          return n.z >= 0.0 ? texture2D(tFront, uv) : texture2D(tBack, vec2(1.0-uv.x, uv.y));
+        } else if (an.x >= an.y){                    // spine (z,y plane)
+          uv = vec2(p.z/uHalf.z, p.y/uHalf.y)*0.5+0.5;
+          return n.x >= 0.0 ? texture2D(tSpine, vec2(1.0-uv.x, uv.y)) : texture2D(tSpine, uv);
+        } else {                                     // top / bottom (x,z plane)
+          uv = vec2(p.x/uHalf.x, p.z/uHalf.z)*0.5+0.5;
+          return n.y >= 0.0 ? texture2D(tTop, vec2(uv.x, 1.0-uv.y)) : texture2D(tBottom, uv);
+        }
+      }`)
+    .replace('#include <map_fragment>', `
+      vec4 faceCol = boxAlbedo();
+      diffuseColor.rgb *= faceCol.rgb;`)
+    // uneven sheen: nudge roughness with low-frequency noise
+    .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+      roughnessFactor = clamp(roughnessFactor + (vnoise(vObjPos*22.0)-0.5)*0.16, 0.05, 1.0);`);
+};
+
+// ---- rounded box: real bevel on every corner + edge -------------------------
+const radius = Math.min(W, H, D) * 0.06;               // subtle, ~real cardboard
+const geo = new RoundedBoxGeometry(W, H, D, 6, radius);
+const box = new THREE.Mesh(geo, boxMat);
+box.castShadow = true;
+box.rotation.y = -0.5;
+scene.add(box);
+
+// contact shadow catcher
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(40, 40),
+  new THREE.ShadowMaterial({ opacity: 0.42 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -H / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// ---- load the six face textures into the shader uniforms --------------------
+const loader = new THREE.TextureLoader();
+const anis = renderer.capabilities.getMaxAnisotropy();
+let pending = 0, failed = 0;
+function loadFace(url, uniform) {
+  if (!url) return;
+  pending++;
+  loader.load(url, (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = anis;
+    tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+    uniform.value = tex;
+    if (--pending === 0) settle();
+  }, undefined, () => { failed++; if (--pending === 0) settle(); });
+}
+function settle() {
+  const l = document.getElementById('loading');
+  l.textContent = failed ? `${failed} texture(s) unavailable` : '';
+  l.style.opacity = '0';
+  window.__coverLoaded = true;
+}
+
+const T = GAME.textures || { front: GAME.cover };
+loadFace(T.front,  faceUniforms.tFront);
+loadFace(T.back,   faceUniforms.tBack);
+loadFace(T.spine,  faceUniforms.tSpine);
+loadFace(T.top,    faceUniforms.tTop);
+loadFace(T.bottom, faceUniforms.tBottom);
+
+// ---- controls: TrackballControls for unrestricted rotation around ALL axes.
+// OrbitControls pins the camera's up-vector to world-Y, so you can only spin
+// around vertical and can never tumble the box over onto its top/bottom. A
+// trackball is a true arcball: free rotation about any axis (plus roll), no
+// gimbal lock, no "you've hit the pole" limit. Spin it however much you like.
+const controls = new TrackballControls(camera, renderer.domElement);
+controls.rotateSpeed = 3.0;
+controls.zoomSpeed = 1.2;
+controls.noPan = true;
+controls.staticMoving = false;
+controls.dynamicDampingFactor = 0.12;
+controls.minDistance = 3.5;
+controls.maxDistance = 11;
+controls.target.set(0, 0, 0);
+
+// gentle idle spin until the user first grabs the box
+let idle = true;
+controls.addEventListener('start', () => { idle = false; });
+
+// dev: ?yaw=<radians> freezes the box angle; ?cam=x,y,z moves the camera,
+// both just for screenshotting from a fixed viewpoint.
+const _q = new URLSearchParams(location.search);
+if (_q.get('yaw') !== null) { box.rotation.y = parseFloat(_q.get('yaw')); idle = false; }
+if (_q.get('cam')) { const [x, y, z] = _q.get('cam').split(',').map(Number); camera.position.set(x, y, z); idle = false; }
+
+// ---- antialiasing pipeline ----
+// MSAA (multisampled HDR target) smooths the geometry silhouette; SMAA on top
+// cleans the shader/texture seams on the bevels and the fine grain (the parts
+// MSAA alone can't fix), so edges stay stable while rotating. OutputPass does
+// tone mapping + sRGB at the end of the chain.
+const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+const composer = new EffectComposer(renderer, rt);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new SMAAPass());
+composer.addPass(new OutputPass());
+
+// ---- resize + loop ----
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  renderer.setPixelRatio(dpr);
+  renderer.setSize(w, h, false);
+  composer.setPixelRatio(dpr);
+  composer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  controls.handleResize();
+}
+window.addEventListener('resize', resize);
+resize();
+
+const _right = new THREE.Vector3(), _camDir = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
+renderer.setAnimationLoop(() => {
+  if (idle) box.rotation.y += 0.0025;
+  controls.update();
+  // hide the shadow floor once the camera drops below the box, so the bottom
+  // face isn't occluded by the (dark) shadow patch when you orbit underneath.
+  ground.visible = camera.position.y > -H / 2 + 0.02;
+  // park the highlight light near the camera, offset up-and-to-the-side, so the
+  // face currently facing the viewer catches a glancing specular highlight.
+  camera.getWorldDirection(_camDir);
+  _right.crossVectors(_camDir, _up).normalize();
+  followLight.position.copy(camera.position).addScaledVector(_right, 2.5).addScaledVector(_up, 3.0);
+  composer.render();
+});
+</script>
+</body>
+</html>

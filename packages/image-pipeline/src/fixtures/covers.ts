@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 
 /**
- * Real covers copied from apps/web-legacy/public/covers/, with the dimensions
- * and colours the legacy texture script produced for them (games.json).
+ * Real covers from the legacy app, with the dimensions and colours its texture
+ * script produced for them.
  */
 export const COVER_FIXTURES = {
   // A JPEG taller than the cover tier, so both tiers scale down.

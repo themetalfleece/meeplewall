@@ -23,17 +23,3 @@ next-env.d.ts
 # OS / editor cruft
 .DS_Store
 *.log
-
-# --- legacy app (apps/web-legacy) regenerable data-pipeline caches ---
-# raw downloaded gallery candidate images (rebuildable cache); keep gallery.json
-apps/web-legacy/scripts/gallery-cache/**/*-src.*
-
-# vision deprojection working files
-apps/web-legacy/scripts/gallery-cache/_deproj/
-apps/web-legacy/scripts/gallery-cache/_deproj2/
-apps/web-legacy/scripts/gallery-cache/_fronts/
-apps/web-legacy/scripts/gallery-cache/_flaps/
-apps/web-legacy/scripts/gallery-cache/_shapes/
-apps/web-legacy/scripts/gallery-cache/_artcrop/
-apps/web-legacy/scripts/gallery-cache/_backquads/
-apps/web-legacy/scripts/cyl-src/bag-of-chips-atlas.png

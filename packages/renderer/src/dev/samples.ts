@@ -17,7 +17,7 @@ function covers(id: string): GameBoxInput['covers'] {
   };
 }
 
-// Records copied from the legacy games.json, converted to millimetres.
+// Records copied from the legacy app's game data, converted to millimetres.
 const HAPPY_SALMON_OUTLINE: ReadonlyArray<readonly [number, number]> = [
   [0.867, 0.003],
   [0.895, 0.038],

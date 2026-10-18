@@ -12,7 +12,7 @@ description: >-
 
 ## Layout
 
-- `apps/*`: deployable apps. `apps/web-legacy` is frozen; its own `AGENTS.md` says what may change there.
+- `apps/*`: deployable apps.
 - `packages/*`: shared code. `packages/config` (`@meeplewall/config`) is the shared TypeScript, ESLint and Prettier config.
 - Root-level `scripts/` holds repo tooling (the agent doc scripts), not app code.
 
@@ -47,17 +47,15 @@ Anything from outside the type system (an API response, a file, a database row, 
 
 `--if-present` means a package joins a gate only once it defines that script, so a new package does not need stubs. The flip side: a package with no `typecheck` script is silently unchecked. Every new package defines `lint`, `typecheck` and `build`, and adds `test` with its first test.
 
-`.github/workflows/deploy.yml` builds `web-legacy` and publishes `apps/web-legacy/dist` to GitHub Pages.
-
 ## Prettier scope
 
-`.prettierignore` leaves out the frozen legacy app, generated output, the original root planning docs (`/*.md` except `AGENTS.md`) and the shared agent baseline, which is formatted in its source repo and copied byte-identical. Everything else is in the gate, so run `pnpm format:write` before handing work over.
+`.prettierignore` leaves out generated output, the renderer's reference assets (`packages/renderer/public/`) and the shared agent baseline, which is formatted in its source repo and copied byte-identical. Everything else is in the gate, so run `pnpm format:write` before handing work over.
 
 Prettier rewrites a `\uXXXX` escape in a string literal into the literal character. To keep a forbidden character such as an em dash out of the source, build it with `String.fromCodePoint(0x2014)` instead.
 
 ## Versions
 
-New dependencies follow `package-management`. Every third-party entry outside the frozen `apps/web-legacy` is a `catalog:` reference into `pnpm-workspace.yaml`. The shared lint and format tooling is in `catalog:dev` even though `packages/config` lists it under `dependencies`, because none of it ships.
+New dependencies follow `package-management`. Every third-party entry is a `catalog:` reference into `pnpm-workspace.yaml`. The shared lint and format tooling is in `catalog:dev` even though `packages/config` lists it under `dependencies`, because none of it ships.
 
 To give a package a library the catalog already lists, write the `catalog:` reference into its `package.json` by hand and run `pnpm install`. `pnpm add --save-catalog-name=dev eslint` re-resolves the newest release and rewrites the existing catalog range for every package (it moved `typescript` across a major), which is an upgrade, not an addition.
 

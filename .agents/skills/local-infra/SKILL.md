@@ -28,7 +28,7 @@ CI also runs `up -d --wait postgres` for the database suites (`packages/db`, `pa
 
 ## App images
 
-Each deployable app has an `apps/<app>/Dockerfile`, built from the repo root. Its build context is filtered by the root `.dockerignore`, which keeps out `node_modules`, `dist`, every `.env*` file at any depth and the legacy app's assets. Do not use a per-Dockerfile `<name>.dockerignore`: only BuildKit reads it, and the classic builder then copies the local `node_modules` and the install fails.
+Each deployable app has an `apps/<app>/Dockerfile`, built from the repo root. Its build context is filtered by the root `.dockerignore`, which keeps out `node_modules`, `dist`, and every `.env*` file at any depth. Do not use a per-Dockerfile `<name>.dockerignore`: only BuildKit reads it, and the classic builder then copies the local `node_modules` and the install fails.
 
 **Production is Dokploy building these Dockerfiles.** We publish no images, so there is no registry push, no publish workflow and no production compose file; CI only proves each Dockerfile still builds. A Dockerfile change must keep building from the repo root with no extra context, since that is all Dokploy gives it.
 

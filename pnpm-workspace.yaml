@@ -7,8 +7,7 @@ packages:
 injectWorkspacePackages: true
 
 # Third-party versions live here, never in a manifest. What each catalog means
-# is in .agents/skills/package-management/SKILL.md. The frozen apps/web-legacy
-# keeps its own ranges.
+# is in .agents/skills/package-management/SKILL.md.
 catalog:
   '@aws-sdk/client-s3': ^3.1152.0
   '@tanstack/react-query': ^5.104.4
@@ -45,7 +44,7 @@ catalogs:
     react: ^19.0.0
 
 # Dependencies whose install/postinstall build scripts are allowed to run.
-# esbuild fetches its platform binary (needed by Vite); sharp builds its
+# esbuild fetches its platform binary (needed by drizzle-kit); sharp builds its
 # libvips bindings for the image pipeline.
 allowBuilds:
   esbuild: true

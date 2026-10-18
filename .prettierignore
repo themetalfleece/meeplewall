@@ -1,7 +1,4 @@
-# Never reformat the frozen legacy app or any generated output. Its AGENTS.md
-# is ours, so it stays in the gate.
-apps/web-legacy/*
-!apps/web-legacy/AGENTS.md
+# Never reformat generated output.
 **/dist/
 **/build/
 **/.next/
@@ -10,11 +7,8 @@ apps/web-legacy/*
 pnpm-lock.yaml
 packages/db/src/migrations/
 
-# Pre-existing root docs, left as originally authored. The leading slash keeps
-# this root-relative: nested markdown (package READMEs, ADRs) still gets
-# formatted. AGENTS.md is ours, so it stays in the gate.
-/*.md
-!/AGENTS.md
+# The legacy practice page, kept as written as the renderer's visual reference.
+packages/renderer/public/
 
 # The shared agent baseline is formatted in its source repo and copied
 # byte-identical, so a local reformat would make every upgrade a noisy diff.

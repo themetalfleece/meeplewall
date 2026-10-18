@@ -4,7 +4,7 @@ import { SAMPLES, type SampleName, isSampleName } from './samples.js';
 
 const DEFAULT_YAW = -0.5;
 const DEFAULT_CAMERA: CameraPosition = { x: 3, y: 2.1, z: 6.2 };
-/** `pnpm --filter web-legacy dev --port 5174`, beside this server on Vite's default 5173. */
+/** The legacy Vite app, run from git history on port 5174 beside this server on 5173. */
 const DEFAULT_LEGACY_ORIGIN = 'http://localhost:5174';
 
 /** Reads `?cam=x,y,z`, the same format the practice page takes. */

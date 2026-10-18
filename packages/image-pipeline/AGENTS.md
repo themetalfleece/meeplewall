@@ -13,8 +13,12 @@
 - **Never upscale.** A cover smaller than a tier keeps its own size.
 - **Decode through `openImage`**, so EXIF orientation and the truncated-input check apply everywhere.
 - **`stats()` ignores the pipeline.** It reads the decoded input, so an `extract` or `flatten` queued before it does nothing. Render the region to raw pixels and stat that. The legacy script fell for this: its "centre" dominant was really the whole image's.
-- **The average is the exact mean of the region.** The legacy script used a 1x1 resize, which weights the middle, so averaged colours differ from `games.json` by a few levels.
+- **The average is the exact mean of the region.** The legacy script used a 1x1 resize, which weights the middle, so averaged colours differ from the legacy values by a few levels.
+
+## Docs
+
+`docs/box-art-pipeline.md` is the design for the full six-face box: orientation, BGG face photos, de-projection, matching to the front and generated fallbacks. Only the front is ported. Read it before porting another face.
 
 ## Tests
 
-The fixtures in `src/fixtures/` are real covers copied from `apps/web-legacy/public/covers/`, with the legacy dimensions and colours in `covers.ts`. Assert format, dimensions and colours within a tolerance, never bytes: a libvips upgrade changes the encoded output.
+The fixtures in `src/fixtures/` are real covers from the legacy app, with the legacy dimensions and colours in `covers.ts`. Assert format, dimensions and colours within a tolerance, never bytes: a libvips upgrade changes the encoded output.

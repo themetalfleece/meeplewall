@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseGameId, parseUsername, routes, validateUsername } from './route-params';
+import {
+  decodeSegment,
+  parseGameId,
+  parseUsername,
+  routes,
+  validateUsername,
+} from './route-params';
 
 describe('parseUsername', () => {
   it.each(['themetalfleece', 'Some_User', 'a', 'first last', 'dotted.name-2'])(
@@ -20,6 +26,20 @@ describe('parseUsername', () => {
       expect(parseUsername(segment)).toBeNull();
     },
   );
+});
+
+describe('decodeSegment', () => {
+  it('decodes percent escapes', () => {
+    expect(decodeSegment('first%20last')).toBe('first last');
+  });
+
+  it('returns an unescaped segment unchanged', () => {
+    expect(decodeSegment('alice')).toBe('alice');
+  });
+
+  it('returns null for a malformed escape', () => {
+    expect(decodeSegment('%E0%A4%A')).toBeNull();
+  });
 });
 
 describe('validateUsername', () => {

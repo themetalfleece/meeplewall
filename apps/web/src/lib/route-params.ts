@@ -11,7 +11,8 @@ const bggIdSchema = z
   .regex(/^[1-9][0-9]{0,8}$/)
   .transform(Number);
 
-function decodeSegment(segment: string): string | null {
+/** `segment` percent-decoded, or null when its escapes are malformed. */
+export function decodeSegment(segment: string): string | null {
   try {
     return decodeURIComponent(segment);
   } catch {

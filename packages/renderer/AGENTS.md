@@ -1,24 +1,16 @@
 # packages/renderer
 
-`@meeplewall/renderer`: the framework-agnostic Three.js game box. `mountGameBox({ element, game, options })` from `.` and the `<GameBox>` React wrapper from `./react`. v1 draws the rectangular box only; bags, cylinders, tins and flaps render as boxes.
+`@meeplewall/renderer`: the framework-agnostic Three.js game box. `mountGameBox({ element, game, options })` from `.` and the `<GameBox>` React wrapper from `./react`. `GameBoxInput.shape` picks the package: `box` (the default, optionally with a hang tab), `rect-tin`, `round-tin`, `tube`, `foil-bag` or `pouch`.
 
 ## Rules
 
 - **The look is tuned against `apps/web-legacy/public/practice/index.html`.** After any change to lighting, material, shader or antialiasing, run `pnpm --filter @meeplewall/renderer dev` and compare both panes of `dev.html`. `?yaw=<radians>` and `?cam=x,y,z` move both panes together; `?spin` idle-spins the new one.
+- **Other shapes are compared with the legacy app itself.** `?shape=<name>` (or the links above the panes) picks a sample from `src/dev/samples.ts`; for anything but `box` the left pane loads that game's `/g/<id>/` page from `pnpm --filter web-legacy dev --port 5174` (both servers default to 5173), or from `?legacy=<origin>`. The legacy camera differs, so compare shape and material, not pixels.
+- **A new shape touches every exhaustive dispatch.** Add it to `PackageShape` in `types.ts`, then `layoutPackage`, `packageHalfHeight` and `artworkUrls` in `packageLayout.ts` and `createPackageModel`; the `never` tails fail the build until each handles it. Geometry builders go in `packageGeometry.ts` as pure functions with tests.
+- **Textures belong to `ArtworkLoader`, not to a model.** A model is rebuilt whenever its layout changes and is re-shown every loaded texture, so it frees only its own geometry and materials. `ArtSurface` clones a texture before applying a repeat or offset, so the shared original stays untouched.
 - **Never replace a face uniform object; set its `.value`.** The compiled program keeps the object `onBeforeCompile` handed it, so a new object is never seen.
 - **Every shader chunk the patch targets must exist.** `patchBoxShader` throws when one is missing, and `boxShader.test.ts` runs it against the installed `ShaderLib.physical`, so a three.js upgrade that renames a chunk fails the tests. Keep it that way rather than using a silent `String.replace`.
 - **`GameBoxOptions` are mount-time.** `update` takes only the game. The React wrapper reads options once; a caller remounts with a new `key` to change them.
 - **Relative imports end in `.js`.** The package resolves as `NodeNext`.
 
-## Traps already hit
-
-- **`RoomEnvironment` got brighter after r161.** The practice page built it without a renderer, which in r161 meant a main light of intensity 5. Current three.js always uses 900 and also drops the room by 3.5 units. Unpatched, the box renders about 35% brighter. `GameBoxScene` puts both back.
-- **`PCFSoftShadowMap` is gone in r186** and logs a warning. `PCFShadowMap` now honours `shadow.radius`, so it gives the same soft contact shadow.
-- **ANGLE's D3D11 backend (Chrome on Windows) warns on a GLSL function with early returns** (`X4000: potentially uninitialized variable`). `boxAlbedo` assigns one result per branch and returns once.
-- **On D3D11, three's own `packing` chunk logs `X4122` precision warnings.** They come from three, not our patch, and do not appear on ANGLE's GL backend. A smoke check may ignore exactly that warning and nothing else.
-- **Antialiasing is MSAA plus SMAA.** The scene renders into a 4-sample half-float target for the silhouette, then `SMAAPass` cleans the bevel and texture seams that MSAA misses. Because the scene renders into a target, tone mapping and the sRGB transfer happen in `OutputPass`, which must stay last.
-
-## Known deltas from the practice page
-
-- **Artwork is cover-fit, not stretched.** A face image whose aspect differs from its face is centre-cropped. The practice textures are about 3% off, so the front shifts slightly; with the fit off the two panes match to under 1% of pixels.
-- **Faces at a glancing angle (the top, from above) render about 10% darker.** r186 changed the physical BRDF (a DFG lookup and multi-scattering compensation). This is three.js, not our material, and is not patched back.
+The traps already hit and the known deltas from the legacy app are in `.agents/skills/renderer/SKILL.md`. Read it before changing lighting, a shader or a package shape.

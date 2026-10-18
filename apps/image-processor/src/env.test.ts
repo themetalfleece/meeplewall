@@ -15,6 +15,7 @@ const validEnvironment = {
   WEB_INTERNAL_URL: 'http://localhost:3000',
   INTERNAL_REVALIDATE_SECRET: SECRET,
   IMAGE_PROCESSOR_HEALTH_PORT: '8080',
+  LOG_LEVEL: 'warn',
 };
 
 type VariableName = keyof typeof validEnvironment;
@@ -49,6 +50,7 @@ describe('parseWorkerConfig', () => {
       webInternalUrl: 'http://localhost:3000',
       revalidateSecret: SECRET,
       healthPort: 8080,
+      logLevel: 'warn',
     });
   });
 
@@ -72,6 +74,7 @@ describe('parseWorkerConfig', () => {
     ['IMAGE_PROCESSOR_HEALTH_PORT', '0'],
     ['IMAGE_PROCESSOR_HEALTH_PORT', '65536'],
     ['IMAGE_PROCESSOR_HEALTH_PORT', 'eighty'],
+    ['LOG_LEVEL', 'verbose'],
   ] satisfies [VariableName, string][])('throws naming %s when it is %j', (name, value) => {
     expect(() => parseWorkerConfig({ ...validEnvironment, [name]: value })).toThrow(
       new RegExp(`\\b${name}:`),

@@ -1,3 +1,4 @@
+import { LOG_LEVELS, type LogLevel } from '@meeplewall/worker-runtime';
 import { z } from 'zod';
 
 // The only module that reads process.env. Every variable is required and documented in
@@ -8,6 +9,7 @@ const environmentSchema = z.object({
   BGG_USER_AGENT: z.string().trim().min(1),
   BGG_API_TOKEN: z.string().trim().min(1),
   SYNC_WORKER_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535),
+  LOG_LEVEL: z.enum(LOG_LEVELS),
 });
 
 type Environment = Record<string, string | undefined>;
@@ -18,6 +20,7 @@ export interface WorkerConfig {
   bggUserAgent: string;
   bggApiToken: string;
   healthPort: number;
+  logLevel: LogLevel;
 }
 
 /**
@@ -39,6 +42,7 @@ export function parseWorkerConfig(environment: Environment): WorkerConfig {
     bggUserAgent: result.data.BGG_USER_AGENT,
     bggApiToken: result.data.BGG_API_TOKEN,
     healthPort: result.data.SYNC_WORKER_HEALTH_PORT,
+    logLevel: result.data.LOG_LEVEL,
   };
 }
 

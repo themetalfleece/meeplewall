@@ -17,8 +17,101 @@ export interface BoxCovers {
   bottom?: string;
 }
 
+/** Artwork the renderer loads: the box faces plus a hang tab's strip. */
+export type PackageArtwork = BoxFace | 'hangTab';
+
+/** A punched hang hole: a rounded slot with a circle on its upper edge. Edges are fractions of the tab artwork, measured from its top left. */
+export interface HangHole {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  /** Circle radius as a fraction of the tab height. */
+  circleRadius: number;
+  /** Slot corner rounding as a fraction of its shorter half side. Defaults to 1, a stadium. */
+  slotRounding?: number;
+}
+
+/** A retail hang tab standing on top of the box. */
+export interface HangTab {
+  /** Tab artwork, spanning the full box width. */
+  url: string;
+  /** Tab height as a fraction of the box height. */
+  heightFraction: number;
+  /** Tab width as a fraction of the box width, cropping the artwork's side margins. Defaults to 1. */
+  widthFraction?: number;
+  /** Rounding of the two free corners, as a fraction of the tab's shorter side. Defaults to 0.28. */
+  cornerRadius?: number;
+  hole?: HangHole;
+}
+
+/** The lid's circle within a cover photo, as fractions of the image: centre and radius. */
+export interface LidCrop {
+  centerX: number;
+  centerY: number;
+  radius: number;
+}
+
+/** A pouch silhouette, as points in fractions of the cutout image measured from its top left. */
+export interface PouchOutline {
+  /** Width over height of the silhouette. */
+  aspect: number;
+  points: ReadonlyArray<readonly [number, number]>;
+}
+
+/** A rectangular cardboard box, optionally with a hang tab. */
+export interface BoxShape {
+  kind: 'box';
+  hangTab?: HangTab;
+}
+
+/** A metal tin with a flat front and rounded corners. */
+export interface RectTinShape {
+  kind: 'rect-tin';
+  /** Corner radius as a fraction of the shorter front edge. Defaults to 0.07. */
+  cornerRadius?: number;
+}
+
+/** A short round tin with the artwork on its lid. Dimensions are millimetres. */
+export interface RoundTinShape {
+  kind: 'round-tin';
+  diameter: number;
+  height: number;
+  /** Flat top-down lid art. When omitted the front cover is used, cropped by `lidCrop`. */
+  label?: string;
+  lidCrop?: LidCrop;
+}
+
+/** A cardboard tube with the artwork wrapped around it. Dimensions are millimetres. */
+export interface TubeShape {
+  kind: 'tube';
+  diameter: number;
+  height: number;
+  /** Flat wrap art. Defaults to the front cover. */
+  label?: string;
+}
+
+/** A crimped foil snack bag with the front cover printed on it. */
+export interface FoilBagShape {
+  kind: 'foil-bag';
+}
+
+/** A closed, puffed fabric pouch cut to a silhouette. */
+export interface PouchShape {
+  kind: 'pouch';
+  /** The silhouette artwork, opaque out to the outline. */
+  cutout: string;
+  outline: PouchOutline;
+}
+
+/** The game's real packaging. */
+export type PackageShape =
+  BoxShape | RectTinShape | RoundTinShape | TubeShape | FoilBagShape | PouchShape;
+
 /** Everything the renderer needs to draw one game's box. */
 export interface GameBoxInput {
+  /** Defaults to a plain box. */
+  shape?: PackageShape;
   size: BoxSize;
   covers: BoxCovers;
   /** Fill for the front, spine and top while their art loads or when it is missing. */
@@ -36,9 +129,9 @@ export interface CameraPosition {
   z: number;
 }
 
-/** Reported once every requested face texture has loaded or failed. */
+/** Reported once every requested texture has loaded or failed. */
 export interface GameBoxLoadResult {
-  failedFaces: BoxFace[];
+  failedArtwork: PackageArtwork[];
 }
 
 /** Mount-time settings. Changing one means unmounting and mounting again. */

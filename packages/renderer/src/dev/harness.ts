@@ -1,26 +1,11 @@
 import { mountGameBox } from '../index.js';
-import type { CameraPosition, GameBoxInput } from '../types.js';
-
-// The same record and viewpoint the legacy practice page hardcodes, so the two
-// panes of dev.html render the same box from the same camera.
-const TEXTURES = '/textures/the-lord-of-the-rings-fate-of-the-fellowship-436217';
-
-const GAME: GameBoxInput = {
-  size: { width: 270, height: 310, depth: 90 },
-  covers: {
-    front: `${TEXTURES}/cover.webp`,
-    back: `${TEXTURES}/back.webp`,
-    spine: `${TEXTURES}/spine.webp`,
-    top: `${TEXTURES}/top.webp`,
-    bottom: `${TEXTURES}/bottom.webp`,
-  },
-  sideColor: '#182828',
-  edgeColor: '#0e1818',
-  coverAspect: 1417 / 1200,
-};
+import type { CameraPosition } from '../types.js';
+import { SAMPLES, type SampleName, isSampleName } from './samples.js';
 
 const DEFAULT_YAW = -0.5;
 const DEFAULT_CAMERA: CameraPosition = { x: 3, y: 2.1, z: 6.2 };
+/** `pnpm --filter web-legacy dev --port 5174`, beside this server on Vite's default 5173. */
+const DEFAULT_LEGACY_ORIGIN = 'http://localhost:5174';
 
 /** Reads `?cam=x,y,z`, the same format the practice page takes. */
 function parseCamera(value: string | null): CameraPosition {
@@ -37,10 +22,39 @@ function parseYaw(value: string | null): number {
   return Number.isFinite(yaw) ? yaw : DEFAULT_YAW;
 }
 
+/** Reads `?shape=<sample>`, defaulting to the practice page's box. */
+function parseSample(value: string | null): SampleName {
+  if (value !== null && isSampleName(value)) return value;
+
+  return 'box';
+}
+
+/**
+ * The plain box is compared with the practice page from the same camera. Every
+ * other shape is compared with that game's page in the running legacy app.
+ */
+function legacyUrl({
+  sample,
+  yaw,
+  camera,
+  legacyOrigin,
+}: {
+  sample: SampleName;
+  yaw: number;
+  camera: CameraPosition;
+  legacyOrigin: string;
+}): string {
+  if (sample === 'box')
+    return `/practice/index.html?yaw=${yaw}&cam=${camera.x},${camera.y},${camera.z}`;
+
+  return `${legacyOrigin}/g/${SAMPLES[sample].legacyId}/`;
+}
+
 const element = document.getElementById('renderer');
 const legacy = document.getElementById('legacy');
-if (!element || !(legacy instanceof HTMLIFrameElement)) {
-  throw new Error('dev.html is missing the #renderer pane or the #legacy frame');
+const legacyCaption = document.getElementById('legacy-caption');
+if (!element || !(legacy instanceof HTMLIFrameElement) || !legacyCaption) {
+  throw new Error('dev.html is missing the #renderer pane, the #legacy frame or its caption');
 }
 
 // Both panes are frozen at one angle so a screenshot compares like with like.
@@ -48,20 +62,31 @@ if (!element || !(legacy instanceof HTMLIFrameElement)) {
 const query = new URLSearchParams(window.location.search);
 const yaw = parseYaw(query.get('yaw'));
 const camera = parseCamera(query.get('cam'));
+const sample = parseSample(query.get('shape'));
+const legacyOrigin = query.get('legacy') ?? DEFAULT_LEGACY_ORIGIN;
 
-legacy.src = `/practice/index.html?yaw=${yaw}&cam=${camera.x},${camera.y},${camera.z}`;
+legacy.src = legacyUrl({ sample, yaw, camera, legacyOrigin });
+legacyCaption.textContent =
+  sample === 'box' ? 'Legacy practice page' : `Legacy app: ${SAMPLES[sample].legacyId}`;
+
+for (const link of document.querySelectorAll<HTMLAnchorElement>('nav a[data-shape]')) {
+  const target = new URLSearchParams(query);
+  target.set('shape', link.dataset.shape ?? 'box');
+  link.href = `?${target.toString()}`;
+  if (link.dataset.shape === sample) link.setAttribute('aria-current', 'page');
+}
 
 mountGameBox({
   element,
-  game: GAME,
+  game: SAMPLES[sample].game,
   options: {
     autoRotate: query.has('spin'),
     yaw,
     cameraPosition: camera,
-    onLoad: ({ failedFaces }) => {
+    onLoad: ({ failedArtwork }) => {
       // Read by the smoke test to know when the frame is final.
       document.body.dataset.rendererLoaded =
-        failedFaces.length === 0 ? 'ok' : failedFaces.join(',');
+        failedArtwork.length === 0 ? 'ok' : failedArtwork.join(',');
     },
   },
 });

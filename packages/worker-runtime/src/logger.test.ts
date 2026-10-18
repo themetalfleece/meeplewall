@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { describeError, JsonLogger } from './logger.ts';
+import { describeError, JsonLogger, LOG_LEVELS, type LogLevel } from './logger.ts';
 
 const logEntrySchema = z.looseObject({
   time: z.iso.datetime(),
-  level: z.enum(['info', 'warn', 'error']),
+  level: z.enum(LOG_LEVELS),
   message: z.string(),
 });
 
-function captureLogger() {
+function captureLogger(level: LogLevel = 'info') {
   const lines: string[] = [];
-  const logger = new JsonLogger({ write: (line) => lines.push(line) });
+  const logger = new JsonLogger({ write: (line) => lines.push(line), level });
 
   return { lines, logger };
 }
@@ -50,6 +50,26 @@ describe('JsonLogger', () => {
     logger.error('Real message', { level: 'info', message: 'Forged' });
 
     expect(parseLine(lines[0])).toMatchObject({ level: 'error', message: 'Real message' });
+  });
+
+  it('drops entries below its level', () => {
+    const { lines, logger } = captureLogger('warn');
+
+    logger.info('Claimed image job');
+    logger.warn('Lost the lease');
+    logger.error('Image job failed');
+
+    expect(lines.map((line) => parseLine(line).level)).toEqual(['warn', 'error']);
+  });
+
+  it('logs only errors at the error level', () => {
+    const { lines, logger } = captureLogger('error');
+
+    logger.info('Claimed image job');
+    logger.warn('Lost the lease');
+    logger.error('Image job failed');
+
+    expect(lines.map((line) => parseLine(line).level)).toEqual(['error']);
   });
 
   it('keeps a multi-line message on one line', () => {

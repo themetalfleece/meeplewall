@@ -8,10 +8,9 @@
 # minio-init runs once, creates the public-read bucket, then exits.
 name: meeplewall-dev
 
-# Pulled from quay.io because MinIO's Docker Hub namespace no longer exists.
-# This is the newest community image they published; later source releases
-# have no container build.
-x-minio-image: &minio-image quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+# pgsty's community build, because MinIO no longer publishes a public image
+# (Docker Hub is gone and quay.io refuses anonymous pulls). It bundles mc.
+x-minio-image: &minio-image pgsty/minio:RELEASE.2026-08-04T00-00-00Z
 
 services:
   postgres:

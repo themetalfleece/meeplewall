@@ -11,6 +11,7 @@ const variableSchemas = {
   DATABASE_URL: z.string().min(1),
   STORAGE_PUBLIC_BASE_URL: httpUrlSchema,
   INTERNAL_REVALIDATE_SECRET: z.string().min(32, 'must be at least 32 characters'),
+  LOG_LEVEL: z.enum(['info', 'warn', 'error']),
 };
 
 type VariableName = keyof typeof variableSchemas;
@@ -64,4 +65,14 @@ export function storagePublicBaseUrl(): string {
 /** Server-only: the secret the image processor sends to the revalidate route. */
 export function internalRevalidateSecret(): string {
   return fromProcess('INTERNAL_REVALIDATE_SECRET');
+}
+
+/** The least severe log level written: info, warn or error. */
+export function logLevel(): string {
+  return fromProcess('LOG_LEVEL');
+}
+
+/** Whether this is a production build. Next inlines `NODE_ENV`, so client code may call it. */
+export function isProductionBuild(): boolean {
+  return process.env.NODE_ENV === 'production';
 }

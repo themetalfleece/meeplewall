@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   databaseUrl,
   internalRevalidateSecret,
+  isProductionBuild,
+  logLevel,
   readVariable,
   siteUrl,
   storagePublicBaseUrl,
@@ -52,6 +54,12 @@ describe('readVariable', () => {
       }),
     ).toThrow('STORAGE_PUBLIC_BASE_URL is invalid');
   });
+
+  it('rejects a log level it does not know', () => {
+    expect(() =>
+      readVariable({ name: 'LOG_LEVEL', environment: { LOG_LEVEL: 'verbose' } }),
+    ).toThrow('LOG_LEVEL is invalid');
+  });
 });
 
 describe('accessors', () => {
@@ -60,16 +68,32 @@ describe('accessors', () => {
     vi.stubEnv('DATABASE_URL', 'postgres://localhost/test');
     vi.stubEnv('STORAGE_PUBLIC_BASE_URL', 'https://cdn.example.com');
     vi.stubEnv('INTERNAL_REVALIDATE_SECRET', SECRET);
+    vi.stubEnv('LOG_LEVEL', 'warn');
 
     expect(siteUrl().origin).toBe('https://boards.example.com');
     expect(databaseUrl()).toBe('postgres://localhost/test');
     expect(storagePublicBaseUrl()).toBe('https://cdn.example.com');
     expect(internalRevalidateSecret()).toBe(SECRET);
+    expect(logLevel()).toBe('warn');
   });
 
   it('throw when their variable is unset', () => {
     vi.stubEnv('SITE_URL', undefined);
 
     expect(() => siteUrl()).toThrow('SITE_URL is not set');
+  });
+});
+
+describe('isProductionBuild', () => {
+  it('is true in a production build', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+
+    expect(isProductionBuild()).toBe(true);
+  });
+
+  it.each(['development', 'test'])('is false when NODE_ENV is %s', (nodeEnv) => {
+    vi.stubEnv('NODE_ENV', nodeEnv);
+
+    expect(isProductionBuild()).toBe(false);
   });
 });

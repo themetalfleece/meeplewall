@@ -29,7 +29,7 @@ The design and pipeline knowledge lives in the root planning docs. They stay whe
 - **`PLAN.md` section 0 wins.** Its revisions are authoritative where they conflict with later sections, which are marked as superseded.
 - **Commands use `npm`.** They predate the workspace. Use the `pnpm` equivalent, for example `pnpm --filter web-legacy data` for the pipeline CLI. A data refresh may change its output, but not the legacy code (see `apps/web-legacy/AGENTS.md`).
 - **BGG facts in these docs are dated.** Where they disagree with `.agents/skills/boardgamegeek/`, the skill wins.
-- **The 3D box is ported to `packages/renderer`.** Its `AGENTS.md` holds the current renderer rules and the known deltas from the practice page, and wins over `PLAN.md` section 5.
+- **The 3D box and the package shapes are ported to `packages/renderer`.** Its `AGENTS.md` holds the current renderer rules and the known deltas from the legacy app, and wins over `PLAN.md` section 5 and the implementation notes in `PACKAGE-SHAPES.md`.
 - **The front cover is the reference and is never renormalised.** Every other face is matched to it. This principle runs through the texture docs.
 
 ## Editing them

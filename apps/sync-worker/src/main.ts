@@ -22,10 +22,16 @@ const MAX_ATTEMPTS = 3;
 const IDLE_MILLISECONDS = 2_000;
 const HEALTH_CHECK_TIMEOUT_MILLISECONDS = 2_000;
 
-const logger = new JsonLogger({ write: (line) => process.stdout.write(line) });
+function writeLine(line: string): void {
+  process.stdout.write(line);
+}
+
+// Reports a crash before LOG_LEVEL is known. Errors pass every level, so this drops nothing.
+const crashLogger = new JsonLogger({ write: writeLine, level: 'error' });
 
 async function main(): Promise<void> {
   const config = loadWorkerConfig();
+  const logger = new JsonLogger({ write: writeLine, level: config.logLevel });
   const database = createDatabase({ connectionString: config.databaseUrl });
   database.$client.on('error', (error) => {
     logger.error('Idle database connection failed', { error: describeError(error) });
@@ -88,6 +94,6 @@ async function main(): Promise<void> {
 try {
   await main();
 } catch (error) {
-  logger.error('Sync worker crashed', { error: describeError(error) });
+  crashLogger.error('Sync worker crashed', { error: describeError(error) });
   process.exitCode = 1;
 }

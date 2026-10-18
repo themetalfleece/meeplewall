@@ -1,5 +1,4 @@
 import {
-  ClampToEdgeWrapping,
   DataTexture,
   LinearFilter,
   LinearMipmapLinearFilter,
@@ -8,11 +7,11 @@ import {
   RepeatWrapping,
   SRGBColorSpace,
   type Texture,
-  TextureLoader,
   type IUniform,
   Vector3,
   Vector4,
 } from 'three';
+import { imageAspect } from './ArtworkLoader.js';
 import { patchBoxShader } from './boxShader.js';
 import { parseHexColor } from './color.js';
 import {
@@ -23,9 +22,38 @@ import {
   type UvTransform,
 } from './dimensions.js';
 import { PAPER_GRAIN_SIZE, generatePaperGrain } from './paperGrain.js';
-import type { BoxFace, GameBoxInput, GameBoxLoadResult } from './types.js';
+import type { BoxFace, GameBoxInput } from './types.js';
 
 export const BOX_FACES: readonly BoxFace[] = ['front', 'back', 'spine', 'top', 'bottom'];
+
+/** The surface a box is printed on. */
+export type BoxFinish = 'card' | 'tin';
+
+interface FinishSettings {
+  roughness: number;
+  clearcoat: number;
+  clearcoatRoughness: number;
+  envMapIntensity: number;
+  bumpScale: number;
+}
+
+// A tin is glossier and smoother than coated card, but stays non-metallic so the print survives.
+const FINISHES: Record<BoxFinish, FinishSettings> = {
+  card: {
+    roughness: 0.6,
+    clearcoat: 0.45,
+    clearcoatRoughness: 0.34,
+    envMapIntensity: 1,
+    bumpScale: 0.9,
+  },
+  tin: {
+    roughness: 0.34,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.2,
+    envMapIntensity: 1.25,
+    bumpScale: 0.4,
+  },
+};
 
 /** Which flat colour stands in for each face until its art arrives. */
 const FALLBACK_COLOR_KEY: Record<BoxFace, 'sideColor' | 'edgeColor'> = {
@@ -48,8 +76,7 @@ const UNIFORM_SUFFIX: Record<BoxFace, string> = {
 let paperGrainPixels: Uint8Array | null = null;
 
 interface FaceSlot {
-  url: string | undefined;
-  /** Loaded artwork for `url`, or null while loading, after a failure, or with no URL. */
+  /** Loaded artwork, or null while it loads, after a failure, or with no URL. */
   texture: Texture<HTMLImageElement> | null;
   fallback: DataTexture;
   map: IUniform<Texture>;
@@ -57,8 +84,8 @@ interface FaceSlot {
 }
 
 /**
- * The single coated-card material shared by all six faces, plus the face
- * artwork it samples. One material keeps the lighting identical on every face.
+ * The single coated-card material shared by all six faces. One material keeps
+ * the lighting identical on every face. The textures it shows belong to the caller.
  */
 export class BoxMaterial {
   readonly material: MeshPhysicalMaterial;
@@ -66,28 +93,9 @@ export class BoxMaterial {
   readonly #grain: DataTexture;
   readonly #halfExtents: IUniform<Vector3> = { value: new Vector3(0.5, 0.5, 0.5) };
   readonly #slots: Record<BoxFace, FaceSlot>;
-  readonly #loader = new TextureLoader();
-  readonly #anisotropy: number;
-  readonly #onFrontAspect: (aspect: number) => void;
-  readonly #onLoad: ((result: GameBoxLoadResult) => void) | undefined;
-  readonly #pendingFaces = new Set<BoxFace>();
-  readonly #failedFaces = new Set<BoxFace>();
   #box: OrientedBox | null = null;
-  #disposed = false;
 
-  constructor({
-    anisotropy,
-    onFrontAspect,
-    onLoad,
-  }: {
-    anisotropy: number;
-    /** Called with the front image's width over height each time a new front loads. */
-    onFrontAspect: (aspect: number) => void;
-    onLoad: ((result: GameBoxLoadResult) => void) | undefined;
-  }) {
-    this.#anisotropy = anisotropy;
-    this.#onFrontAspect = onFrontAspect;
-    this.#onLoad = onLoad;
+  constructor() {
     this.#grain = BoxMaterial.#createGrainTexture();
     this.#slots = {
       front: BoxMaterial.#createSlot(),
@@ -99,14 +107,10 @@ export class BoxMaterial {
 
     this.material = new MeshPhysicalMaterial({
       color: '#ffffff',
-      roughness: 0.6,
       metalness: 0,
-      clearcoat: 0.45,
-      clearcoatRoughness: 0.34,
-      envMapIntensity: 1,
       bumpMap: this.#grain,
-      bumpScale: 0.9,
     });
+    this.setFinish('card');
     this.material.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, this.#uniforms());
       patchBoxShader(shader);
@@ -122,38 +126,30 @@ export class BoxMaterial {
     for (const face of BOX_FACES) this.#refit(face);
   }
 
-  /** Applies a game's colours and starts loading any face URL that changed. */
-  setGame(game: GameBoxInput): void {
-    const wasLoading = this.#pendingFaces.size > 0;
-
+  /** Paints each face's stand-in colour, shown until its artwork arrives. */
+  setColors(game: Pick<GameBoxInput, 'sideColor' | 'edgeColor'>): void {
     for (const face of BOX_FACES) {
-      const slot = this.#slots[face];
-      BoxMaterial.#paintFallback({ texture: slot.fallback, hex: game[FALLBACK_COLOR_KEY[face]] });
-
-      const url = game.covers[face];
-      if (url === slot.url) continue;
-
-      slot.texture?.dispose();
-      slot.texture = null;
-      slot.url = url;
-      // The previous URL's load state no longer applies, whether or not a new load starts.
-      this.#pendingFaces.delete(face);
-      this.#failedFaces.delete(face);
-      this.#show(face);
-      if (url !== undefined) this.#load({ face, url });
+      BoxMaterial.#paintFallback({
+        texture: this.#slots[face].fallback,
+        hex: game[FALLBACK_COLOR_KEY[face]],
+      });
     }
+  }
 
-    // Dropping the last face still in flight settles the batch without a load callback.
-    if (wasLoading) this.#reportIfSettled();
+  /** Shows a face's artwork, or its stand-in colour when `texture` is null. */
+  setFace({ face, texture }: { face: BoxFace; texture: Texture<HTMLImageElement> | null }): void {
+    const slot = this.#slots[face];
+    slot.texture = texture;
+    slot.map.value = texture ?? slot.fallback;
+    this.#refit(face);
+  }
+
+  setFinish(finish: BoxFinish): void {
+    Object.assign(this.material, FINISHES[finish]);
   }
 
   dispose(): void {
-    this.#disposed = true;
-    for (const face of BOX_FACES) {
-      const slot = this.#slots[face];
-      slot.texture?.dispose();
-      slot.fallback.dispose();
-    }
+    for (const face of BOX_FACES) this.#slots[face].fallback.dispose();
     this.#grain.dispose();
     this.material.dispose();
   }
@@ -165,53 +161,6 @@ export class BoxMaterial {
       uniforms[`uFit${UNIFORM_SUFFIX[face]}`] = this.#slots[face].fit;
     }
     return uniforms;
-  }
-
-  #load({ face, url }: { face: BoxFace; url: string }): void {
-    this.#pendingFaces.add(face);
-
-    this.#loader.load(
-      url,
-      (texture) => {
-        const slot = this.#slots[face];
-        if (this.#disposed || slot.url !== url) {
-          texture.dispose();
-          return;
-        }
-
-        texture.colorSpace = SRGBColorSpace;
-        texture.anisotropy = this.#anisotropy;
-        texture.wrapS = ClampToEdgeWrapping;
-        texture.wrapT = ClampToEdgeWrapping;
-        slot.texture = texture;
-        this.#show(face);
-        if (face === 'front') this.#onFrontAspect(BoxMaterial.#imageAspect(texture));
-        this.#settle({ face, url, failed: false });
-      },
-      undefined,
-      () => this.#settle({ face, url, failed: true }),
-    );
-  }
-
-  /** Records a finished load and reports once nothing is still in flight. */
-  #settle({ face, url, failed }: { face: BoxFace; url: string; failed: boolean }): void {
-    if (this.#disposed || this.#slots[face].url !== url) return;
-
-    this.#pendingFaces.delete(face);
-    if (failed) this.#failedFaces.add(face);
-    this.#reportIfSettled();
-  }
-
-  #reportIfSettled(): void {
-    if (this.#pendingFaces.size > 0) return;
-
-    this.#onLoad?.({ failedFaces: BOX_FACES.filter((each) => this.#failedFaces.has(each)) });
-  }
-
-  #show(face: BoxFace): void {
-    const slot = this.#slots[face];
-    slot.map.value = slot.texture ?? slot.fallback;
-    this.#refit(face);
   }
 
   #refit(face: BoxFace): void {
@@ -230,14 +179,9 @@ export class BoxMaterial {
     if (!this.#box || !texture) return IDENTITY_UV_TRANSFORM;
 
     return coverFit({
-      imageAspect: BoxMaterial.#imageAspect(texture),
+      imageAspect: imageAspect(texture),
       targetAspect: faceAspect({ box: this.#box, face }),
     });
-  }
-
-  static #imageAspect(texture: Texture<HTMLImageElement>): number {
-    const { naturalWidth, naturalHeight } = texture.image;
-    return naturalHeight > 0 ? naturalWidth / naturalHeight : 1;
   }
 
   static #createSlot(): FaceSlot {
@@ -245,7 +189,6 @@ export class BoxMaterial {
     fallback.colorSpace = SRGBColorSpace;
     fallback.needsUpdate = true;
     return {
-      url: undefined,
       texture: null,
       fallback,
       map: { value: fallback },

@@ -7,6 +7,7 @@ const validEnvironment = {
   BGG_USER_AGENT: 'meeplewall tests',
   BGG_API_TOKEN: 'a-bgg-token',
   SYNC_WORKER_HEALTH_PORT: '8081',
+  LOG_LEVEL: 'warn',
 };
 
 type VariableName = keyof typeof validEnvironment;
@@ -29,6 +30,7 @@ describe('parseWorkerConfig', () => {
       bggUserAgent: 'meeplewall tests',
       bggApiToken: 'a-bgg-token',
       healthPort: 8081,
+      logLevel: 'warn',
     });
   });
 
@@ -45,6 +47,7 @@ describe('parseWorkerConfig', () => {
     ['SYNC_WORKER_HEALTH_PORT', '0'],
     ['SYNC_WORKER_HEALTH_PORT', '65536'],
     ['SYNC_WORKER_HEALTH_PORT', 'eighty'],
+    ['LOG_LEVEL', 'verbose'],
   ] satisfies [VariableName, string][])('throws naming %s when it is %j', (name, value) => {
     expect(() => parseWorkerConfig({ ...validEnvironment, [name]: value })).toThrow(
       new RegExp(`\\b${name}:`),

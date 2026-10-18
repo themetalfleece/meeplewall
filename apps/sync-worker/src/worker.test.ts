@@ -62,7 +62,7 @@ function createWorker({
   const worker = new SyncWorker({
     leases,
     runner: { runSync },
-    logger: new JsonLogger({ write: (line) => lines.push(line) }),
+    logger: new JsonLogger({ write: (line) => lines.push(line), level: 'info' }),
     workerId: WORKER_ID,
     renewMilliseconds: RENEW_MILLISECONDS,
     idleMilliseconds: 1,

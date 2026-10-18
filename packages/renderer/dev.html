@@ -24,6 +24,17 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
+      nav {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      nav a {
+        color: inherit;
+      }
+      nav a[aria-current='page'] {
+        color: #f2ede3;
+      }
       main {
         display: flex;
         gap: 24px;
@@ -48,9 +59,18 @@
     </style>
   </head>
   <body>
+    <nav aria-label="Package shape">
+      <a data-shape="box">Box</a>
+      <a data-shape="hang-tab">Hang tab</a>
+      <a data-shape="rect-tin">Rect tin</a>
+      <a data-shape="round-tin">Round tin</a>
+      <a data-shape="tube">Tube</a>
+      <a data-shape="foil-bag">Foil bag</a>
+      <a data-shape="pouch">Pouch</a>
+    </nav>
     <main>
       <figure>
-        <figcaption>Legacy practice page</figcaption>
+        <figcaption id="legacy-caption">Legacy practice page</figcaption>
         <div class="pane">
           <iframe id="legacy" title="Legacy practice page"></iframe>
         </div>

@@ -2,6 +2,7 @@ import {
   ACESFilmicToneMapping,
   Color,
   DirectionalLight,
+  Group,
   HalfFloatType,
   HemisphereLight,
   Mesh,
@@ -20,27 +21,34 @@ import {
 } from 'three';
 import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { ArtworkLoader, imageAspect } from './ArtworkLoader.js';
 import { BoxMaterial } from './BoxMaterial.js';
-import { bevelRadius, orientBox, type OrientedBox } from './dimensions.js';
-import type { CameraPosition, GameBoxInput, GameBoxOptions } from './types.js';
+import { createPackageModel } from './createPackageModel.js';
+import {
+  PACKAGE_ARTWORKS,
+  artworkUrls,
+  layoutPackage,
+  packageHalfHeight,
+  shapeOf,
+} from './packageLayout.js';
+import type { ArtworkChange, PackageModel } from './PackageModel.js';
+import type { CameraPosition, GameBoxInput, GameBoxOptions, PackageArtwork } from './types.js';
 
 const DEFAULT_BACKGROUND = '#0b0b0c';
 const DEFAULT_YAW = -0.5;
 const DEFAULT_CAMERA: CameraPosition = { x: 3, y: 2.1, z: 6.2 };
 const DEFAULT_MAX_PIXEL_RATIO = 2;
 const IDLE_SPIN_PER_FRAME = 0.0025;
-const BEVEL_SEGMENTS = 6;
 const STUDIO_MAIN_LIGHT_INTENSITY = 5;
 /** Used to orient the box until the front image reports its real aspect. */
 const ASSUMED_COVER_ASPECT = 1;
 
 /**
- * One game box on its own canvas: studio lighting, a contact shadow, trackball
+ * One game's package on its own canvas: studio lighting, a contact shadow, trackball
  * controls and an MSAA plus SMAA pipeline. Owns every GPU resource it creates.
  */
 export class GameBoxScene {
@@ -49,8 +57,10 @@ export class GameBoxScene {
   readonly #scene = new Scene();
   readonly #camera = new PerspectiveCamera(35, 1, 0.1, 100);
   readonly #environment: Texture;
-  readonly #boxMaterial: BoxMaterial;
-  readonly #box: Mesh<RoundedBoxGeometry>;
+  readonly #artwork: ArtworkLoader<PackageArtwork>;
+  readonly #boxMaterial = new BoxMaterial();
+  /** Carries the yaw and the idle spin, whichever package is inside. */
+  readonly #turntable = new Group();
   readonly #ground: Mesh<PlaneGeometry, ShadowMaterial>;
   readonly #followLight = new DirectionalLight('#fff6ec', 1.15);
   readonly #controls: TrackballControls | null;
@@ -62,8 +72,11 @@ export class GameBoxScene {
   readonly #cameraRight = new Vector3();
   static readonly #UP = new Vector3(0, 1, 0);
   #game: GameBoxInput;
+  #frontUrl: string | undefined;
   #frontAspect: number | null = null;
-  #orientedBox: OrientedBox | null = null;
+  #model: PackageModel | null = null;
+  /** The layout `#model` was built from, serialised, so an unchanged one is not rebuilt. */
+  #modelKey = '';
   #idle: boolean;
 
   constructor({
@@ -103,15 +116,15 @@ export class GameBoxScene {
     this.#scene.environment = this.#environment;
     this.#addLights();
 
-    this.#boxMaterial = new BoxMaterial({
+    const { onLoad } = options;
+    this.#artwork = new ArtworkLoader({
+      artworks: PACKAGE_ARTWORKS,
       anisotropy: this.#renderer.capabilities.getMaxAnisotropy(),
-      onFrontAspect: (aspect) => this.#handleFrontAspect(aspect),
-      onLoad: options.onLoad,
+      onTexture: (change) => this.#handleTexture(change),
+      onSettled: (failedArtwork) => onLoad?.({ failedArtwork }),
     });
-    this.#box = new Mesh(new RoundedBoxGeometry(1, 1, 1), this.#boxMaterial.material);
-    this.#box.castShadow = true;
-    this.#box.rotation.y = options.yaw ?? DEFAULT_YAW;
-    this.#scene.add(this.#box);
+    this.#turntable.rotation.y = options.yaw ?? DEFAULT_YAW;
+    this.#scene.add(this.#turntable);
 
     this.#ground = new Mesh(new PlaneGeometry(40, 40), new ShadowMaterial({ opacity: 0.42 }));
     this.#ground.rotation.x = -Math.PI / 2;
@@ -138,20 +151,23 @@ export class GameBoxScene {
   }
 
   update(game: GameBoxInput): void {
-    const frontChanged = game.covers.front !== this.#game.covers.front;
-    if (frontChanged) this.#frontAspect = null;
+    const urls = artworkUrls(game);
+    if (urls.front !== this.#frontUrl) this.#frontAspect = null;
 
+    this.#frontUrl = urls.front;
     this.#game = game;
-    this.#reshape();
-    this.#boxMaterial.setGame(game);
+    this.#rebuild();
+    this.#model?.paint(game);
+    this.#artwork.setUrls(urls);
   }
 
   dispose(): void {
     this.#renderer.setAnimationLoop(null);
     this.#resizeObserver.disconnect();
     this.#controls?.dispose();
+    this.#model?.dispose();
     this.#boxMaterial.dispose();
-    this.#box.geometry.dispose();
+    this.#artwork.dispose();
     this.#ground.geometry.dispose();
     this.#ground.material.dispose();
     this.#environment.dispose();
@@ -161,30 +177,29 @@ export class GameBoxScene {
     this.#renderer.domElement.remove();
   }
 
-  /** Rebuilds the geometry only when the oriented dimensions actually change. */
-  #reshape(): void {
-    const next = orientBox({ size: this.#game.size, coverAspect: this.#coverAspect() });
-    const current = this.#orientedBox;
-    if (
-      current &&
-      current.width === next.width &&
-      current.height === next.height &&
-      current.depth === next.depth
-    ) {
-      return;
-    }
+  /** Rebuilds the package only when its layout actually changes. */
+  #rebuild(): void {
+    const layout = layoutPackage({
+      shape: shapeOf(this.#game),
+      size: this.#game.size,
+      coverAspect: this.#coverAspect(),
+    });
+    const key = JSON.stringify(layout);
+    if (key === this.#modelKey) return;
 
-    this.#orientedBox = next;
-    this.#box.geometry.dispose();
-    this.#box.geometry = new RoundedBoxGeometry(
-      next.width,
-      next.height,
-      next.depth,
-      BEVEL_SEGMENTS,
-      bevelRadius(next),
-    );
-    this.#ground.position.y = -next.height / 2;
-    this.#boxMaterial.setBox(next);
+    if (this.#model) {
+      this.#turntable.remove(this.#model.object);
+      this.#model.dispose();
+    }
+    const model = createPackageModel({ layout, boxMaterial: this.#boxMaterial });
+    this.#model = model;
+    this.#modelKey = key;
+    this.#turntable.add(model.object);
+    this.#ground.position.y = -packageHalfHeight(layout);
+    model.paint(this.#game);
+    for (const artwork of PACKAGE_ARTWORKS) {
+      model.showArtwork({ artwork, texture: this.#artwork.texture(artwork) });
+    }
   }
 
   #coverAspect(): number {
@@ -197,9 +212,13 @@ export class GameBoxScene {
     return ASSUMED_COVER_ASPECT;
   }
 
-  #handleFrontAspect(aspect: number): void {
-    this.#frontAspect = aspect;
-    this.#reshape();
+  #handleTexture(change: ArtworkChange): void {
+    this.#model?.showArtwork(change);
+    if (change.artwork !== 'front' || !change.texture) return;
+
+    // The front image's real aspect can reorient the package, which rebuilds it.
+    this.#frontAspect = imageAspect(change.texture);
+    this.#rebuild();
   }
 
   #addLights(): void {
@@ -267,7 +286,7 @@ export class GameBoxScene {
   }
 
   #renderFrame(): void {
-    if (this.#idle) this.#box.rotation.y += IDLE_SPIN_PER_FRAME;
+    if (this.#idle) this.#turntable.rotation.y += IDLE_SPIN_PER_FRAME;
     this.#controls?.update();
 
     // Hide the shadow floor once the camera drops below it, or it hides the bottom face.

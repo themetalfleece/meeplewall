@@ -1,4 +1,5 @@
 import type { StorageOptions } from '@meeplewall/storage';
+import { LOG_LEVELS, type LogLevel } from '@meeplewall/worker-runtime';
 import { z } from 'zod';
 
 // The only module that reads process.env. Every variable is required and documented in
@@ -19,6 +20,7 @@ const workerEnvironmentSchema = serviceEnvironmentSchema.extend({
   WEB_INTERNAL_URL: z.url({ protocol: /^https?$/ }),
   INTERNAL_REVALIDATE_SECRET: z.string().min(32, 'must be at least 32 characters'),
   IMAGE_PROCESSOR_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535),
+  LOG_LEVEL: z.enum(LOG_LEVELS),
 });
 
 type Environment = Record<string, string | undefined>;
@@ -34,6 +36,7 @@ export interface WorkerConfig extends ServiceConfig {
   webInternalUrl: string;
   revalidateSecret: string;
   healthPort: number;
+  logLevel: LogLevel;
 }
 
 function toServiceConfig(values: z.output<typeof serviceEnvironmentSchema>): ServiceConfig {
@@ -69,6 +72,7 @@ export function parseWorkerConfig(environment: Environment): WorkerConfig {
     webInternalUrl: result.data.WEB_INTERNAL_URL,
     revalidateSecret: result.data.INTERNAL_REVALIDATE_SECRET,
     healthPort: result.data.IMAGE_PROCESSOR_HEALTH_PORT,
+    logLevel: result.data.LOG_LEVEL,
   };
 }
 

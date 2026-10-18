@@ -4,13 +4,26 @@ description: >-
   What BoardGameGeek actually serves and how packages/boardgamegeek talks to it.
   Read before calling BGG, adding a geekdo endpoint or schema field, touching
   the rate limit or backoff, considering XMLAPI2, fetching a user's collection,
-  or changing the box-size cross-check. Lists the open endpoints, their quirks,
-  and what is blocked.
+  changing the box-size cross-check, or touching the BGG attribution, the site
+  footer or the about and privacy pages. Lists the open endpoints, their quirks,
+  what is blocked, and what BGG's API terms require.
 ---
 
 # BoardGameGeek
 
 Facts as of October 2026. Re-probe before trusting one that matters: BGG changes these without notice.
+
+## Terms of use
+
+Our XMLAPI2 token comes under BGG's [XML API Terms of Use](https://boardgamegeek.com/wiki/page/XML_API_Terms_of_Use). What they require:
+
+- **Non-commercial only.** Ads, payments or a donation link would make Meeplewall commercial and need BGG's commercial licence first.
+- **Credit BGG and show the Powered by BGG logo**, linked to BGG, on every public page. `SiteFooter` in the `apps/web` root layout carries it with the non-affiliation notice, so never drop it from a route. The logo is BGG's official file, unaltered; the originals are in [BGG's asset folder](https://drive.google.com/drive/folders/1k3VgEIpNEY59iTVnpTibt31JcO0rEaSw).
+- **Do not modify BGG's data**, and never use it to train an AI model.
+- **Do not load BGG's servers.** Cache aggressively and keep the request rate low.
+- **Only XMLAPI2 is licensed.** BGG's policy treats its private site APIs, `api.geekdo.com` included, as unlicensed for third-party use.
+
+The `/about` and `/privacy` pages in `apps/web` say what we fetch from BGG and what we store. Change them in the same change as either.
 
 ## geekdo endpoints
 

@@ -16,7 +16,7 @@
 - **`src/lib/env.ts` is the only `process.env` reader.** Next reads `apps/web/.env.local`; `.env.example` beside it lists every variable. `SITE_URL` is needed at build time too, since `/` is prerendered: without it `pnpm build` fails.
 - **Pages call `src/lib` loaders, never `/api/...`.** Logic that is not Next-specific belongs in a package (`collection-sync`, `db`, `boardgamegeek`).
 - **`src/lib/sync-status.ts` is client code.** `SyncWatcher` parses its schema, so it never imports a server package (see the `nextjs` skill).
-- **Params arrive encoded.** Parse them with `parseUsername` and `parseGameId`; build links with `routes`.
+- **Params arrive encoded.** Parse them with `parseUsername` and `parseGameId`; build links with `routes`, whose entries are all functions, fixed paths too.
 - **The 3D box only gets the processed cover.** BGG's image CDN sends no CORS headers, so `toGameBoxInput` falls back to `public/placeholder-cover.png`, never a BGG URL.
 - **Social images use BGG's original JPEG or PNG.** Their renderer cannot read WebP. `next/og` and the reads are imported inside the image function.
 - **Postgres migrations are not run here.** The image processor applies them at startup, or run `pnpm --filter @meeplewall/db migrate`.

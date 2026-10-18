@@ -40,7 +40,7 @@ export function parseGameId(segment: string): number | null {
   return result.success ? result.data : null;
 }
 
-/** Path helpers, so every link to a route is built one way. */
+/** Path helpers, so every link to a route is built one way. Fixed paths are functions too. */
 export const routes = {
   collection: (username: string) => `/u/${encodeURIComponent(username)}`,
   collectionGame: ({ username, bggId }: { username: string; bggId: number }) =>
@@ -48,7 +48,9 @@ export const routes = {
   game: (bggId: number) => `/g/${bggId}`,
   syncStatus: (username: string) => `/api/sync/${encodeURIComponent(username)}`,
   refresh: (username: string) => `/api/refresh/${encodeURIComponent(username)}`,
-};
+  about: () => '/about',
+  privacy: () => '/privacy',
+} satisfies Record<string, (...args: never[]) => string>;
 
 /** The props Next.js passes each route. Params arrive still encoded and as a promise. */
 export interface UserRouteProps {

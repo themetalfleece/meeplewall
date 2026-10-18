@@ -4,6 +4,10 @@ Board game collections from BoardGameGeek, shelved as 3D boxes, at
 **[meeplewall.com](https://meeplewall.com/)**. The rest of this file describes the frozen
 legacy app in `apps/web-legacy`.
 
+The source code is MIT licensed (see [LICENSE](LICENSE)). Game data, names and box art
+belong to BoardGameGeek and the games' publishers and are not covered by that license.
+Meeplewall is not affiliated with or endorsed by BoardGameGeek.
+
 A Stripe-Press-style showcase of a ~200-game board-game collection, rendered as
 photorealistic 3D boxes you can browse and open. Live at
 **[jasongames.xyz](https://jasongames.xyz/)**.

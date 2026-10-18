@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { externalLinks } from '@/lib/external-links';
+
 import styles from './SiteHeader.module.css';
 
 export function SiteHeader() {
@@ -8,7 +10,7 @@ export function SiteHeader() {
       <Link href="/" className={styles.brand}>
         Meeplewall
       </Link>
-      <a className={styles.credit} href="https://boardgamegeek.com" rel="noreferrer">
+      <a className={styles.credit} href={externalLinks.bggHome} rel="noreferrer">
         Data from BoardGameGeek
       </a>
     </header>

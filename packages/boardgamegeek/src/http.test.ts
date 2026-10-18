@@ -1,30 +1,30 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RequestThrottle, retryDelayMs } from './http.ts';
+import { RequestThrottle, retryDelayMilliseconds } from './http.ts';
 
-describe('retryDelayMs', () => {
+describe('retryDelayMilliseconds', () => {
   it('doubles from one second', () => {
-    expect([1, 2, 3, 4].map((attempt) => retryDelayMs({ attempt, retryAfter: null }))).toEqual([
-      1000, 2000, 4000, 8000,
-    ]);
+    expect(
+      [1, 2, 3, 4].map((attempt) => retryDelayMilliseconds({ attempt, retryAfter: null })),
+    ).toEqual([1000, 2000, 4000, 8000]);
   });
 
   it('caps the backoff at 30 seconds', () => {
-    expect(retryDelayMs({ attempt: 10, retryAfter: null })).toBe(30_000);
+    expect(retryDelayMilliseconds({ attempt: 10, retryAfter: null })).toBe(30_000);
   });
 
   it('honours Retry-After in seconds', () => {
-    expect(retryDelayMs({ attempt: 1, retryAfter: '7' })).toBe(7000);
+    expect(retryDelayMilliseconds({ attempt: 1, retryAfter: '7' })).toBe(7000);
   });
 
   it('caps Retry-After at 30 seconds', () => {
-    expect(retryDelayMs({ attempt: 1, retryAfter: '600' })).toBe(30_000);
+    expect(retryDelayMilliseconds({ attempt: 1, retryAfter: '600' })).toBe(30_000);
   });
 
   it.each(['', 'Wed, 21 Oct 2026 07:28:00 GMT'])(
     'falls back to the backoff for a Retry-After of %j',
     (retryAfter) => {
-      expect(retryDelayMs({ attempt: 2, retryAfter })).toBe(2000);
+      expect(retryDelayMilliseconds({ attempt: 2, retryAfter })).toBe(2000);
     },
   );
 });

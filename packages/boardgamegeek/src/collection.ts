@@ -1,7 +1,15 @@
 import { XMLParser } from 'fast-xml-parser';
 import { z } from 'zod';
 
-import { BggHttpError, BggResponseError, PoliteHttpClient, sleep } from './http.ts';
+import {
+  BggHttpError,
+  BggResponseError,
+  PoliteHttpClient,
+  politeHttpClientOptionsSchema,
+  sleep,
+  throwUnlessOk,
+} from './http.ts';
+import { bggIdSchema } from './schemas.ts';
 
 const COLLECTION_URL = 'https://boardgamegeek.com/xmlapi2/collection';
 
@@ -11,8 +19,8 @@ const COLLECTION_URL = 'https://boardgamegeek.com/xmlapi2/collection';
  * to ten, for about two minutes in all.
  */
 const MAX_QUEUED_ATTEMPTS = 15;
-const INITIAL_QUEUED_DELAY_MS = 2_000;
-const MAX_QUEUED_DELAY_MS = 10_000;
+const INITIAL_QUEUED_DELAY_MILLISECONDS = 2_000;
+const MAX_QUEUED_DELAY_MILLISECONDS = 10_000;
 
 /** One game in a user's collection, with that user's own status flags and rating. */
 export type BggCollectionItem = z.output<typeof collectionItemSchema>;
@@ -44,7 +52,7 @@ const wishlistPrioritySchema = z
 
 const collectionItemSchema = z
   .object({
-    objectid: z.union([z.number(), z.string()]).transform(Number).pipe(z.number().int().positive()),
+    objectid: bggIdSchema,
     status: z.object({
       own: flagSchema,
       prevowned: flagSchema,
@@ -137,10 +145,8 @@ const collectionDocumentSchema = z.union([
   }),
 ]);
 
-const collectionOptionsSchema = z.object({
-  userAgent: z.string().trim().min(1),
+const collectionOptionsSchema = politeHttpClientOptionsSchema.extend({
   token: z.string().trim().min(1),
-  requestsPerSecond: z.number().positive().max(10),
 });
 
 export type BggCollectionClientOptions = z.input<typeof collectionOptionsSchema>;
@@ -185,7 +191,9 @@ class XmlApiCollectionClient implements BggCollectionClient {
       }
 
       await response.body?.cancel();
-      await sleep(Math.min(INITIAL_QUEUED_DELAY_MS * attempt, MAX_QUEUED_DELAY_MS));
+      await sleep(
+        Math.min(INITIAL_QUEUED_DELAY_MILLISECONDS * attempt, MAX_QUEUED_DELAY_MILLISECONDS),
+      );
     }
 
     throw new BggHttpError({ status: 202, url });
@@ -211,11 +219,7 @@ class XmlApiCollectionClient implements BggCollectionClient {
     url: string;
     response: Response;
   }): Promise<BggCollectionItem[] | null> {
-    if (!response.ok) {
-      await response.body?.cancel();
-
-      throw new BggHttpError({ status: response.status, url });
-    }
+    await throwUnlessOk({ url, response });
 
     const result = collectionDocumentSchema.safeParse(
       parseXml({ url, text: await response.text() }),

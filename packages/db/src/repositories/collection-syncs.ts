@@ -7,6 +7,7 @@ import {
   type CollectionSync,
   type RefreshSource,
 } from '../schema/index.ts';
+import { leaseExpiry } from './leases.ts';
 import { ensureUser, findUser } from './users.ts';
 
 // Repeats the partial unique index's predicate, so ON CONFLICT can infer that index.
@@ -115,7 +116,7 @@ export async function claimNextCollectionSync(
     .set({
       attempts: sql`${collectionSyncs.attempts} + 1`,
       lockedBy: workerId,
-      lockedUntil: sql`now() + make_interval(secs => ${holdSeconds})`,
+      lockedUntil: leaseExpiry(holdSeconds),
     })
     .where(inArray(collectionSyncs.id, nextSyncId))
     .returning();
@@ -149,7 +150,7 @@ export async function renewCollectionSyncLease(
 ): Promise<CollectionSync | undefined> {
   const [sync] = await database
     .update(collectionSyncs)
-    .set({ lockedUntil: sql`now() + make_interval(secs => ${holdSeconds})` })
+    .set({ lockedUntil: leaseExpiry(holdSeconds) })
     .where(heldBy({ syncId, workerId }))
     .returning();
 

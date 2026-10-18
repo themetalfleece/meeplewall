@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/test-database.d.ts",
+      "default": "./dist/testing/test-database.js"
     }
   },
   "files": [

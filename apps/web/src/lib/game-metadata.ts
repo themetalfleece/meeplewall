@@ -21,6 +21,10 @@ function summarise({
     : description;
 }
 
+function notFoundMetadata(): Metadata {
+  return { title: 'Game not found', robots: { index: false } };
+}
+
 /**
  * Metadata for a game page. Both game routes point their canonical URL at `/g/[gId]`, since a
  * game is the same page whichever collection it is viewed from.
@@ -33,9 +37,13 @@ export async function gameMetadata({
   username: string | null;
 }): Promise<Metadata> {
   const bggId = parseGameId(segment);
-  const game = bggId === null ? null : await loadGame({ bggId });
-  if (bggId === null || game === null) {
-    return { title: 'Game not found', robots: { index: false } };
+  if (bggId === null) {
+    return notFoundMetadata();
+  }
+
+  const game = await loadGame({ bggId });
+  if (game === null) {
+    return notFoundMetadata();
   }
 
   const title = username === null ? game.name : `${game.name} in ${username}'s collection`;

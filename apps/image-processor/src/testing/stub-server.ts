@@ -20,6 +20,16 @@ export interface StubResponse {
   waitFor?: Promise<void>;
 }
 
+/** A `waitFor` promise for a stub response, and the function that lets the response through. */
+export function holdResponse(): { waitFor: Promise<void>; release: () => void } {
+  let release = () => {};
+  const waitFor = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+
+  return { waitFor, release };
+}
+
 async function readBody(request: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
   for await (const chunk of request) {

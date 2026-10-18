@@ -2,11 +2,29 @@ import { describe, expect, it } from 'vitest';
 import {
   IDENTITY_UV_TRANSFORM,
   MILLIMETRES_PER_UNIT,
+  assertPositive,
   bevelRadius,
   coverFit,
   faceAspect,
   orientBox,
 } from './dimensions.js';
+
+describe('assertPositive', () => {
+  it('accepts a finite number above zero', () => {
+    expect(() =>
+      assertPositive({ value: 0.5, requirement: 'Size must be positive' }),
+    ).not.toThrow();
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    'rejects %s, naming the requirement',
+    (bad) => {
+      expect(() => assertPositive({ value: bad, requirement: 'Size must be positive' })).toThrow(
+        new RangeError(`Size must be positive, got ${bad}`),
+      );
+    },
+  );
+});
 
 describe('orientBox', () => {
   const size = { width: 270, height: 310, depth: 90 };
@@ -40,7 +58,7 @@ describe('orientBox', () => {
     });
   });
 
-  it('does not reorder the caller’s size object', () => {
+  it("does not reorder the caller's size object", () => {
     const input = { width: 90, height: 310, depth: 270 };
     orientBox({ size: input, coverAspect: 1 });
     expect(input).toEqual({ width: 90, height: 310, depth: 270 });

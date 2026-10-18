@@ -1,4 +1,4 @@
-import { replaceChunk, type ShaderSource } from './boxShader.js';
+import { patchShader, type ShaderSource } from './shaderPatch.js';
 
 // GLSL patches that cut parting lines around a cylinder's side: a lift-off tin
 // lid, a tube's cap. Each seam is a dark groove with a bright ridge just above,
@@ -46,29 +46,16 @@ export function patchSeamShader({
 float axial = vAxis / uHalfHeight * 0.5 + 0.5;
 ${seams.map(seamRing).join('\n')}`;
 
-  shader.vertexShader = replaceChunk({
-    source: shader.vertexShader,
-    chunk: '#include <common>',
-    replacement: VERTEX_DECLARATIONS,
-  });
-  shader.vertexShader = replaceChunk({
-    source: shader.vertexShader,
-    chunk: '#include <begin_vertex>',
-    replacement: VERTEX_POSITION,
-  });
-  shader.fragmentShader = replaceChunk({
-    source: shader.fragmentShader,
-    chunk: '#include <common>',
-    replacement: FRAGMENT_DECLARATIONS,
-  });
-  shader.fragmentShader = replaceChunk({
-    source: shader.fragmentShader,
-    chunk: '#include <map_fragment>',
-    replacement: albedo,
-  });
-  shader.fragmentShader = replaceChunk({
-    source: shader.fragmentShader,
-    chunk: '#include <roughnessmap_fragment>',
-    replacement: FRAGMENT_ROUGHNESS,
+  patchShader({
+    shader,
+    vertex: [
+      { chunk: '#include <common>', replacement: VERTEX_DECLARATIONS },
+      { chunk: '#include <begin_vertex>', replacement: VERTEX_POSITION },
+    ],
+    fragment: [
+      { chunk: '#include <common>', replacement: FRAGMENT_DECLARATIONS },
+      { chunk: '#include <map_fragment>', replacement: albedo },
+      { chunk: '#include <roughnessmap_fragment>', replacement: FRAGMENT_ROUGHNESS },
+    ],
   });
 }

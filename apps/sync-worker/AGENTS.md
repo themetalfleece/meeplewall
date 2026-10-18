@@ -18,7 +18,7 @@ Container: `docker build -f apps/sync-worker/Dockerfile .` from the root, then r
 3. **Finish.** The row becomes `succeeded` or `failed` and the lease is released. If the lease was lost meanwhile, the stored collection stands but finishing the row is left to the new holder.
 4. **Crash.** A worker that dies mid-sync stops renewing, so its lease runs out within a minute and another claim picks the sync up. After 3 attempts the sync is failed with `Gave up after 3 attempts`.
 
-SIGTERM or SIGINT stops the loop after the sync in hand. That can take minutes; a container killed sooner leaves the lease to run out, and the sync is retried.
+SIGTERM or SIGINT stops the loop after the sync in hand, then the health server and the pool close, through `runWorkerProcess` from `packages/worker-runtime`. That can take minutes; a container killed sooner leaves the lease to run out, and the sync is retried.
 
 ## Rules
 

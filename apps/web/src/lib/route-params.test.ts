@@ -114,6 +114,7 @@ describe('gameSegment', () => {
 
 describe('routes', () => {
   it('encodes the username in every user route', () => {
+    expect(routes.home()).toBe('/');
     expect(routes.collection('first last')).toBe('/u/first%20last');
     expect(routes.collectionGame({ username: 'first last', bggId: 13, name: 'CATAN' })).toBe(
       '/u/first%20last/g/13-catan',

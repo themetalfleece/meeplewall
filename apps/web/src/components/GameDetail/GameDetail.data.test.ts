@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { GameView } from '@/lib/games';
 
-import { bggGameUrl, gameFacts, gameTags } from './GameDetail.data';
+import { gameFacts, gameTags } from './GameDetail.data';
 
 const GAME: GameView = {
   bggId: 13,
@@ -73,11 +73,5 @@ describe('gameTags', () => {
 
   it('is empty for a game with neither', () => {
     expect(gameTags({ categories: [], mechanics: [] })).toEqual([]);
-  });
-});
-
-describe('bggGameUrl', () => {
-  it('links to the game on BGG', () => {
-    expect(bggGameUrl(13)).toBe('https://boardgamegeek.com/boardgame/13');
   });
 });

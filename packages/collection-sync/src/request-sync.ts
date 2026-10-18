@@ -16,7 +16,7 @@ export type SyncRequest =
 
 /**
  * Queues a sync for the sync worker, joins the one already running, or declines
- * when the user's latest sync started under a minute ago. Touches only the
+ * when the user's latest sync started under `SYNC_THROTTLE_SECONDS` ago. Touches only the
  * database, so the web app can call it without a BGG client.
  */
 export async function requestCollectionSync(

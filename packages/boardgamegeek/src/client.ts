@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { PoliteHttpClient } from './http.ts';
+import { PoliteHttpClient, politeHttpClientOptionsSchema } from './http.ts';
 import {
   gameItemResponseSchema,
   gameStatsResponseSchema,
@@ -29,12 +29,7 @@ export type BggClient = {
   fetchGameVersions(options: { bggId: number }): Promise<BggGameVersion[]>;
 };
 
-const bggClientOptionsSchema = z.object({
-  userAgent: z.string().trim().min(1),
-  requestsPerSecond: z.number().positive().max(10),
-});
-
-export type BggClientOptions = z.input<typeof bggClientOptionsSchema>;
+export type BggClientOptions = z.input<typeof politeHttpClientOptionsSchema>;
 
 const bggIdSchema = z.number().int().positive();
 
@@ -46,6 +41,11 @@ function parseBggId(bggId: number): number {
   }
 
   return result.data;
+}
+
+/** The query naming one game, which every geekdo endpoint we call starts with. */
+function thingQuery(bggId: number): Record<string, string> {
+  return { objectid: String(parseBggId(bggId)), objecttype: 'thing' };
 }
 
 function geekdoUrl({ path, query }: { path: string; query: Record<string, string> }): string {
@@ -63,7 +63,7 @@ class GeekdoClient implements BggClient {
   }
 
   async fetchGame({ bggId }: { bggId: number }): Promise<BggGame | null> {
-    const objectQuery = { objectid: String(parseBggId(bggId)), objecttype: 'thing' };
+    const objectQuery = thingQuery(bggId);
     // Sequential on purpose: the throttle serialises the two requests anyway, and an unknown id
     // then costs one request instead of two.
     const item = await this.#http.getJson({
@@ -84,7 +84,7 @@ class GeekdoClient implements BggClient {
   }
 
   async fetchGameVersions({ bggId }: { bggId: number }): Promise<BggGameVersion[]> {
-    const objectId = String(parseBggId(bggId));
+    const objectQuery = thingQuery(bggId);
     const versions: BggGameVersion[] = [];
 
     for (let page = 1; page <= MAX_VERSION_PAGES; page += 1) {
@@ -92,8 +92,7 @@ class GeekdoClient implements BggClient {
         url: geekdoUrl({
           path: 'geekitem/linkeditems',
           query: {
-            objectid: objectId,
-            objecttype: 'thing',
+            ...objectQuery,
             linkdata_index: 'boardgameversion',
             subtype: 'boardgameversion',
             sort: 'yearpublished',
@@ -128,7 +127,7 @@ class GeekdoClient implements BggClient {
  * through this client. Throws, naming each field, when an option is missing or invalid.
  */
 export function createBggClient(options: BggClientOptions): BggClient {
-  const result = bggClientOptionsSchema.safeParse(options);
+  const result = politeHttpClientOptionsSchema.safeParse(options);
 
   if (!result.success) {
     throw new TypeError(`Invalid BGG client options:\n${z.prettifyError(result.error)}`);

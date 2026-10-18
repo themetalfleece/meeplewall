@@ -1,4 +1,4 @@
-import { OG_COLORS } from './OgImage.constants';
+import { OG_COLORS, OG_FRAME_STYLE } from './OgImage.constants';
 import { collectionOgText } from './OgImage.data';
 import type { CollectionOgImageProps } from './OgImage.types';
 
@@ -8,19 +8,7 @@ export function CollectionOgImage({ summary, username }: CollectionOgImageProps)
   const coverUrls = summary === null ? [] : summary.coverUrls;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        height: '100%',
-        justifyContent: 'space-between',
-        padding: 64,
-        background: OG_COLORS.background,
-        color: OG_COLORS.text,
-        fontFamily: 'Georgia, serif',
-      }}
-    >
+    <div style={{ ...OG_FRAME_STYLE, flexDirection: 'column', justifyContent: 'space-between' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', fontSize: 68 }}>{title}</div>
         {subtitle !== null && (

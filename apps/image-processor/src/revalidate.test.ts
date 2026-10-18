@@ -6,7 +6,7 @@ import { StubServer } from './testing/stub-server.ts';
 const PATH = '/api/internal/revalidate';
 const SECRET = 'a-revalidate-secret-of-at-least-32-chars';
 
-// apps/web's route does not exist yet, so a local stub plays it.
+// A local stub plays apps/web's revalidate route.
 describe('createRevalidate', () => {
   let web: StubServer;
 

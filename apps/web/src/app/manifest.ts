@@ -1,13 +1,13 @@
 import type { MetadataRoute } from 'next';
 
-import { BRAND_BACKGROUND_COLOR } from '@/lib/brand';
+import { BRAND_BACKGROUND_COLOR, SITE_DESCRIPTION, SITE_NAME } from '@/lib/brand';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/',
-    name: 'Meeplewall',
-    short_name: 'Meeplewall',
-    description: 'Board game collections from BoardGameGeek, shelved as 3D boxes.',
+    name: SITE_NAME,
+    short_name: SITE_NAME,
+    description: SITE_DESCRIPTION,
     start_url: '/',
     scope: '/',
     display: 'standalone',

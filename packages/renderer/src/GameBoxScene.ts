@@ -39,8 +39,8 @@ import type { ArtworkChange, PackageModel } from './PackageModel.js';
 import type { CameraPosition, GameBoxInput, GameBoxOptions, PackageArtwork } from './types.js';
 
 const DEFAULT_BACKGROUND = '#0b0b0c';
-const DEFAULT_YAW = -0.5;
-const DEFAULT_CAMERA: CameraPosition = { x: 3, y: 2.1, z: 6.2 };
+export const DEFAULT_YAW = -0.5;
+export const DEFAULT_CAMERA: CameraPosition = { x: 3, y: 2.1, z: 6.2 };
 const DEFAULT_MAX_PIXEL_RATIO = 2;
 const IDLE_SPIN_PER_FRAME = 0.0025;
 const STUDIO_MAIN_LIGHT_INTENSITY = 5;

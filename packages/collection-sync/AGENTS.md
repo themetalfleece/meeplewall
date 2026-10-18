@@ -18,4 +18,4 @@
 
 ## Tests
 
-`collection-sync-service.test.ts` and `request-sync.test.ts` run against a throwaway database on the compose Postgres (`DATABASE_URL` from this package's `.env.local`, or the shell) with fake BGG clients from `src/testing/`. They skip when Postgres is down, and fail instead under `CI`.
+`collection-sync-service.test.ts` and `request-sync.test.ts` run against a throwaway database on the compose Postgres (`DATABASE_URL` from this package's `.env.local`, or the shell) with fake BGG clients from `src/testing/`. `src/testing/test-database.ts` wraps `TestDatabase` from `@meeplewall/db/testing`, as packages/db's own helper does. They skip when Postgres is down, and fail instead under `CI`.

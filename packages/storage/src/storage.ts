@@ -16,7 +16,7 @@ const storageOptionsSchema = z.object({
   accessKeyId: z.string().min(1),
   secretAccessKey: z.string().min(1),
   bucket: z.string().min(1),
-  publicBaseUrl: httpUrlSchema.transform((url) => url.replace(/\/+$/, '')),
+  publicBaseUrl: httpUrlSchema,
   forcePathStyle: z.boolean(),
 });
 

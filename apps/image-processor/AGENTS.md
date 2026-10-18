@@ -20,7 +20,7 @@ Container: `docker build -f apps/image-processor/Dockerfile .` from the root, th
 5. **Revalidate.** `POST {WEB_INTERNAL_URL}/api/internal/revalidate`, `Authorization: Bearer {INTERNAL_REVALIDATE_SECRET}`, body `{ "bggGameId": n }`. A failure is logged, not fatal: the asset is stored.
 6. **Failure.** Any earlier error marks the job `failed` for good, the message in `last_error` (`Source fetch failed with 404`). Re-enqueue to retry.
 
-SIGTERM or SIGINT stops the loop after the job in hand, closes the health server and pool, and exits 0. The loop, logger and health server come from `packages/worker-runtime`.
+SIGTERM or SIGINT stops the loop after the job in hand, closes the health server and pool, and exits 0. The loop, logger, health server and this process lifecycle (`runWorkerProcess`) come from `packages/worker-runtime`.
 
 ## Rules
 

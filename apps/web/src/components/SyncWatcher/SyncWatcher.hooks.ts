@@ -12,10 +12,7 @@ import {
   syncStatusQueryKey,
 } from './SyncWatcher.data';
 
-/**
- * Re-renders the route's server components once a sync this page watched finishes, so the
- * freshly stored grid replaces the skeleton or the stale one.
- */
+/** Re-renders the route once a sync this page watched succeeds, so the new grid shows. */
 export function useRefreshWhenSyncFinishes(state: SyncStatus['state']): void {
   const router = useRouter();
   const previousState = useRef(state);
@@ -44,6 +41,7 @@ export function useSyncStatus({
     staleTime: POLL_INTERVAL_MS,
     refetchInterval: (query) => pollInterval(query.state.data),
   });
+
   useRefreshWhenSyncFinishes(data.state);
 
   return data;

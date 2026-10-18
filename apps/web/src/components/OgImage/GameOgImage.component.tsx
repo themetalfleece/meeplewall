@@ -1,7 +1,11 @@
-import { OG_COLORS, OG_IMAGE_SIZE } from './OgImage.constants';
+import {
+  NOT_FOUND_GAME_NAME,
+  OG_COLORS,
+  OG_FRAME_STYLE,
+  OG_IMAGE_SIZE,
+  OG_PADDING,
+} from './OgImage.constants';
 import type { GameOgImageProps } from './OgImage.types';
-
-const NOT_FOUND_NAME = 'Board game not found';
 
 /**
  * A game's social image: its cover beside its name. Inline styles, as the renderer needs. The
@@ -11,25 +15,13 @@ export function GameOgImage({ game, collectionOf }: GameOgImageProps) {
   const imageUrl = game === null ? null : game.images.originalUrl;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        gap: 56,
-        padding: 64,
-        background: OG_COLORS.background,
-        color: OG_COLORS.text,
-        fontFamily: 'Georgia, serif',
-      }}
-    >
+    <div style={{ ...OG_FRAME_STYLE, alignItems: 'center', gap: 56 }}>
       {imageUrl !== null && (
         <img
           src={imageUrl}
           alt=""
           width={440}
-          height={OG_IMAGE_SIZE.height - 128}
+          height={OG_IMAGE_SIZE.height - 2 * OG_PADDING}
           style={{ objectFit: 'contain' }}
         />
       )}
@@ -40,7 +32,7 @@ export function GameOgImage({ game, collectionOf }: GameOgImageProps) {
           </div>
         )}
         <div style={{ display: 'flex', fontSize: 72, lineHeight: 1.1 }}>
-          {game === null ? NOT_FOUND_NAME : game.name}
+          {game === null ? NOT_FOUND_GAME_NAME : game.name}
         </div>
         {game !== null && game.year !== null && (
           <div style={{ display: 'flex', fontSize: 36, color: OG_COLORS.muted }}>{game.year}</div>

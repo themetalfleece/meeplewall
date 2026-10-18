@@ -1,12 +1,12 @@
-import type { MeshPhysicalMaterial, Texture } from 'three';
+import { MeshPhysicalMaterial, type MeshPhysicalMaterialParameters, type Texture } from 'three';
 import type { TextureTransform } from './packageLayout.js';
 
 const WHITE = '#ffffff';
 
 /**
  * A material that prints one piece of artwork, painted a stand-in colour while
- * there is none. A transform is applied to a private copy of the texture, so the
- * shared original is never changed.
+ * there is none. It builds and owns its material. A transform is applied to a
+ * private copy of the texture, so the shared original is never changed.
  */
 export class ArtSurface {
   readonly material: MeshPhysicalMaterial;
@@ -16,13 +16,13 @@ export class ArtSurface {
   #fallbackColor = WHITE;
 
   constructor({
-    material,
+    materialParameters,
     transform = null,
   }: {
-    material: MeshPhysicalMaterial;
+    materialParameters: MeshPhysicalMaterialParameters;
     transform?: TextureTransform | null;
   }) {
-    this.material = material;
+    this.material = new MeshPhysicalMaterial(materialParameters);
     this.#transform = transform;
   }
 

@@ -1,7 +1,7 @@
 import { ShaderLib } from 'three';
 import { describe, expect, it } from 'vitest';
-import type { ShaderSource } from './boxShader.js';
 import { patchSeamShader } from './seamShader.js';
+import type { ShaderSource } from './shaderPatch.js';
 
 // The physical program from the installed three.js, so an upgrade that renames
 // a chunk the patch targets fails here rather than in a browser.

@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 
@@ -6,6 +5,7 @@ import { loadCollectionGame } from '@/lib/collections';
 import { parseGameId, parseUsername, routes } from '@/lib/route-params';
 import { parseShelf } from '@/lib/shelves';
 
+import { BackLink } from './BackLink.component';
 import { describePosition } from './CollectionNav.data';
 import styles from './CollectionNav.module.css';
 import type { CollectionNavProps } from './CollectionNav.types';
@@ -28,19 +28,19 @@ export async function CollectionNav({ params, searchParams }: CollectionNavProps
   if (entry === null) {
     return (
       <nav className={styles.nav} aria-label={`${username}'s collection`}>
-        <Link className={styles.back} href={routes.collection(username)}>
-          &larr; Back to {username}&rsquo;s collection
-        </Link>
+        <BackLink owner={username} href={routes.collection(username)} />
       </nav>
     );
   }
+
   const { displayName, shelf } = entry;
 
   return (
     <nav className={styles.nav} aria-label={`${displayName}'s collection`}>
-      <Link className={styles.back} href={routes.collectionShelf({ username: displayName, shelf })}>
-        &larr; Back to {displayName}&rsquo;s collection
-      </Link>
+      <BackLink
+        owner={displayName}
+        href={routes.collectionShelf({ username: displayName, shelf })}
+      />
       <p className={styles.position}>{describePosition(entry)}</p>
       <ul className={styles.badges}>
         {entry.badges.map((badge) => (

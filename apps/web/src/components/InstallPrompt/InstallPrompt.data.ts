@@ -37,6 +37,7 @@ function wasDismissed(browserWindow: Window): boolean {
   }
 }
 
+/** Reads the platform, the display mode and any earlier dismissal. Call only after mount. */
 export function readInstallEnvironment(browserWindow: Window): InstallEnvironment {
   const { navigator } = browserWindow;
 

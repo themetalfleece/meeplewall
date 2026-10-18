@@ -17,10 +17,8 @@
   "devDependencies": {
     "@meeplewall/config": "workspace:*",
     "@types/node": "catalog:dev",
-    "@types/pg": "catalog:",
     "drizzle-orm": "catalog:",
     "eslint": "catalog:dev",
-    "pg": "catalog:",
     "sharp": "catalog:",
     "typescript": "catalog:dev",
     "vite": "catalog:dev",

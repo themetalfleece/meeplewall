@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { downloadSource } from './download-source.ts';
-import { StubServer } from './testing/stub-server.ts';
+import { holdResponse, StubServer } from './testing/stub-server.ts';
 
 const PATH = '/images/cover.jpg';
 const MAX_BYTES = 10;
@@ -74,11 +74,8 @@ describe('downloadSource', () => {
   });
 
   it('rejects a source slower than the timeout', async () => {
-    let release = () => {};
-    const released = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    source.route({ path: PATH, response: { status: 200, body: 'late', waitFor: released } });
+    const { waitFor, release } = holdResponse();
+    source.route({ path: PATH, response: { status: 200, body: 'late', waitFor } });
 
     try {
       await expect(download({ timeoutMilliseconds: 100 })).rejects.toThrow(/timeout|aborted/i);

@@ -1,7 +1,8 @@
+import { OG_IMAGE_SIZE } from '@/components/OgImage/OgImage.constants';
 import { parseUsername, type UserRouteProps } from '@/lib/route-params';
 
 export const alt = 'A BoardGameGeek collection, as a row of box covers';
-export const size = { width: 1200, height: 630 };
+export const size = OG_IMAGE_SIZE;
 export const contentType = 'image/png';
 
 /** The collection owner's name over a few covers. Reads only, so sharing never starts a sync. */

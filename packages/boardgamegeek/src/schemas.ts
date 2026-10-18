@@ -2,9 +2,8 @@ import { z } from 'zod';
 
 import { htmlToPlainText } from './html.ts';
 
-// Response shapes of BGG's open JSON API at api.geekdo.com. Only the fields we use are listed;
-// the rest of each payload is stripped. Every schema transforms into the public camelCase shape,
-// so the inferred output types are the package's public types.
+// Response shapes of api.geekdo.com, transformed into the public camelCase types. Only the fields
+// we use are listed.
 
 /** BGG sends numbers as strings, and `0` or `""` where a value is unknown. Those become null. */
 const optionalPositiveNumberSchema = z
@@ -21,7 +20,8 @@ const countSchema = z
   .transform(Number)
   .pipe(z.number().int().nonnegative());
 
-const bggIdSchema = z
+/** A BGG object id, sent as a number or a numeric string. */
+export const bggIdSchema = z
   .union([z.number(), z.string()])
   .transform(Number)
   .pipe(z.number().int().positive());
@@ -153,5 +153,3 @@ export const gameVersionsPageResponseSchema = z
     versions: items,
     totalCount: config === undefined ? null : config.numitems,
   }));
-
-export type BggGameVersionsPage = z.output<typeof gameVersionsPageResponseSchema>;

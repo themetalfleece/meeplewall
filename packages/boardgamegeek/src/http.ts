@@ -3,8 +3,14 @@ import { z } from 'zod';
 /** BGG answers 429 when rate limited and 503 when overloaded. Both clear up if we wait. */
 const RETRYABLE_STATUSES = new Set([429, 503]);
 const MAX_ATTEMPTS = 5;
-const INITIAL_RETRY_DELAY_MS = 1000;
-const MAX_RETRY_DELAY_MS = 30_000;
+const INITIAL_RETRY_DELAY_MILLISECONDS = 1000;
+const MAX_RETRY_DELAY_MILLISECONDS = 30_000;
+
+/** The options every BGG client takes for its `PoliteHttpClient`. */
+export const politeHttpClientOptionsSchema = z.object({
+  userAgent: z.string().trim().min(1),
+  requestsPerSecond: z.number().positive().max(10),
+});
 
 /** BGG answered with a status we do not retry, or kept answering 429 or 503. */
 export class BggHttpError extends Error {
@@ -36,11 +42,28 @@ export function sleep(milliseconds: number): Promise<void> {
   });
 }
 
+/** Discards the body of a non-2xx response and throws `BggHttpError` for it. */
+export async function throwUnlessOk({
+  url,
+  response,
+}: {
+  url: string;
+  response: Response;
+}): Promise<void> {
+  if (response.ok) {
+    return;
+  }
+
+  await response.body?.cancel();
+
+  throw new BggHttpError({ status: response.status, url });
+}
+
 /**
  * Exponential backoff from one second, unless BGG sent a `Retry-After` in seconds. Capped at 30
  * seconds either way.
  */
-export function retryDelayMs({
+export function retryDelayMilliseconds({
   attempt,
   retryAfter,
 }: {
@@ -50,19 +73,22 @@ export function retryDelayMs({
   const retryAfterSeconds = Number(retryAfter);
 
   if (retryAfter !== null && retryAfter.trim() !== '' && Number.isFinite(retryAfterSeconds)) {
-    return Math.min(Math.max(retryAfterSeconds, 0) * 1000, MAX_RETRY_DELAY_MS);
+    return Math.min(Math.max(retryAfterSeconds, 0) * 1000, MAX_RETRY_DELAY_MILLISECONDS);
   }
 
-  return Math.min(INITIAL_RETRY_DELAY_MS * 2 ** (attempt - 1), MAX_RETRY_DELAY_MS);
+  return Math.min(
+    INITIAL_RETRY_DELAY_MILLISECONDS * 2 ** (attempt - 1),
+    MAX_RETRY_DELAY_MILLISECONDS,
+  );
 }
 
 /** Spaces request starts at least `1 / requestsPerSecond` apart, however many callers queue. */
 export class RequestThrottle {
-  readonly #intervalMs: number;
+  readonly #intervalMilliseconds: number;
   #nextSlotAt = 0;
 
   constructor({ requestsPerSecond }: { requestsPerSecond: number }) {
-    this.#intervalMs = 1000 / requestsPerSecond;
+    this.#intervalMilliseconds = 1000 / requestsPerSecond;
   }
 
   async waitForSlot(): Promise<void> {
@@ -70,7 +96,7 @@ export class RequestThrottle {
     const slotAt = Math.max(now, this.#nextSlotAt);
 
     // Reserve the slot before waiting, so concurrent callers queue behind each other.
-    this.#nextSlotAt = slotAt + this.#intervalMs;
+    this.#nextSlotAt = slotAt + this.#intervalMilliseconds;
 
     if (slotAt > now) {
       await sleep(slotAt - now);
@@ -104,7 +130,21 @@ export class PoliteHttpClient {
   }): Promise<z.output<Schema> | null> {
     const response = await this.get({ url, headers: { Accept: 'application/json' } });
 
-    return this.#read({ url, response, schema });
+    if (response.status === 404) {
+      await response.body?.cancel();
+
+      return null;
+    }
+
+    await throwUnlessOk({ url, response });
+
+    const result = schema.safeParse(parseJson({ url, text: await response.text() }));
+
+    if (!result.success) {
+      throw new BggResponseError({ url, reason: z.prettifyError(result.error) });
+    }
+
+    return result.data;
   }
 
   /**
@@ -121,39 +161,10 @@ export class PoliteHttpClient {
       }
 
       await response.body?.cancel();
-      await sleep(retryDelayMs({ attempt, retryAfter: response.headers.get('retry-after') }));
+      await sleep(
+        retryDelayMilliseconds({ attempt, retryAfter: response.headers.get('retry-after') }),
+      );
     }
-  }
-
-  async #read<Schema extends z.ZodType>({
-    url,
-    response,
-    schema,
-  }: {
-    url: string;
-    response: Response;
-    schema: Schema;
-  }): Promise<z.output<Schema> | null> {
-    if (response.status === 404) {
-      await response.body?.cancel();
-
-      return null;
-    }
-
-    if (!response.ok) {
-      await response.body?.cancel();
-
-      throw new BggHttpError({ status: response.status, url });
-    }
-
-    const body = parseJson({ url, text: await response.text() });
-    const result = schema.safeParse(body);
-
-    if (!result.success) {
-      throw new BggResponseError({ url, reason: z.prettifyError(result.error) });
-    }
-
-    return result.data;
   }
 }
 

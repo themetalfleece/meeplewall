@@ -134,18 +134,12 @@ importers:
       '@types/node':
         specifier: catalog:dev
         version: 26.6.5
-      '@types/pg':
-        specifier: 'catalog:'
-        version: 8.23.1
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.4(@types/pg@8.23.1)(pg@8.23.1)
       eslint:
         specifier: catalog:dev
         version: 10.13.0
-      pg:
-        specifier: 'catalog:'
-        version: 8.23.1
       sharp:
         specifier: 'catalog:'
         version: 0.35.5(@types/node@26.6.5)

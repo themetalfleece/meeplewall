@@ -1,21 +1,8 @@
-import { randomUUID } from 'node:crypto';
-
-import pg from 'pg';
 import { afterAll, beforeAll, beforeEach } from 'vitest';
 
-import { closeDatabase, createDatabase, migrateDatabase, type Database } from '../database.ts';
+import type { Database } from '../database.ts';
+import { canReachPostgres, TestDatabase } from '../testing/test-database.ts';
 import { readDatabaseUrl } from './database-url.ts';
-
-async function canConnect(connectionString: string): Promise<boolean> {
-  const client = new pg.Client({ connectionString, connectionTimeoutMillis: 3_000 });
-  try {
-    await client.connect();
-    await client.end();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * The server connection string the database suites run against, or undefined
@@ -24,7 +11,7 @@ async function canConnect(connectionString: string): Promise<boolean> {
  */
 export async function resolveTestServerUrl(): Promise<string | undefined> {
   const connectionString = readDatabaseUrl();
-  if (connectionString !== undefined && (await canConnect(connectionString))) {
+  if (connectionString !== undefined && (await canReachPostgres(connectionString))) {
     return connectionString;
   }
   if (process.env.CI !== undefined) {
@@ -32,68 +19,6 @@ export async function resolveTestServerUrl(): Promise<string | undefined> {
   }
 
   return undefined;
-}
-
-async function runServerStatement({
-  serverUrl,
-  statement,
-}: {
-  serverUrl: string;
-  statement: string;
-}): Promise<void> {
-  const client = new pg.Client({ connectionString: serverUrl });
-  await client.connect();
-  try {
-    await client.query(statement);
-  } finally {
-    await client.end();
-  }
-}
-
-/** A freshly migrated database of its own for one test file, dropped afterwards. */
-export class TestDatabase {
-  readonly database: Database;
-  readonly #serverUrl: string;
-  readonly #name: string;
-
-  private constructor({
-    database,
-    serverUrl,
-    name,
-  }: {
-    database: Database;
-    serverUrl: string;
-    name: string;
-  }) {
-    this.database = database;
-    this.#serverUrl = serverUrl;
-    this.#name = name;
-  }
-
-  static async create({ serverUrl }: { serverUrl: string }): Promise<TestDatabase> {
-    const name = `meeplewall_test_${randomUUID().replaceAll('-', '')}`;
-    await runServerStatement({ serverUrl, statement: `create database "${name}"` });
-
-    const databaseUrl = new URL(serverUrl);
-    databaseUrl.pathname = `/${name}`;
-    const database = createDatabase({ connectionString: databaseUrl.toString() });
-    await migrateDatabase(database);
-
-    return new TestDatabase({ database, serverUrl, name });
-  }
-
-  /** Empties every table. Every other table cascades from these two. */
-  async reset(): Promise<void> {
-    await this.database.$client.query('truncate bgg_games, bgg_users cascade');
-  }
-
-  async destroy(): Promise<void> {
-    await closeDatabase(this.database);
-    await runServerStatement({
-      serverUrl: this.#serverUrl,
-      statement: `drop database if exists "${this.#name}" with (force)`,
-    });
-  }
 }
 
 /**

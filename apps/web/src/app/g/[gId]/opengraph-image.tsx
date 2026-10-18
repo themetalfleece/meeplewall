@@ -1,7 +1,8 @@
+import { OG_IMAGE_SIZE } from '@/components/OgImage/OgImage.constants';
 import { parseGameId, type GameRouteProps } from '@/lib/route-params';
 
 export const alt = 'A board game box, with its name';
-export const size = { width: 1200, height: 630 };
+export const size = OG_IMAGE_SIZE;
 export const contentType = 'image/png';
 
 /** The game's cover and name. The renderer and the read load only when an image is drawn. */

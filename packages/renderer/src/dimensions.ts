@@ -3,6 +3,19 @@ import type { BoxFace, BoxSize } from './types.js';
 /** Millimetres per world unit. A 310 mm box is 3.1 units tall, the scale the lighting and camera were tuned at. */
 export const MILLIMETRES_PER_UNIT = 100;
 
+/** Throws a RangeError stating `requirement` unless `value` is a finite number above zero. */
+export function assertPositive({
+  value,
+  requirement,
+}: {
+  value: number;
+  requirement: string;
+}): void {
+  if (Number.isFinite(value) && value > 0) return;
+
+  throw new RangeError(`${requirement}, got ${value}`);
+}
+
 /** Box dimensions in world units, oriented so the front face is width by height. */
 export interface OrientedBox {
   width: number;
@@ -24,14 +37,12 @@ export function orientBox({
 }): OrientedBox {
   const dimensions = [size.width, size.height, size.depth];
   for (const dimension of dimensions) {
-    if (!Number.isFinite(dimension) || dimension <= 0) {
-      throw new RangeError(`Box dimensions must be positive millimetres, got ${dimension}`);
-    }
+    assertPositive({
+      value: dimension,
+      requirement: 'Box dimensions must be positive millimetres',
+    });
   }
-
-  if (!Number.isFinite(coverAspect) || coverAspect <= 0) {
-    throw new RangeError(`Cover aspect must be a positive ratio, got ${coverAspect}`);
-  }
+  assertPositive({ value: coverAspect, requirement: 'Cover aspect must be a positive ratio' });
 
   const [longest = 0, middle = 0, thinnest = 0] = dimensions.sort(
     (first, second) => second - first,

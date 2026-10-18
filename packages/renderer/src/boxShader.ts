@@ -1,10 +1,4 @@
-import type { WebGLProgramParametersWithUniforms } from 'three';
-
-/** The part of a compiling program the patch rewrites. */
-export type ShaderSource = Pick<
-  WebGLProgramParametersWithUniforms,
-  'vertexShader' | 'fragmentShader'
->;
+import { patchShader, type ShaderSource } from './shaderPatch.js';
 
 // GLSL patches for MeshPhysicalMaterial. A rounded box has no clean per-face
 // UVs, so the fragment stage picks each face by its dominant object-space normal
@@ -96,51 +90,17 @@ roughnessFactor = clamp(roughnessFactor + (valueNoise(vObjectPosition * 22.0) - 
  * rendering a blank box.
  */
 export function patchBoxShader(shader: ShaderSource): void {
-  shader.vertexShader = replaceChunk({
-    source: shader.vertexShader,
-    chunk: '#include <common>',
-    replacement: VERTEX_DECLARATIONS,
+  patchShader({
+    shader,
+    vertex: [
+      { chunk: '#include <common>', replacement: VERTEX_DECLARATIONS },
+      { chunk: '#include <begin_vertex>', replacement: VERTEX_POSITION },
+      { chunk: '#include <beginnormal_vertex>', replacement: VERTEX_NORMAL },
+    ],
+    fragment: [
+      { chunk: '#include <common>', replacement: FRAGMENT_DECLARATIONS },
+      { chunk: '#include <map_fragment>', replacement: FRAGMENT_ALBEDO },
+      { chunk: '#include <roughnessmap_fragment>', replacement: FRAGMENT_ROUGHNESS },
+    ],
   });
-  shader.vertexShader = replaceChunk({
-    source: shader.vertexShader,
-    chunk: '#include <begin_vertex>',
-    replacement: VERTEX_POSITION,
-  });
-  shader.vertexShader = replaceChunk({
-    source: shader.vertexShader,
-    chunk: '#include <beginnormal_vertex>',
-    replacement: VERTEX_NORMAL,
-  });
-  shader.fragmentShader = replaceChunk({
-    source: shader.fragmentShader,
-    chunk: '#include <common>',
-    replacement: FRAGMENT_DECLARATIONS,
-  });
-  shader.fragmentShader = replaceChunk({
-    source: shader.fragmentShader,
-    chunk: '#include <map_fragment>',
-    replacement: FRAGMENT_ALBEDO,
-  });
-  shader.fragmentShader = replaceChunk({
-    source: shader.fragmentShader,
-    chunk: '#include <roughnessmap_fragment>',
-    replacement: FRAGMENT_ROUGHNESS,
-  });
-}
-
-/** Replaces the first occurrence of a shader chunk, throwing when it is missing. */
-export function replaceChunk({
-  source,
-  chunk,
-  replacement,
-}: {
-  source: string;
-  chunk: string;
-  replacement: string;
-}): string {
-  if (!source.includes(chunk)) {
-    throw new Error(`Shader chunk "${chunk}" not found; the three.js shader layout has changed`);
-  }
-
-  return source.replace(chunk, replacement);
 }

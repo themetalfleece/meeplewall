@@ -1,9 +1,8 @@
+import { DEFAULT_CAMERA, DEFAULT_YAW } from '../GameBoxScene.js';
 import { mountGameBox } from '../index.js';
 import type { CameraPosition } from '../types.js';
 import { SAMPLES, type SampleName, isSampleName } from './samples.js';
 
-const DEFAULT_YAW = -0.5;
-const DEFAULT_CAMERA: CameraPosition = { x: 3, y: 2.1, z: 6.2 };
 /** The legacy Vite app, run from git history on port 5174 beside this server on 5173. */
 const DEFAULT_LEGACY_ORIGIN = 'http://localhost:5174';
 

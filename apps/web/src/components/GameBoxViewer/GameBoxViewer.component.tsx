@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import dynamic from 'next/dynamic';
 
+import { BoxPlaceholder } from './BoxPlaceholder.component';
 import styles from './GameBoxViewer.module.css';
 import type { GameBoxViewerProps } from './GameBoxViewer.types';
 
@@ -12,10 +13,6 @@ const GameBox = dynamic(
   () => import('@meeplewall/renderer/react').then((renderer) => renderer.GameBox),
   { ssr: false, loading: BoxPlaceholder },
 );
-
-function BoxPlaceholder() {
-  return <div className={styles.placeholder} />;
-}
 
 /** The game's box in 3D: drag to turn it, scroll to zoom. */
 export function GameBoxViewer({ game, label }: GameBoxViewerProps) {

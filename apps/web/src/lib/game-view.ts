@@ -32,7 +32,13 @@ export interface GameImages {
   edgeColor: string | null;
 }
 
-function assetOfKind({ assets, kind }: { assets: ImageAsset[]; kind: ImageAsset['kind'] }) {
+function assetOfKind({
+  assets,
+  kind,
+}: {
+  assets: ImageAsset[];
+  kind: ImageAsset['kind'];
+}): ImageAsset | undefined {
   return assets.find((asset) => asset.kind === kind);
 }
 

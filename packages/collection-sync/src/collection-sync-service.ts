@@ -2,6 +2,7 @@ import type { BggClient } from '@meeplewall/boardgamegeek';
 import {
   enqueueImageJob,
   finishCollectionSync,
+  imageKind,
   listGames,
   listImageAssets,
   recordRefresh,
@@ -12,14 +13,11 @@ import {
   type CollectionItemInput,
   type CollectionSyncOutcome,
   type DatabaseExecutor,
-  type ImageKind,
 } from '@meeplewall/db';
 
 import type { CollectedGame, CollectionProvider } from './collection-provider.ts';
 import { GAME_MAX_AGE_SECONDS, isOlderThan } from './freshness.ts';
 import { toGameInput } from './game-input.ts';
-
-const IMAGE_KINDS: readonly ImageKind[] = ['cover', 'thumb'];
 
 /** How a run ended. `lost` means the lease ran out and another worker owns the sync now. */
 export type SyncRunOutcome = CollectionSyncOutcome | { status: 'lost' };
@@ -160,7 +158,7 @@ export class CollectionSyncService {
     const processed = new Set(assets.map((asset) => `${asset.bggGameId}:${asset.kind}`));
 
     for (const game of withSource) {
-      for (const kind of IMAGE_KINDS) {
+      for (const kind of imageKind.enumValues) {
         if (!processed.has(`${game.id}:${kind}`)) {
           await enqueueImageJob(this.#database, { bggGameId: game.id, kind });
         }

@@ -12,19 +12,19 @@ Meeplewall is not affiliated with or endorsed by BoardGameGeek.
 
 A pnpm workspaces monorepo. Each workspace has an `AGENTS.md` with its own rules.
 
-| Workspace                  | What it is                                                    |
-| -------------------------- | ------------------------------------------------------------- |
-| `apps/web`                 | the Next.js site                                              |
-| `apps/sync-worker`         | imports BGG collections; the only process that calls BGG      |
-| `apps/image-processor`     | turns BGG covers into box textures and uploads them           |
-| `packages/boardgamegeek`   | the BGG client and the box-size cross-check                   |
-| `packages/collection-sync` | queues and runs collection syncs                              |
-| `packages/db`              | the Drizzle schema, migrations and repositories over Postgres |
-| `packages/image-pipeline`  | image processing over Sharp                                   |
-| `packages/renderer`        | the Three.js game box and its React wrapper                   |
-| `packages/storage`         | the S3-compatible client for R2 and the local minio           |
-| `packages/worker-runtime`  | logging, health checks and the poll loop the workers share    |
-| `packages/config`          | the shared TypeScript, ESLint and Prettier config             |
+| Workspace                  | What it is                                                                        |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `apps/web`                 | the Next.js site                                                                  |
+| `apps/sync-worker`         | imports BGG collections; the only process that calls BGG                          |
+| `apps/image-processor`     | turns BGG covers into box textures and uploads them                               |
+| `packages/boardgamegeek`   | the BGG client and the box-size cross-check                                       |
+| `packages/collection-sync` | queues and runs collection syncs                                                  |
+| `packages/db`              | the Drizzle schema, migrations and repositories over Postgres                     |
+| `packages/image-pipeline`  | image processing over Sharp                                                       |
+| `packages/renderer`        | the Three.js game box and its React wrapper                                       |
+| `packages/storage`         | the S3-compatible client for R2 and the local minio                               |
+| `packages/worker-runtime`  | logging, health checks, the poll loop and the process lifecycle the workers share |
+| `packages/config`          | the shared TypeScript, ESLint and Prettier config                                 |
 
 The product goals and the look are in [`docs/PLAN.md`](docs/PLAN.md).
 

@@ -1,5 +1,11 @@
 import { ClampToEdgeWrapping, SRGBColorSpace, type Texture, TextureLoader } from 'three';
 
+/** A texture arriving for one artwork key, or null when it is cleared. */
+export interface TextureChange<Artwork extends string> {
+  artwork: Artwork;
+  texture: Texture<HTMLImageElement> | null;
+}
+
 interface ArtworkSlot {
   url: string | undefined;
   /** Loaded texture for `url`, or null while loading, after a failure, or with no URL. */
@@ -15,10 +21,7 @@ export class ArtworkLoader<Artwork extends string> {
   readonly #slots = new Map<Artwork, ArtworkSlot>();
   readonly #loader = new TextureLoader();
   readonly #anisotropy: number;
-  readonly #onTexture: (change: {
-    artwork: Artwork;
-    texture: Texture<HTMLImageElement> | null;
-  }) => void;
+  readonly #onTexture: (change: TextureChange<Artwork>) => void;
   readonly #onSettled: (failed: Artwork[]) => void;
   readonly #pending = new Set<Artwork>();
   readonly #failed = new Set<Artwork>();
@@ -34,7 +37,7 @@ export class ArtworkLoader<Artwork extends string> {
     artworks: readonly Artwork[];
     anisotropy: number;
     /** Called when a key's texture arrives, or with null when its URL changes. */
-    onTexture: (change: { artwork: Artwork; texture: Texture<HTMLImageElement> | null }) => void;
+    onTexture: (change: TextureChange<Artwork>) => void;
     onSettled: (failed: Artwork[]) => void;
   }) {
     this.#artworks = artworks;
@@ -120,7 +123,7 @@ export class ArtworkLoader<Artwork extends string> {
   #reportIfSettled(): void {
     if (this.#pending.size > 0) return;
 
-    this.#onSettled(this.#artworks.filter((each) => this.#failed.has(each)));
+    this.#onSettled(this.#artworks.filter((artwork) => this.#failed.has(artwork)));
   }
 }
 

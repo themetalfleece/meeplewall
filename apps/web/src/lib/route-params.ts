@@ -73,6 +73,7 @@ export function gameSegment({ bggId, name }: GameLink): string {
 
 /** Path helpers, so every link to a route is built one way. Fixed paths are functions too. */
 export const routes = {
+  home: () => '/',
   collection: (username: string) => `/u/${encodeURIComponent(username)}`,
   collectionShelf: ({ username, shelf }: { username: string; shelf: CollectionShelf }) =>
     `/u/${encodeURIComponent(username)}${shelfQuery(shelf)}`,
@@ -108,7 +109,5 @@ export interface RouteSearchParams {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-/** What a route handler's second argument carries. */
-export interface UserRouteContext {
-  params: Promise<{ uId: string }>;
-}
+/** What a `[uId]` route handler's second argument carries: the same params a page gets. */
+export type UserRouteContext = UserRouteProps;

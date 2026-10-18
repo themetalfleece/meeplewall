@@ -8,13 +8,13 @@ import {
   upsertGame,
   type ImageKind,
 } from '@meeplewall/db';
+import { JsonLogger } from '@meeplewall/worker-runtime';
 import { eq } from 'drizzle-orm';
 import sharp from 'sharp';
-import { JsonLogger } from '@meeplewall/worker-runtime';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { createRevalidate } from './revalidate.ts';
-import { StubServer, type StubResponse } from './testing/stub-server.ts';
+import { holdResponse, StubServer, type StubResponse } from './testing/stub-server.ts';
 import { resolveTestServices, TestServices } from './testing/test-services.ts';
 import { ImageWorker } from './worker.ts';
 
@@ -221,11 +221,8 @@ describe.skipIf(config === undefined)('ImageWorker against Postgres and minio', 
     /** Holds the source response until the lease has moved to another worker, then lets it through. */
     async function processWhileLeaseIsTaken(response: Omit<StubResponse, 'waitFor'>) {
       await addGame({ imageUrlRaw: stub.url(SOURCE_PATH) });
-      let releaseSource = () => {};
-      const sourceReleased = new Promise<void>((resolve) => {
-        releaseSource = resolve;
-      });
-      stub.route({ path: SOURCE_PATH, response: { ...response, waitFor: sourceReleased } });
+      const source = holdResponse();
+      stub.route({ path: SOURCE_PATH, response: { ...response, waitFor: source.waitFor } });
       const job = await enqueue('cover');
 
       const processing = createWorker().processNextJob();
@@ -234,7 +231,7 @@ describe.skipIf(config === undefined)('ImageWorker against Postgres and minio', 
         .update(imageJobs)
         .set({ lockedBy: 'another-worker' })
         .where(eq(imageJobs.id, job.id));
-      releaseSource();
+      source.release();
 
       return { job, outcome: await processing };
     }
@@ -269,11 +266,8 @@ describe.skipIf(config === undefined)('ImageWorker against Postgres and minio', 
 
   it('finishes the job in hand when stopped, then returns', async () => {
     await addGame({ imageUrlRaw: stub.url(SOURCE_PATH) });
-    let releaseSource = () => {};
-    const sourceReleased = new Promise<void>((resolve) => {
-      releaseSource = resolve;
-    });
-    serveSourceCover({ waitFor: sourceReleased });
+    const source = holdResponse();
+    serveSourceCover({ waitFor: source.waitFor });
     const inFlight = await enqueue('cover');
     const worker = createWorker();
 
@@ -281,7 +275,7 @@ describe.skipIf(config === undefined)('ImageWorker against Postgres and minio', 
     await expect.poll(() => stub.requestsTo(SOURCE_PATH).length).toBe(1);
     worker.stop();
     const queuedAfterStop = await enqueue('thumb');
-    releaseSource();
+    source.release();
     await running;
 
     expect((await readJob(inFlight.id))?.status).toBe('ready');

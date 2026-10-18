@@ -1,6 +1,7 @@
 import { GameBoxViewer } from '@/components/GameBoxViewer';
+import { externalLinks } from '@/lib/external-links';
 
-import { bggGameUrl, gameFacts, gameTags } from './GameDetail.data';
+import { gameFacts, gameTags } from './GameDetail.data';
 import styles from './GameDetail.module.css';
 import type { GameDetailProps } from './GameDetail.types';
 
@@ -37,7 +38,7 @@ export function GameDetail({ game }: GameDetailProps) {
           </ul>
         )}
         {game.description !== null && <p className={styles.description}>{game.description}</p>}
-        <a className={styles.source} href={bggGameUrl(game.bggId)} rel="noreferrer">
+        <a className={styles.source} href={externalLinks.bggGame(game.bggId)} rel="noreferrer">
           View on BoardGameGeek
         </a>
       </div>

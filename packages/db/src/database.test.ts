@@ -1,12 +1,11 @@
-import { randomUUID } from 'node:crypto';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-import pg from 'pg';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { closeDatabase, createDatabase, migrateDatabase } from './database.ts';
 import { resolveTestServerUrl, useTestDatabase } from './dev/test-database.ts';
+import { ScratchDatabase } from './testing/test-database.ts';
 
 const serverUrl = await resolveTestServerUrl();
 
@@ -37,27 +36,19 @@ describe.skipIf(serverUrl === undefined)('migrateDatabase', () => {
 });
 
 describe.skipIf(serverUrl === undefined)('migrateDatabase from two processes at once', () => {
-  const name = `meeplewall_test_${randomUUID().replaceAll('-', '')}`;
-
-  async function runServerStatement(statement: string) {
-    const client = new pg.Client({ connectionString: serverUrl });
-    await client.connect();
-    try {
-      await client.query(statement);
-    } finally {
-      await client.end();
-    }
-  }
+  let scratch: ScratchDatabase | undefined;
 
   afterAll(async () => {
-    await runServerStatement(`drop database if exists "${name}" with (force)`);
+    await scratch?.drop();
   });
 
   it('applies every migration exactly once', async () => {
-    await runServerStatement(`create database "${name}"`);
-    const databaseUrl = new URL(serverUrl ?? '');
-    databaseUrl.pathname = `/${name}`;
-    const pools = [1, 2].map(() => createDatabase({ connectionString: databaseUrl.toString() }));
+    if (serverUrl === undefined) {
+      throw new Error('The suite ran without a server; it should have been skipped');
+    }
+    scratch = await ScratchDatabase.create({ serverUrl });
+    const { connectionString } = scratch;
+    const pools = [1, 2].map(() => createDatabase({ connectionString }));
 
     try {
       await Promise.all(pools.map((pool) => migrateDatabase(pool)));

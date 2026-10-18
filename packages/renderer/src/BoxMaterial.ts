@@ -22,9 +22,10 @@ import {
   type UvTransform,
 } from './dimensions.js';
 import { PAPER_GRAIN_SIZE, generatePaperGrain } from './paperGrain.js';
-import type { BoxFace, GameBoxInput } from './types.js';
+import type { PackageColors } from './PackageModel.js';
+import type { BoxFace } from './types.js';
 
-export const BOX_FACES: readonly BoxFace[] = ['front', 'back', 'spine', 'top', 'bottom'];
+const BOX_FACES: readonly BoxFace[] = ['front', 'back', 'spine', 'top', 'bottom'];
 
 /** The surface a box is printed on. */
 export type BoxFinish = 'card' | 'tin';
@@ -56,7 +57,7 @@ const FINISHES: Record<BoxFinish, FinishSettings> = {
 };
 
 /** Which flat colour stands in for each face until its art arrives. */
-const FALLBACK_COLOR_KEY: Record<BoxFace, 'sideColor' | 'edgeColor'> = {
+const FALLBACK_COLOR_KEY: Record<BoxFace, keyof PackageColors> = {
   front: 'sideColor',
   back: 'edgeColor',
   spine: 'sideColor',
@@ -127,11 +128,11 @@ export class BoxMaterial {
   }
 
   /** Paints each face's stand-in colour, shown until its artwork arrives. */
-  setColors(game: Pick<GameBoxInput, 'sideColor' | 'edgeColor'>): void {
+  setColors(colors: PackageColors): void {
     for (const face of BOX_FACES) {
       BoxMaterial.#paintFallback({
         texture: this.#slots[face].fallback,
-        hex: game[FALLBACK_COLOR_KEY[face]],
+        hex: colors[FALLBACK_COLOR_KEY[face]],
       });
     }
   }

@@ -1,8 +1,9 @@
 import { type BufferGeometry, DoubleSide, Group, Mesh, MeshPhysicalMaterial } from 'three';
 import { ArtSurface } from './ArtSurface.js';
-import { pillowGeometry, pouchGeometry } from './packageGeometry.js';
+import { pillowGeometry } from './packageGeometry.js';
 import type { PackageLayout } from './packageLayout.js';
 import type { ArtworkChange, PackageColors, PackageModel } from './PackageModel.js';
+import { pouchGeometry } from './pouchGeometry.js';
 
 export type BagLayout = Extract<PackageLayout, { kind: 'foil-bag' | 'pouch' }>;
 
@@ -21,12 +22,12 @@ export class BagModel implements PackageModel {
     if (layout.kind === 'foil-bag') {
       this.#geometry = pillowGeometry({ ...layout, creases: true });
       this.#art = new ArtSurface({
-        material: new MeshPhysicalMaterial({
+        materialParameters: {
           roughness: 0.32,
           metalness: 0.25,
           clearcoat: 0.5,
           clearcoatRoughness: 0.35,
-        }),
+        },
       });
       this.#back = new MeshPhysicalMaterial({ roughness: 0.32, metalness: 0.4, clearcoat: 0.5 });
       // The same half, mirrored, closes the bag.
@@ -36,12 +37,7 @@ export class BagModel implements PackageModel {
     } else {
       this.#geometry = pouchGeometry(layout);
       this.#art = new ArtSurface({
-        material: new MeshPhysicalMaterial({
-          roughness: 0.95,
-          sheen: 0.2,
-          sheenRoughness: 0.9,
-          side: DoubleSide,
-        }),
+        materialParameters: { roughness: 0.95, sheen: 0.2, sheenRoughness: 0.9, side: DoubleSide },
       });
       this.#back = null;
     }

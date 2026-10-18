@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createStorage } from './storage.js';
-import type { StorageOptions } from './storage.js';
+
+import { createStorage, type StorageOptions } from './storage.js';
 
 const validOptions: StorageOptions = {
   endpoint: 'http://localhost:9000',

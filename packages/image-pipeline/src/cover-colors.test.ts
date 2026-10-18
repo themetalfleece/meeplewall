@@ -8,6 +8,10 @@ function channels(hex: string): number[] {
   return [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16));
 }
 
+function toHex(values: number[]): string {
+  return `#${values.map((value) => Math.round(value).toString(16).padStart(2, '0')).join('')}`;
+}
+
 function expectColorNear({
   actual,
   expected,
@@ -83,18 +87,8 @@ describe('sampleCoverColors', () => {
 
     const colors = await sampleCoverColors({ input });
 
-    const side = channels(colors.sideColor);
-    expectColorNear({
-      actual: colors.edgeColor,
-      expected: `#${side
-        .map((value) =>
-          Math.round(value * 0.6)
-            .toString(16)
-            .padStart(2, '0'),
-        )
-        .join('')}`,
-      tolerance: 1,
-    });
+    const darkened = channels(colors.sideColor).map((value) => value * 0.6);
+    expectColorNear({ actual: colors.edgeColor, expected: toHex(darkened), tolerance: 1 });
   });
 
   it('falls back to the average when the dominant colour is near white', async () => {

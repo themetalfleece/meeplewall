@@ -23,4 +23,4 @@
 
 ## Tests
 
-Each test file gets its own throwaway database, migrated from scratch, through `useTestDatabase` in `src/dev/test-database.ts`. The suites skip when `DATABASE_URL` is unset or unreachable, except under `CI`, where they fail. The database user needs `CREATEDB`, which the compose user has.
+Each test file gets its own throwaway database, migrated from scratch, through `useTestDatabase` in `src/dev/test-database.ts`. It wraps `TestDatabase` from `src/testing/test-database.ts`, which is built and exported as `@meeplewall/db/testing` so other workspaces' suites share it; keep vitest and `process.env` out of that file. The suites skip when `DATABASE_URL` is unset or unreachable, except under `CI`, where they fail. The database user needs `CREATEDB`, which the compose user has.

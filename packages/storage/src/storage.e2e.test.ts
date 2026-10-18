@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
+
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { createStorage } from './storage.js';
-import type { Storage, StorageOptions } from './storage.js';
+
+import { createStorage, type Storage, type StorageOptions } from './storage.js';
 
 // Round trip against the compose minio. Skips when the STORAGE_* variables are unset or minio
 // is not answering, so a machine without the stack reports skipped rather than green.

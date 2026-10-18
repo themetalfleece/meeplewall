@@ -22,7 +22,7 @@ export function useInstallPrompt() {
 
     function handleAppInstalled() {
       setPromptEvent(null);
-      setEnvironment((current) => markInstalled(current));
+      setEnvironment((current) => updateEnvironment(current, { isInstalled: true }));
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -45,7 +45,7 @@ export function useInstallPrompt() {
 
   function dismiss() {
     rememberDismissal(window);
-    setEnvironment((current) => markDismissed(current));
+    setEnvironment((current) => updateEnvironment(current, { isDismissed: true }));
   }
 
   return {
@@ -55,18 +55,14 @@ export function useInstallPrompt() {
   };
 }
 
-function markInstalled(environment: InstallEnvironment | null): InstallEnvironment | null {
+/** The environment with `change` applied, or null while the page has not mounted. */
+function updateEnvironment(
+  environment: InstallEnvironment | null,
+  change: Partial<InstallEnvironment>,
+): InstallEnvironment | null {
   if (environment === null) {
     return null;
   }
 
-  return { ...environment, isInstalled: true };
-}
-
-function markDismissed(environment: InstallEnvironment | null): InstallEnvironment | null {
-  if (environment === null) {
-    return null;
-  }
-
-  return { ...environment, isDismissed: true };
+  return { ...environment, ...change };
 }

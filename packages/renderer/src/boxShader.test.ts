@@ -1,18 +1,7 @@
 import { ShaderLib } from 'three';
 import { describe, expect, it } from 'vitest';
-import { type ShaderSource, patchBoxShader, replaceChunk } from './boxShader.js';
-
-describe('replaceChunk', () => {
-  it('replaces the first occurrence only', () => {
-    expect(replaceChunk({ source: 'a #x b #x', chunk: '#x', replacement: 'y' })).toBe('a y b #x');
-  });
-
-  it('throws when the chunk is missing', () => {
-    expect(() => replaceChunk({ source: 'void main() {}', chunk: '#x', replacement: 'y' })).toThrow(
-      'Shader chunk "#x" not found',
-    );
-  });
-});
+import { patchBoxShader } from './boxShader.js';
+import type { ShaderSource } from './shaderPatch.js';
 
 describe('patchBoxShader', () => {
   // The physical program from the installed three.js, so an upgrade that renames

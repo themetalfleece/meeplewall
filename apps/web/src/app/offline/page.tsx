@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { routes } from '@/lib/route-params';
+
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
@@ -16,7 +18,7 @@ export default function OfflinePage() {
       <p className={styles.text}>
         Collections and games load from the network. Reconnect and try again.
       </p>
-      <Link href="/">Back to the home page</Link>
+      <Link href={routes.home()}>Back to the home page</Link>
     </main>
   );
 }

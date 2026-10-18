@@ -1,21 +1,12 @@
-import { randomUUID } from 'node:crypto';
-
-import { closeDatabase, createDatabase, migrateDatabase, type Database } from '@meeplewall/db';
+import type { Database } from '@meeplewall/db';
+import { canReachPostgres, TestDatabase } from '@meeplewall/db/testing';
 import { afterAll, beforeAll, beforeEach } from 'vitest';
 
 /** The compose Postgres from DATABASE_URL, or undefined so the suite skips. CI never skips. */
 export async function resolveTestServerUrl(): Promise<string | undefined> {
   const serverUrl = process.env.DATABASE_URL;
-  if (serverUrl !== undefined && serverUrl !== '') {
-    const probe = createDatabase({ connectionString: serverUrl });
-    try {
-      await probe.$client.query('select 1');
-      return serverUrl;
-    } catch {
-      // Unreachable: fall through to skip, or to fail under CI.
-    } finally {
-      await closeDatabase(probe);
-    }
+  if (serverUrl !== undefined && serverUrl !== '' && (await canReachPostgres(serverUrl))) {
+    return serverUrl;
   }
   if (process.env.CI !== undefined) {
     throw new Error('CI must run the sync suite, but DATABASE_URL is unset or unreachable');
@@ -24,59 +15,30 @@ export async function resolveTestServerUrl(): Promise<string | undefined> {
   return undefined;
 }
 
-async function runServerStatement({
-  serverUrl,
-  statement,
-}: {
-  serverUrl: string;
-  statement: string;
-}): Promise<void> {
-  const server = createDatabase({ connectionString: serverUrl });
-  try {
-    await server.$client.query(statement);
-  } finally {
-    await closeDatabase(server);
-  }
-}
-
 /**
  * Gives the enclosing suite its own migrated database, emptied before each test.
  * Call it inside a `describe.skipIf(serverUrl === undefined)` block.
  */
 export function useTestDatabase(serverUrl: string | undefined): () => Database {
-  const name = `collection_sync_test_${randomUUID().replaceAll('-', '')}`;
-  let database: Database | undefined;
+  let testDatabase: TestDatabase | undefined;
 
   beforeAll(async () => {
     if (serverUrl === undefined) {
       throw new Error('useTestDatabase ran without a server; wrap the suite in describe.skipIf');
     }
-    await runServerStatement({ serverUrl, statement: `create database "${name}"` });
-    const databaseUrl = new URL(serverUrl);
-    databaseUrl.pathname = `/${name}`;
-    database = createDatabase({ connectionString: databaseUrl.toString() });
-    await migrateDatabase(database);
+    testDatabase = await TestDatabase.create({ serverUrl });
   });
   beforeEach(async () => {
-    // Every other table cascades from these two.
-    await database?.$client.query('truncate bgg_games, bgg_users cascade');
+    await testDatabase?.reset();
   });
   afterAll(async () => {
-    if (database !== undefined) {
-      await closeDatabase(database);
-    }
-    if (serverUrl !== undefined) {
-      await runServerStatement({
-        serverUrl,
-        statement: `drop database if exists "${name}" with (force)`,
-      });
-    }
+    await testDatabase?.destroy();
   });
 
   return () => {
-    if (database === undefined) {
+    if (testDatabase === undefined) {
       throw new Error('The test database is only available inside a test');
     }
-    return database;
+    return testDatabase.database;
   };
 }

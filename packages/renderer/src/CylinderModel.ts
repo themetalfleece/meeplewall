@@ -68,11 +68,7 @@ export class CylinderModel implements PackageModel {
     const halfHeight = layout.height / 2;
     if (layout.kind === 'tube') {
       const art = new ArtSurface({
-        material: new MeshPhysicalMaterial({
-          roughness: 0.62,
-          clearcoat: 0.22,
-          clearcoatRoughness: 0.4,
-        }),
+        materialParameters: { roughness: 0.62, clearcoat: 0.22, clearcoatRoughness: 0.4 },
       });
       CylinderModel.#addSeams({ material: art.material, halfHeight, seams: TUBE_SEAMS });
       const ends = [CylinderModel.#cardEnd(), CylinderModel.#cardEnd()];
@@ -80,13 +76,13 @@ export class CylinderModel implements PackageModel {
     }
     if (layout.kind === 'round-tin') {
       const art = new ArtSurface({
-        material: new MeshPhysicalMaterial({
+        materialParameters: {
           metalness: 0.12,
           roughness: 0.42,
           clearcoat: 0.5,
           clearcoatRoughness: 0.28,
           envMapIntensity: 1.1,
-        }),
+        },
         transform: layout.lid,
       });
       const band = new MeshPhysicalMaterial({ metalness: 0.85, roughness: 0.3, clearcoat: 0.2 });

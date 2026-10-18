@@ -87,11 +87,7 @@ export class BoxModel implements PackageModel {
 
   static #createHangTab(tab: HangTabLayout): HangTabParts {
     const art = new ArtSurface({
-      material: new MeshPhysicalMaterial({
-        roughness: 0.5,
-        clearcoat: 0.3,
-        clearcoatRoughness: 0.34,
-      }),
+      materialParameters: { roughness: 0.5, clearcoat: 0.3, clearcoatRoughness: 0.34 },
     });
     const band = new MeshPhysicalMaterial({ roughness: 0.6 });
     // Extrusion groups: 0 is the front and back caps, 1 is the walls.

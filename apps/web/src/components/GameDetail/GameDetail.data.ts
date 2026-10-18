@@ -35,8 +35,3 @@ function describeRating({ averageRating, ratingCount }: GameView): string | null
 export function gameTags(game: Pick<GameView, 'categories' | 'mechanics'>): string[] {
   return [...new Set([...game.categories, ...game.mechanics])];
 }
-
-/** The game's page on BoardGameGeek. */
-export function bggGameUrl(bggId: number): string {
-  return `https://boardgamegeek.com/boardgame/${bggId}`;
-}

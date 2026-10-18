@@ -1,4 +1,4 @@
-import { MILLIMETRES_PER_UNIT, orientBox, type OrientedBox } from './dimensions.js';
+import { MILLIMETRES_PER_UNIT, assertPositive, orientBox, type OrientedBox } from './dimensions.js';
 import type {
   BoxSize,
   GameBoxInput,
@@ -102,10 +102,7 @@ export function layoutPackage({
   }
   if (shape.kind === 'pouch') {
     const { aspect, points } = shape.outline;
-    if (!Number.isFinite(aspect) || aspect <= 0) {
-      throw new RangeError(`Pouch aspect must be a positive ratio, got ${aspect}`);
-    }
-
+    assertPositive({ value: aspect, requirement: 'Pouch aspect must be a positive ratio' });
     const { width } = orientBox({ size, coverAspect });
     const height = width / aspect;
     return { kind: 'pouch', width, height, puff: Math.min(width, height) * POUCH_PUFF, points };
@@ -131,9 +128,10 @@ function cylinderUnits({ diameter, height }: { diameter: number; height: number 
   height: number;
 } {
   for (const dimension of [diameter, height]) {
-    if (!Number.isFinite(dimension) || dimension <= 0) {
-      throw new RangeError(`Cylinder dimensions must be positive millimetres, got ${dimension}`);
-    }
+    assertPositive({
+      value: dimension,
+      requirement: 'Cylinder dimensions must be positive millimetres',
+    });
   }
 
   return { radius: diameter / 2 / MILLIMETRES_PER_UNIT, height: height / MILLIMETRES_PER_UNIT };

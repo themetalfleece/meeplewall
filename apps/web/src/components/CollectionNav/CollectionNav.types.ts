@@ -7,6 +7,12 @@ export interface CollectionNavProps extends RouteSearchParams {
   params: Promise<{ uId: string; gId: string }>;
 }
 
+export interface BackLinkProps {
+  /** The collection owner's name as the link reads it. */
+  owner: string;
+  href: string;
+}
+
 export interface NeighbourLinkProps {
   username: string;
   shelf: CollectionShelf;

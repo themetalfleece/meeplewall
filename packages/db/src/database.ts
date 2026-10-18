@@ -9,9 +9,8 @@ import pg from 'pg';
 
 import * as schema from './schema/index.ts';
 
-// Resolves to the package's src/migrations from both src/ and the built dist/. Built with
-// node:path rather than `new URL(..., import.meta.url)`, which bundlers such as Turbopack read
-// as an asset import and fail to resolve.
+// The package's src/migrations, from both src/ and dist/. Built with node:path because Turbopack
+// reads `new URL(..., import.meta.url)` as an asset import and fails.
 const MIGRATIONS_FOLDER = path.join(
   path.dirname(path.dirname(fileURLToPath(import.meta.url))),
   'src',

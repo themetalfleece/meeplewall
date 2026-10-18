@@ -1,11 +1,8 @@
-import type { Object3D, Texture } from 'three';
+import type { Object3D } from 'three';
+import type { TextureChange } from './ArtworkLoader.js';
 import type { GameBoxInput, PackageArtwork } from './types.js';
 
-/** A texture arriving for one artwork key, or null when it is cleared. */
-export interface ArtworkChange {
-  artwork: PackageArtwork;
-  texture: Texture<HTMLImageElement> | null;
-}
+export type ArtworkChange = TextureChange<PackageArtwork>;
 
 export type PackageColors = Pick<GameBoxInput, 'sideColor' | 'edgeColor'>;
 

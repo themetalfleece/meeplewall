@@ -8,6 +8,7 @@ import {
   type ImageJob,
   type ImageKind,
 } from '../schema/index.ts';
+import { leaseExpiry } from './leases.ts';
 
 export type ImageAssetInput = Pick<
   ImageAsset,
@@ -60,7 +61,7 @@ export async function claimNextImageJob(
       status: 'processing',
       attempts: sql`${imageJobs.attempts} + 1`,
       lockedBy: workerId,
-      lockedUntil: sql`now() + make_interval(secs => ${holdSeconds})`,
+      lockedUntil: leaseExpiry(holdSeconds),
       updatedAt: sql`now()`,
     })
     .where(inArray(imageJobs.id, nextJobId))

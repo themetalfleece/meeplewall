@@ -10,8 +10,6 @@ const variableSchemas = {
   SITE_URL: httpUrlSchema,
   DATABASE_URL: z.string().min(1),
   STORAGE_PUBLIC_BASE_URL: httpUrlSchema,
-  BGG_USER_AGENT: z.string().trim().min(1),
-  BGG_API_TOKEN: z.string().trim().min(1),
   INTERNAL_REVALIDATE_SECRET: z.string().min(32, 'must be at least 32 characters'),
 };
 
@@ -61,15 +59,6 @@ export function databaseUrl(): string {
 /** Where processed images are served from, without a trailing key. */
 export function storagePublicBaseUrl(): string {
   return fromProcess('STORAGE_PUBLIC_BASE_URL');
-}
-
-export function bggUserAgent(): string {
-  return fromProcess('BGG_USER_AGENT');
-}
-
-/** Server-only: the bearer token of the app registered with BGG for XMLAPI2. */
-export function bggApiToken(): string {
-  return fromProcess('BGG_API_TOKEN');
 }
 
 /** Server-only: the secret the image processor sends to the revalidate route. */

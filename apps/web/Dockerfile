@@ -1,11 +1,10 @@
 # The Next.js app as a standalone Node server. Build from the repo root:
 #
-#   docker build -f infra/Dockerfile.web --build-arg SITE_URL=https://meeplewall.com -t meeplewall-web .
+#   docker build -f apps/web/Dockerfile --build-arg SITE_URL=https://meeplewall.com -t meeplewall-web .
 #
 # SITE_URL is needed at build time because static pages are rendered then; give the container the
-# same value. At runtime it reads SITE_URL, DATABASE_URL, STORAGE_PUBLIC_BASE_URL, BGG_USER_AGENT,
-# BGG_API_TOKEN and INTERNAL_REVALIDATE_SECRET (see apps/web/.env.example), and serves
-# GET /healthz on PORT.
+# same value. At runtime it reads SITE_URL, DATABASE_URL, STORAGE_PUBLIC_BASE_URL and
+# INTERNAL_REVALIDATE_SECRET (see apps/web/.env.example), and serves GET /healthz on PORT.
 
 # Node's current LTS line. Pin the exact release, never a floating tag.
 FROM node:24.22.0-trixie-slim AS build

@@ -1,9 +1,9 @@
-# The image-processor worker. Build from the repo root:
+# The sync worker. Build from the repo root:
 #
-#   docker build -f infra/Dockerfile.image-processor -t meeplewall-image-processor .
+#   docker build -f apps/sync-worker/Dockerfile -t meeplewall-sync-worker .
 #
-# It reads every variable in apps/image-processor/.env.example, and serves GET /healthz on
-# IMAGE_PROCESSOR_HEALTH_PORT.
+# It reads every variable in apps/sync-worker/.env.example, and serves GET /healthz on
+# SYNC_WORKER_HEALTH_PORT. Run exactly one: its BGG rate limit is per process.
 
 # Node's current LTS line. Pin the exact release, never a floating tag.
 FROM node:24.22.0-trixie-slim AS build
@@ -12,10 +12,10 @@ RUN corepack enable
 WORKDIR /repo
 COPY . .
 # Installs and builds only the worker and the workspace packages it depends on.
-RUN pnpm install --frozen-lockfile --filter "@meeplewall/image-processor..."
-RUN pnpm --filter "@meeplewall/image-processor..." build
+RUN pnpm install --frozen-lockfile --filter "@meeplewall/sync-worker..."
+RUN pnpm --filter "@meeplewall/sync-worker..." build
 # A self-contained copy with production dependencies only, workspace packages included.
-RUN pnpm --filter @meeplewall/image-processor deploy --prod /deploy
+RUN pnpm --filter @meeplewall/sync-worker deploy --prod /deploy
 
 FROM node:24.22.0-trixie-slim
 ENV NODE_ENV=production
@@ -24,5 +24,5 @@ COPY --from=build --chown=node:node /deploy ./
 USER node
 # The slim image has no curl, so the probe uses Node's fetch.
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
-  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.IMAGE_PROCESSOR_HEALTH_PORT}/healthz`).then((response) => process.exit(response.ok ? 0 : 1), () => process.exit(1))"]
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.SYNC_WORKER_HEALTH_PORT}/healthz`).then((response) => process.exit(response.ok ? 0 : 1), () => process.exit(1))"]
 CMD ["node", "dist/main.js"]

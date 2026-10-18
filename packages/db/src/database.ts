@@ -44,7 +44,21 @@ export async function closeDatabase(database: Database): Promise<void> {
   await database.$client.end();
 }
 
-/** Applies every migration that has not run yet, in order. */
+// An arbitrary key every process agrees on, held while it migrates.
+const MIGRATION_LOCK_KEY = 4_118_652_201;
+
+/**
+ * Applies every migration that has not run yet, in order. Each worker calls it at
+ * startup, so it holds a Postgres advisory lock: a second caller waits, then finds
+ * nothing left to apply.
+ */
 export async function migrateDatabase(database: Database): Promise<void> {
-  await migrate(database, { migrationsFolder: MIGRATIONS_FOLDER });
+  const client = await database.$client.connect();
+  try {
+    await client.query('select pg_advisory_lock($1)', [MIGRATION_LOCK_KEY]);
+    await migrate(drizzle({ client, schema }), { migrationsFolder: MIGRATIONS_FOLDER });
+  } finally {
+    // Closing the connection drops the lock with it, even when the migration failed midway.
+    client.release(true);
+  }
 }

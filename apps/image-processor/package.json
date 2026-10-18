@@ -30,6 +30,7 @@
     "@meeplewall/db": "workspace:*",
     "@meeplewall/image-pipeline": "workspace:*",
     "@meeplewall/storage": "workspace:*",
+    "@meeplewall/worker-runtime": "workspace:*",
     "zod": "catalog:"
   }
 }

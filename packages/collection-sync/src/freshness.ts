@@ -12,8 +12,9 @@ export const GAME_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 export const SYNC_THROTTLE_SECONDS = 60;
 
 /**
- * A sync still running after this long is treated as lost to a crashed process.
- * A large cold collection takes several minutes at the BGG rate limit.
+ * A sync still running after this long, with no worker holding it, is treated as
+ * lost, for example because no sync worker is up. A large cold collection takes
+ * several minutes at the BGG rate limit.
  */
 export const SYNC_ABANDONED_AFTER_SECONDS = 60 * 60;
 
@@ -30,16 +31,19 @@ export function isOlderThan({
   return now.getTime() - timestamp.getTime() > maxAgeSeconds * MILLISECONDS_PER_SECOND;
 }
 
-/** True when a sync still marked running started too long ago to be alive. */
+/** True when a sync still marked running started too long ago to be alive and no worker holds it. */
 export function isSyncAbandoned({
   sync,
   now,
 }: {
-  sync: Pick<CollectionSync, 'status' | 'startedAt'>;
+  sync: Pick<CollectionSync, 'status' | 'startedAt' | 'lockedUntil'>;
   now: Date;
 }): boolean {
+  const leased = sync.lockedUntil !== null && sync.lockedUntil.getTime() > now.getTime();
+
   return (
     sync.status === 'running' &&
+    !leased &&
     isOlderThan({ timestamp: sync.startedAt, now, maxAgeSeconds: SYNC_ABANDONED_AFTER_SECONDS })
   );
 }

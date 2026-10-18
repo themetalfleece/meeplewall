@@ -1,0 +1,9 @@
+{
+  "extends": "@meeplewall/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src"]
+}

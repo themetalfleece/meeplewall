@@ -1,5 +1,7 @@
 import {
   bggGames,
+  claimNextCollectionSync,
+  collectionSyncs,
   getCollectionByUsername,
   getCollectionSync,
   imageAssets,
@@ -14,6 +16,7 @@ import type { CollectedGame } from './collection-provider.ts';
 import { CollectionSyncService } from './collection-sync-service.ts';
 import { SYNC_THROTTLE_SECONDS } from './freshness.ts';
 import { toGameInput } from './game-input.ts';
+import { requestCollectionSync } from './request-sync.ts';
 import { FakeBggClient, FakeCollectionProvider, bggGame } from './testing/bgg-fakes.ts';
 import { resolveTestServerUrl, useTestDatabase } from './testing/test-database.ts';
 
@@ -22,6 +25,8 @@ const serverUrl = await resolveTestServerUrl();
 const AZUL = bggGame({ bggId: 230802, name: 'Azul' });
 const CATAN = bggGame({ bggId: 13, name: 'CATAN' });
 const BARE = bggGame({ bggId: 7, name: 'Bare Box', imageUrl: null });
+
+const WORKER = 'sync-worker-test';
 
 function collected(bggId: number, overrides: Partial<CollectedGame> = {}): CollectedGame {
   return { bggId, owned: true, wantToPlay: false, userRating: null, ...overrides };
@@ -44,56 +49,32 @@ describe.skipIf(serverUrl === undefined)('CollectionSyncService', () => {
     return new CollectionSyncService({ database: database(), bgg, provider, now });
   }
 
-  async function startAndRun(service: CollectionSyncService, username: string) {
-    const request = await service.requestSync({ username });
+  /** Queues a sync the way the web app does, then claims it the way the sync worker does. */
+  async function startAndClaim(username: string) {
+    const request = await requestCollectionSync(database(), { username, source: 'user' });
     if (request.kind !== 'started') {
       throw new Error(`Expected a started sync, got ${request.kind}`);
     }
+    const claimed = await claimNextCollectionSync(database(), {
+      workerId: WORKER,
+      holdSeconds: 60,
+      maxAttempts: 3,
+    });
+    if (claimed?.sync.id !== request.sync.id) {
+      throw new Error('Expected to claim the sync just started');
+    }
 
-    return {
-      sync: request.sync,
-      outcome: await service.runSync({ sync: request.sync, username, source: 'user' }),
-    };
+    return claimed;
   }
 
-  describe('requestSync', () => {
-    it('starts a sync for a user seen for the first time', async () => {
-      const request = await createService().requestSync({ username: 'alice' });
+  async function startAndRun(service: CollectionSyncService, username: string) {
+    const claimed = await startAndClaim(username);
 
-      expect(request.kind).toBe('started');
-      expect(request.sync.status).toBe('running');
-    });
-
-    it('joins the sync already running', async () => {
-      const service = createService();
-      const first = await service.requestSync({ username: 'alice' });
-
-      const second = await service.requestSync({ username: 'Alice' });
-
-      expect(second).toEqual({ kind: 'joined', sync: first.sync });
-    });
-
-    it('declines a new sync within the throttle window after the last one finished', async () => {
-      const service = createService({ collections: { alice: [] } });
-      await startAndRun(service, 'alice');
-
-      const request = await service.requestSync({ username: 'alice' });
-
-      expect(request.kind).toBe('throttled');
-      expect(request.kind === 'throttled' && request.retryAfterSeconds).toBeGreaterThan(0);
-    });
-
-    it('starts again once the throttle window has passed', async () => {
-      let now = new Date();
-      const service = createService({ collections: { alice: [] }, now: () => now });
-      await startAndRun(service, 'alice');
-      now = new Date(now.getTime() + (SYNC_THROTTLE_SECONDS + 1) * 1_000);
-
-      const request = await service.requestSync({ username: 'alice' });
-
-      expect(request.kind).toBe('started');
-    });
-  });
+    return {
+      sync: claimed.sync,
+      outcome: await service.runSync({ claimed, workerId: WORKER }),
+    };
+  }
 
   describe('runSync', () => {
     it('stores the collection sorted by name with the user flags, and succeeds', async () => {
@@ -205,19 +186,16 @@ describe.skipIf(serverUrl === undefined)('CollectionSyncService', () => {
     });
 
     it('fails on a BGG error and keeps the previously stored collection', async () => {
-      let now = new Date();
       const bgg = new FakeBggClient({ games: [AZUL, CATAN] });
-      const service = createService({
-        bgg,
-        collections: { alice: [collected(AZUL.bggId)] },
-        now: () => now,
-      });
-      await startAndRun(service, 'alice');
-      now = new Date(now.getTime() + (SYNC_THROTTLE_SECONDS + 1) * 1_000);
+      const service = createService({ bgg, collections: { alice: [collected(AZUL.bggId)] } });
+      const { sync: first } = await startAndRun(service, 'alice');
+      await database()
+        .update(collectionSyncs)
+        .set({ startedAt: sql`now() - make_interval(secs => ${SYNC_THROTTLE_SECONDS + 1})` })
+        .where(eq(collectionSyncs.id, first.id));
       const failing = createService({
         bgg,
         collections: { alice: [collected(AZUL.bggId), collected(CATAN.bggId)] },
-        now: () => now,
       });
       bgg.failWith(new Error('BGG answered 500'));
 
@@ -226,6 +204,28 @@ describe.skipIf(serverUrl === undefined)('CollectionSyncService', () => {
       expect(outcome).toEqual({ status: 'failed', error: 'BGG answered 500' });
       const stored = await getCollectionByUsername(database(), { username: 'alice' });
       expect(stored?.items.map(({ game }) => game.id)).toEqual([AZUL.bggId]);
+    });
+
+    it('reports a lost lease and leaves the result to the worker that took over', async () => {
+      const service = createService({ collections: { alice: [collected(AZUL.bggId)] } });
+      const claimed = await startAndClaim('alice');
+      await database()
+        .update(collectionSyncs)
+        .set({ lockedBy: 'another-worker' })
+        .where(eq(collectionSyncs.id, claimed.sync.id));
+
+      const outcome = await service.runSync({ claimed, workerId: WORKER });
+
+      expect(outcome).toEqual({ status: 'lost' });
+      expect((await getCollectionSync(database(), { syncId: claimed.sync.id }))?.status).toBe(
+        'running',
+      );
+      expect(
+        await database()
+          .select()
+          .from(refreshLog)
+          .where(eq(refreshLog.userId, claimed.sync.userId)),
+      ).toEqual([]);
     });
   });
 });

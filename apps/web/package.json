@@ -12,7 +12,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@meeplewall/boardgamegeek": "workspace:*",
     "@meeplewall/collection-sync": "workspace:*",
     "@meeplewall/db": "workspace:*",
     "@meeplewall/renderer": "workspace:*",

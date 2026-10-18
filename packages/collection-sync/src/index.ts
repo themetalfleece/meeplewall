@@ -2,7 +2,7 @@ export type { CollectedGame, CollectionProvider } from './collection-provider.ts
 export {
   CollectionSyncService,
   type CollectionSyncServiceOptions,
-  type SyncRequest,
+  type SyncRunOutcome,
 } from './collection-sync-service.ts';
 export {
   COLLECTION_MAX_AGE_SECONDS,
@@ -14,3 +14,4 @@ export {
   secondsUntilNextSync,
 } from './freshness.ts';
 export { toGameInput } from './game-input.ts';
+export { requestCollectionSync, type SyncRequest } from './request-sync.ts';

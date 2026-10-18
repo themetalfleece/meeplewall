@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { setTimeout as delay } from 'node:timers/promises';
 
 import {
   claimNextImageJob,
@@ -12,9 +11,9 @@ import {
 } from '@meeplewall/db';
 import { processCover, type EncodedImage } from '@meeplewall/image-pipeline';
 import type { Storage } from '@meeplewall/storage';
+import { describeError, PollLoop, type JsonLogger } from '@meeplewall/worker-runtime';
 
 import { downloadSource } from './download-source.ts';
-import { describeError, type JsonLogger } from './logger.ts';
 import type { Revalidate } from './revalidate.ts';
 
 /** What happened to a claimed job. `lost` means another worker took over its lease. */
@@ -65,29 +64,32 @@ export function imageStorageKey({
  */
 export class ImageWorker {
   readonly #options: ImageWorkerOptions;
-  readonly #stopping = new AbortController();
+  readonly #loop: PollLoop;
 
   constructor(options: ImageWorkerOptions) {
     this.#options = options;
+    this.#loop = new PollLoop({ idleMilliseconds: options.idleMilliseconds });
   }
 
   get isStopping(): boolean {
-    return this.#stopping.signal.aborted;
+    return this.#loop.isStopping;
   }
 
   /** Asks `run` to return once the job in hand, if any, is finished. */
   stop(): void {
-    this.#stopping.abort();
+    this.#loop.stop();
   }
 
   /** Processes jobs until `stop` is called. Never rejects: a failed poll is logged and retried. */
   async run(): Promise<void> {
-    while (!this.isStopping) {
-      const outcome = await this.#pollOnce();
-      if (outcome === undefined) {
-        await this.#idle();
-      }
-    }
+    await this.#loop.run({
+      poll: async () => (await this.processNextJob()) !== undefined,
+      onError: (error) => {
+        this.#options.logger.error('Polling for image jobs failed', {
+          error: describeError(error),
+        });
+      },
+    });
   }
 
   /** Claims and processes one job. Resolves undefined when the queue has nothing claimable. */
@@ -103,25 +105,6 @@ export class ImageWorker {
       return await this.#complete(job);
     } catch (error) {
       return this.#fail({ job, error });
-    }
-  }
-
-  async #pollOnce(): Promise<JobOutcome | undefined> {
-    try {
-      return await this.processNextJob();
-    } catch (error) {
-      this.#options.logger.error('Polling for image jobs failed', { error: describeError(error) });
-      return undefined;
-    }
-  }
-
-  async #idle(): Promise<void> {
-    try {
-      await delay(this.#options.idleMilliseconds, undefined, { signal: this.#stopping.signal });
-    } catch (error) {
-      if (!this.isStopping) {
-        throw error;
-      }
     }
   }
 

@@ -26,7 +26,7 @@ If a required env var is missing, fail with a clear error. A fallback turns a mi
 
 Add each new var to `.env.example` with a descriptive comment. That file is the contract.
 
-**Each workspace that reads the environment owns its own `.env.example`, listing only what it reads.** There is no repo root `.env.example` or `.env.local`. `apps/web` and `apps/image-processor` list what their env module reads; a package lists only what its own scripts and test suites read. A variable two workspaces share, such as `DATABASE_URL` or `INTERNAL_REVALIDATE_SECRET`, appears in both files.
+**Each workspace that reads the environment owns its own `.env.example`, listing only what it reads.** There is no repo root `.env.example` or `.env.local`. `apps/web`, `apps/image-processor` and `apps/sync-worker` list what their env module reads; a package lists only what its own scripts and test suites read. A variable two workspaces share, such as `DATABASE_URL` or `INTERNAL_REVALIDATE_SECRET`, appears in both files.
 
 Local overrides go in `.env.local` beside that `.env.example`, which is git-ignored. Developers copy each `.env.example` they need to `.env.local` next to it. Every loader reads its own workspace directory: Next reads `apps/web` by default, `node --env-file-if-exists=.env.local` runs from the package directory, and each `vitest.config.ts` passes its own directory to `loadEnv`.
 

@@ -5,24 +5,13 @@ const { on } = vi.hoisted(() => ({ on: vi.fn() }));
 vi.mock('@meeplewall/db', () => ({
   createDatabase: vi.fn(() => ({ $client: { on } })),
 }));
-vi.mock('@meeplewall/boardgamegeek', () => ({
-  createBggClient: vi.fn(() => ({})),
-  createBggCollectionClient: vi.fn(() => ({ transport: 'xmlapi2' })),
-}));
-vi.mock('@meeplewall/collection-sync', () => ({
-  CollectionSyncService: vi.fn(),
-}));
 
 const { createDatabase } = await import('@meeplewall/db');
-const { createBggCollectionClient } = await import('@meeplewall/boardgamegeek');
-const { CollectionSyncService } = await import('@meeplewall/collection-sync');
-const { getDatabase, getSyncService } = await import('./services');
+const { getDatabase } = await import('./services');
 
 beforeEach(() => {
   globalThis.meeplewallServices = undefined;
   vi.stubEnv('DATABASE_URL', 'postgres://localhost/test');
-  vi.stubEnv('BGG_USER_AGENT', 'tests');
-  vi.stubEnv('BGG_API_TOKEN', 'token');
 });
 
 afterEach(() => {
@@ -44,37 +33,5 @@ describe('getDatabase', () => {
     getDatabase();
 
     expect(on).toHaveBeenCalledWith('error', expect.any(Function));
-  });
-
-  it('does not need the BGG variables', () => {
-    vi.stubEnv('BGG_API_TOKEN', '');
-
-    expect(() => getDatabase()).not.toThrow();
-  });
-});
-
-describe('getSyncService', () => {
-  it('creates the service once over the shared pool', () => {
-    const first = getSyncService();
-
-    expect(getSyncService()).toBe(first);
-    expect(CollectionSyncService).toHaveBeenCalledTimes(1);
-    expect(CollectionSyncService).toHaveBeenCalledWith(
-      expect.objectContaining({ database: getDatabase() }),
-    );
-  });
-
-  it('gives the collection client the BGG token', () => {
-    getSyncService();
-
-    expect(createBggCollectionClient).toHaveBeenCalledWith(
-      expect.objectContaining({ token: 'token', userAgent: 'tests' }),
-    );
-  });
-
-  it('fails naming the variable when the token is missing', () => {
-    vi.stubEnv('BGG_API_TOKEN', '');
-
-    expect(() => getSyncService()).toThrow('BGG_API_TOKEN is not set');
   });
 });

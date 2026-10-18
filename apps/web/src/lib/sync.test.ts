@@ -1,25 +1,20 @@
-import { SYNC_ABANDONED_AFTER_SECONDS, type SyncRequest } from '@meeplewall/collection-sync';
+import { SYNC_ABANDONED_AFTER_SECONDS } from '@meeplewall/collection-sync';
 import type { CollectionSync } from '@meeplewall/db';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
+import { needsSync, toSyncStatus } from './sync';
 import { IDLE_SYNC_STATUS, syncStatusSchema } from './sync-status';
-
-const { after, runSync } = vi.hoisted(() => ({
-  after: vi.fn<(task: () => Promise<void>) => void>(),
-  runSync: vi.fn(),
-}));
-
-vi.mock('next/server', () => ({ after }));
-vi.mock('./services', () => ({ getSyncService: () => ({ runSync }) }));
-
-const { needsSync, runStartedSyncAfterResponse, toSyncStatus } = await import('./sync');
 
 const NOW = new Date('2026-10-18T12:00:00.000Z');
 const SYNC: CollectionSync = {
   id: '00000000-0000-4000-8000-000000000001',
   userId: '00000000-0000-4000-8000-000000000002',
   status: 'running',
+  source: 'api',
   error: null,
+  attempts: 0,
+  lockedBy: null,
+  lockedUntil: null,
   startedAt: NOW,
   finishedAt: null,
 };
@@ -27,20 +22,6 @@ const SYNC: CollectionSync = {
 function hoursBefore(hours: number): Date {
   return new Date(NOW.getTime() - hours * 3_600_000);
 }
-
-/** Runs whatever was handed to `after`, as Next.js would once the response is sent. */
-async function runDeferredTask() {
-  const [task] = after.mock.calls[0] ?? [];
-  if (task === undefined) {
-    throw new Error('Nothing was deferred');
-  }
-  await task();
-}
-
-afterEach(() => {
-  vi.restoreAllMocks();
-  vi.clearAllMocks();
-});
 
 describe('needsSync', () => {
   it('syncs a user with no stored collection', () => {
@@ -71,7 +52,7 @@ describe('toSyncStatus', () => {
     });
   });
 
-  it('reports a sync still running past the abandoned window as failed', () => {
+  it('reports a sync no worker picked up within the abandoned window as failed', () => {
     const now = new Date(NOW.getTime() + (SYNC_ABANDONED_AFTER_SECONDS + 1) * 1_000);
 
     expect(toSyncStatus({ sync: SYNC, now })).toEqual({
@@ -79,6 +60,13 @@ describe('toSyncStatus', () => {
       startedAt: '2026-10-18T12:00:00.000Z',
       finishedAt: null,
     });
+  });
+
+  it('keeps reporting a long sync as running while a worker holds its lease', () => {
+    const now = new Date(NOW.getTime() + (SYNC_ABANDONED_AFTER_SECONDS + 1) * 1_000);
+    const leased = { ...SYNC, lockedBy: 'worker', lockedUntil: new Date(now.getTime() + 30_000) };
+
+    expect(toSyncStatus({ sync: leased, now }).state).toBe('running');
   });
 
   it('reports a failed sync without its error text', () => {
@@ -107,58 +95,5 @@ describe('toSyncStatus', () => {
     });
 
     expect(syncStatusSchema.parse(status)).toMatchObject({ state: 'succeeded' });
-  });
-});
-
-describe('runStartedSyncAfterResponse', () => {
-  it.each<SyncRequest>([
-    { kind: 'joined', sync: SYNC },
-    { kind: 'throttled', sync: SYNC, retryAfterSeconds: 30 },
-  ])('defers nothing for a $kind request', (request) => {
-    runStartedSyncAfterResponse({ request, username: 'alice', source: 'api' });
-
-    expect(after).not.toHaveBeenCalled();
-  });
-
-  it('runs a started sync after the response', async () => {
-    runSync.mockResolvedValue({ status: 'succeeded' });
-
-    runStartedSyncAfterResponse({
-      request: { kind: 'started', sync: SYNC },
-      username: 'alice',
-      source: 'user',
-    });
-
-    expect(runSync).not.toHaveBeenCalled();
-    await runDeferredTask();
-    expect(runSync).toHaveBeenCalledWith({ sync: SYNC, username: 'alice', source: 'user' });
-  });
-
-  it('logs a failed outcome', async () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    runSync.mockResolvedValue({ status: 'failed', error: 'BGG answered 500' });
-
-    runStartedSyncAfterResponse({
-      request: { kind: 'started', sync: SYNC },
-      username: 'alice',
-      source: 'api',
-    });
-    await runDeferredTask();
-
-    expect(String(log.mock.calls[0]?.[0])).toContain('BGG answered 500');
-  });
-
-  it('logs a crash instead of rejecting', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    runSync.mockRejectedValue(new Error('pool closed'));
-
-    runStartedSyncAfterResponse({
-      request: { kind: 'started', sync: SYNC },
-      username: 'alice',
-      source: 'api',
-    });
-
-    await expect(runDeferredTask()).resolves.toBeUndefined();
-    expect(String(error.mock.calls[0]?.[0])).toContain('pool closed');
   });
 });

@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  bggApiToken,
-  bggUserAgent,
   databaseUrl,
   internalRevalidateSecret,
   readVariable,
@@ -30,9 +28,9 @@ describe('readVariable', () => {
   });
 
   it('treats an empty value as missing', () => {
-    expect(() =>
-      readVariable({ name: 'BGG_API_TOKEN', environment: { BGG_API_TOKEN: '' } }),
-    ).toThrow('BGG_API_TOKEN is not set');
+    expect(() => readVariable({ name: 'DATABASE_URL', environment: { DATABASE_URL: '' } })).toThrow(
+      'DATABASE_URL is not set',
+    );
   });
 
   it('throws naming an invalid variable without echoing its value', () => {
@@ -61,15 +59,11 @@ describe('accessors', () => {
     vi.stubEnv('SITE_URL', 'https://boards.example.com');
     vi.stubEnv('DATABASE_URL', 'postgres://localhost/test');
     vi.stubEnv('STORAGE_PUBLIC_BASE_URL', 'https://cdn.example.com');
-    vi.stubEnv('BGG_USER_AGENT', 'tests');
-    vi.stubEnv('BGG_API_TOKEN', 'token');
     vi.stubEnv('INTERNAL_REVALIDATE_SECRET', SECRET);
 
     expect(siteUrl().origin).toBe('https://boards.example.com');
     expect(databaseUrl()).toBe('postgres://localhost/test');
     expect(storagePublicBaseUrl()).toBe('https://cdn.example.com');
-    expect(bggUserAgent()).toBe('tests');
-    expect(bggApiToken()).toBe('token');
     expect(internalRevalidateSecret()).toBe(SECRET);
   });
 

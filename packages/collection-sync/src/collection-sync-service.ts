@@ -2,38 +2,27 @@ import type { BggClient } from '@meeplewall/boardgamegeek';
 import {
   enqueueImageJob,
   finishCollectionSync,
-  getLatestCollectionSync,
   listGames,
   listImageAssets,
   recordRefresh,
-  startCollectionSync,
   upsertCollection,
   upsertGame,
   type BggGame,
+  type ClaimedCollectionSync,
   type CollectionItemInput,
-  type CollectionSync,
   type CollectionSyncOutcome,
   type DatabaseExecutor,
   type ImageKind,
-  type RefreshSource,
 } from '@meeplewall/db';
 
 import type { CollectedGame, CollectionProvider } from './collection-provider.ts';
-import {
-  GAME_MAX_AGE_SECONDS,
-  SYNC_ABANDONED_AFTER_SECONDS,
-  isOlderThan,
-  secondsUntilNextSync,
-} from './freshness.ts';
+import { GAME_MAX_AGE_SECONDS, isOlderThan } from './freshness.ts';
 import { toGameInput } from './game-input.ts';
 
 const IMAGE_KINDS: readonly ImageKind[] = ['cover', 'thumb'];
 
-/** What asking for a sync did. Only `started` hands the caller a sync to run. */
-export type SyncRequest =
-  | { kind: 'started'; sync: CollectionSync }
-  | { kind: 'joined'; sync: CollectionSync }
-  | { kind: 'throttled'; sync: CollectionSync; retryAfterSeconds: number };
+/** How a run ended. `lost` means the lease ran out and another worker owns the sync now. */
+export type SyncRunOutcome = CollectionSyncOutcome | { status: 'lost' };
 
 export interface CollectionSyncServiceOptions {
   database: DatabaseExecutor;
@@ -70,43 +59,17 @@ export class CollectionSyncService {
   }
 
   /**
-   * Starts a sync, joins the one already running, or declines when the user's
-   * latest sync started under a minute ago. Running the started sync is the
-   * caller's job, through `runSync`, so the caller decides where it runs.
-   */
-  async requestSync({ username }: { username: string }): Promise<SyncRequest> {
-    const latest = await getLatestCollectionSync(this.#database, { username });
-    if (latest !== undefined && latest.status !== 'running') {
-      const retryAfterSeconds = secondsUntilNextSync({
-        startedAt: latest.startedAt,
-        now: this.#now(),
-      });
-      if (retryAfterSeconds > 0) {
-        return { kind: 'throttled', sync: latest, retryAfterSeconds };
-      }
-    }
-
-    const { sync, started } = await startCollectionSync(this.#database, {
-      username,
-      staleAfterSeconds: SYNC_ABANDONED_AFTER_SECONDS,
-    });
-
-    return started ? { kind: 'started', sync } : { kind: 'joined', sync };
-  }
-
-  /**
-   * Runs a started sync to the end and records how it went. Never throws for a
-   * BGG or storage failure: that becomes the sync's `failed` outcome.
+   * Runs a sync `workerId` has claimed to the end and records how it went. Never
+   * throws for a BGG or storage failure: that becomes the sync's `failed`
+   * outcome. Records nothing when the lease was lost, since the new holder will.
    */
   async runSync({
-    sync,
-    username,
-    source,
+    claimed: { sync, username },
+    workerId,
   }: {
-    sync: CollectionSync;
-    username: string;
-    source: RefreshSource;
-  }): Promise<CollectionSyncOutcome> {
+    claimed: ClaimedCollectionSync;
+    workerId: string;
+  }): Promise<SyncRunOutcome> {
     const startedAt = performance.now();
     const outcome = await this.#syncCollection({ username }).then(
       (): CollectionSyncOutcome => ({ status: 'succeeded' }),
@@ -116,11 +79,18 @@ export class CollectionSyncService {
       }),
     );
 
-    await finishCollectionSync(this.#database, { syncId: sync.id, outcome });
+    const finished = await finishCollectionSync(this.#database, {
+      syncId: sync.id,
+      workerId,
+      outcome,
+    });
+    if (finished === undefined) {
+      return { status: 'lost' };
+    }
     await recordRefresh(this.#database, {
       entry: {
         userId: sync.userId,
-        source,
+        source: sync.source,
         status: outcome.status,
         durationMs: Math.round(performance.now() - startedAt),
       },

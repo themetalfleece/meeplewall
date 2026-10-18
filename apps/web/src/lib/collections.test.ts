@@ -7,8 +7,7 @@ const mocks = vi.hoisted(() => ({
   getCollectionEntry: vi.fn(),
   getLatestCollectionSync: vi.fn(),
   listImageAssets: vi.fn(),
-  requestSync: vi.fn(),
-  runStartedSyncAfterResponse: vi.fn(),
+  requestCollectionSync: vi.fn(),
 }));
 
 vi.mock('@meeplewall/db', () => ({
@@ -17,14 +16,11 @@ vi.mock('@meeplewall/db', () => ({
   getLatestCollectionSync: mocks.getLatestCollectionSync,
   listImageAssets: mocks.listImageAssets,
 }));
-vi.mock('./services', () => ({
-  getDatabase: () => 'database',
-  getSyncService: () => ({ requestSync: mocks.requestSync }),
+vi.mock('@meeplewall/collection-sync', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@meeplewall/collection-sync')>()),
+  requestCollectionSync: mocks.requestCollectionSync,
 }));
-vi.mock('./sync', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('./sync')>()),
-  runStartedSyncAfterResponse: mocks.runStartedSyncAfterResponse,
-}));
+vi.mock('./services', () => ({ getDatabase: () => 'database' }));
 
 const { loadCollectionGame, loadCollectionPage, loadCollectionSummary } =
   await import('./collections');
@@ -106,7 +102,11 @@ function sync(
     id: 'sync-1',
     userId: 'user-1',
     status,
+    source: 'api',
     error: null,
+    attempts: 0,
+    lockedBy: null,
+    lockedUntil: null,
     startedAt,
     finishedAt: status === 'running' ? null : new Date(NOW),
   };
@@ -138,17 +138,15 @@ afterEach(() => {
 });
 
 describe('loadCollectionPage', () => {
-  it('starts a sync for an unknown user and returns no cards yet', async () => {
+  it('queues a sync for an unknown user and returns no cards yet', async () => {
     mocks.getCollectionByUsername.mockResolvedValue(undefined);
-    const request = { kind: 'started', sync: sync('running') };
-    mocks.requestSync.mockResolvedValue(request);
+    mocks.requestCollectionSync.mockResolvedValue({ kind: 'started', sync: sync('running') });
 
     const page = await loadCollectionPage({ username: 'alice' });
 
     expect(page).toMatchObject({ displayName: 'alice', cards: null, fetchedAt: null });
     expect(page.sync.state).toBe('running');
-    expect(mocks.runStartedSyncAfterResponse).toHaveBeenCalledWith({
-      request,
+    expect(mocks.requestCollectionSync).toHaveBeenCalledWith('database', {
       username: 'alice',
       source: 'api',
     });
@@ -161,7 +159,7 @@ describe('loadCollectionPage', () => {
 
     const page = await loadCollectionPage({ username: 'alice' });
 
-    expect(mocks.requestSync).not.toHaveBeenCalled();
+    expect(mocks.requestCollectionSync).not.toHaveBeenCalled();
     expect(page.displayName).toBe('Alice');
     expect(page.sync.state).toBe('succeeded');
     expect(page.cards).toEqual([
@@ -188,7 +186,7 @@ describe('loadCollectionPage', () => {
 
   it('keeps showing a stale collection while it starts a refresh', async () => {
     mocks.getCollectionByUsername.mockResolvedValue(stored(STALE));
-    mocks.requestSync.mockResolvedValue({ kind: 'started', sync: sync('running') });
+    mocks.requestCollectionSync.mockResolvedValue({ kind: 'started', sync: sync('running') });
 
     const page = await loadCollectionPage({ username: 'alice' });
 
@@ -202,22 +200,19 @@ describe('loadCollectionPage', () => {
 
     const page = await loadCollectionPage({ username: 'alice' });
 
-    expect(mocks.requestSync).not.toHaveBeenCalled();
+    expect(mocks.requestCollectionSync).not.toHaveBeenCalled();
     expect(page.sync.state).toBe('running');
   });
 
-  it('restarts a sync left running by a crashed process', async () => {
+  it('queues a fresh sync when the last one was never picked up', async () => {
     mocks.getCollectionByUsername.mockResolvedValue(undefined);
     const abandonedAt = new Date(NOW - (SYNC_ABANDONED_AFTER_SECONDS + 60) * 1_000);
     mocks.getLatestCollectionSync.mockResolvedValue(sync('running', abandonedAt));
-    const request = { kind: 'started', sync: sync('running') };
-    mocks.requestSync.mockResolvedValue(request);
+    mocks.requestCollectionSync.mockResolvedValue({ kind: 'started', sync: sync('running') });
 
     const page = await loadCollectionPage({ username: 'alice' });
 
-    expect(mocks.requestSync).toHaveBeenCalledWith({ username: 'alice' });
-    expect(mocks.runStartedSyncAfterResponse).toHaveBeenCalledWith({
-      request,
+    expect(mocks.requestCollectionSync).toHaveBeenCalledWith('database', {
       username: 'alice',
       source: 'api',
     });
@@ -227,7 +222,7 @@ describe('loadCollectionPage', () => {
   it('reports the last failed sync when a retry is throttled', async () => {
     mocks.getCollectionByUsername.mockResolvedValue(undefined);
     mocks.getLatestCollectionSync.mockResolvedValue(sync('failed'));
-    mocks.requestSync.mockResolvedValue({
+    mocks.requestCollectionSync.mockResolvedValue({
       kind: 'throttled',
       sync: sync('failed'),
       retryAfterSeconds: 20,
@@ -294,6 +289,6 @@ describe('loadCollectionSummary', () => {
         'https://cf.geekdo-images.com/2.thumb.jpg',
       ],
     });
-    expect(mocks.requestSync).not.toHaveBeenCalled();
+    expect(mocks.requestCollectionSync).not.toHaveBeenCalled();
   });
 });

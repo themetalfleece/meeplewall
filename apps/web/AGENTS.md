@@ -6,9 +6,9 @@
 
 - **Cache Components and Partial Prefetching are on.** No `export const revalidate`: a cached read is `'use cache'` plus `cacheLife` and `cacheTag`, and anything request-time sits in `<Suspense>` after `await connection()`.
 - **Game reads are cached.** `loadGame` in `src/lib/games.ts` lives a day, tagged `game:<id>`. `POST /api/internal/revalidate` expires the tag when the image processor stores a cover.
-- **Collection reads are not.** `/u/[uId]` and the nav on `/u/[uId]/g/[gId]` read Postgres per request: a sync finishes in the background, where no Next revalidation can run.
-- **A stale or unknown user starts a sync** from `loadCollectionPage`, run with `after()` once the response is sent. `SyncWatcher` polls `/api/sync/[uId]` and calls `router.refresh()` when it succeeds.
-- **A sync still running past `SYNC_ABANDONED_AFTER_SECONDS` reads as failed.** `toSyncStatus` in `src/lib/sync.ts` checks its age, so a sync lost to a restart stops the polling, shows "Try again", and the next visit or refresh reclaims the row.
+- **Collection reads are not.** `/u/[uId]` and the nav on `/u/[uId]/g/[gId]` read Postgres per request, since syncs finish in another process.
+- **The web app never calls BGG.** A stale or unknown user, or the refresh route, queues a sync with `requestCollectionSync` for `apps/sync-worker`. `SyncWatcher` polls `/api/sync/[uId]` and calls `router.refresh()` when it succeeds.
+- **An unleased sync running past `SYNC_ABANDONED_AFTER_SECONDS` reads as failed.** `toSyncStatus` checks its age and lease, so a sync nobody picked up stops the polling, shows "Try again", and the next visit or refresh reclaims the row.
 - **Not-found inside a streamed boundary answers 200** with the not-found UI and `noindex`: the shell went out first.
 
 ## Rules
@@ -19,13 +19,13 @@
 - **Params arrive encoded.** Parse them with `parseUsername` and `parseGameId`; build links with `routes`, whose entries are all functions, fixed paths too.
 - **The 3D box only gets the processed cover.** BGG's image CDN sends no CORS headers, so `toGameBoxInput` falls back to `public/placeholder-cover.png`, never a BGG URL.
 - **Social images use BGG's original JPEG or PNG.** Their renderer cannot read WebP. `next/og` and the reads are imported inside the image function.
-- **Postgres migrations are not run here.** The image processor applies them at startup, or run `pnpm --filter @meeplewall/db migrate`.
+- **Postgres migrations are not run here.** The image processor and the sync worker apply them at startup, or run `pnpm --filter @meeplewall/db migrate`.
 
 ## Running it
 
 - `pnpm --filter "@meeplewall/web..." build` builds the packages and the app. `pnpm --filter @meeplewall/web dev` serves it.
-- `pnpm --filter @meeplewall/web start` runs `.next/standalone/apps/web/server.js`. Copy `public` and `.next/static` beside it first, as `infra/Dockerfile.web` does.
-- `docker build -f infra/Dockerfile.web --build-arg SITE_URL=<origin> .` from the root.
+- `pnpm --filter @meeplewall/web start` runs `.next/standalone/apps/web/server.js`. Copy `public` and `.next/static` beside it first, as `apps/web/Dockerfile` does.
+- `docker build -f apps/web/Dockerfile --build-arg SITE_URL=<origin> .` from the root.
 
 ## Tests
 

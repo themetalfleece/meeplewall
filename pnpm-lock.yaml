@@ -118,6 +118,9 @@ importers:
       '@meeplewall/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@meeplewall/worker-runtime':
+        specifier: workspace:*
+        version: link:../../packages/worker-runtime
       zod:
         specifier: 'catalog:'
         version: 4.6.7
@@ -153,11 +156,45 @@ importers:
         specifier: catalog:dev
         version: 5.0.5(@types/node@26.6.5)(jsdom@30.1.3)(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15))
 
-  apps/web:
+  apps/sync-worker:
     dependencies:
       '@meeplewall/boardgamegeek':
         specifier: workspace:*
         version: link:../../packages/boardgamegeek
+      '@meeplewall/collection-sync':
+        specifier: workspace:*
+        version: link:../../packages/collection-sync
+      '@meeplewall/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@meeplewall/worker-runtime':
+        specifier: workspace:*
+        version: link:../../packages/worker-runtime
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
+    devDependencies:
+      '@meeplewall/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@types/node':
+        specifier: catalog:dev
+        version: 26.6.5
+      eslint:
+        specifier: catalog:dev
+        version: 10.13.0
+      typescript:
+        specifier: catalog:dev
+        version: 6.0.3
+      vite:
+        specifier: catalog:dev
+        version: 8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15)
+      vitest:
+        specifier: catalog:dev
+        version: 5.0.5(@types/node@26.6.5)(jsdom@30.1.3)(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15))
+
+  apps/web:
+    dependencies:
       '@meeplewall/collection-sync':
         specifier: workspace:*
         version: link:../../packages/collection-sync
@@ -473,6 +510,30 @@ importers:
       vitest:
         specifier: catalog:dev
         version: 5.0.5(@types/node@26.6.5)(jsdom@30.1.3)(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15))
+
+  packages/worker-runtime:
+    devDependencies:
+      '@meeplewall/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: catalog:dev
+        version: 26.6.5
+      eslint:
+        specifier: catalog:dev
+        version: 10.13.0
+      typescript:
+        specifier: catalog:dev
+        version: 6.0.3
+      vite:
+        specifier: catalog:dev
+        version: 8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15)
+      vitest:
+        specifier: catalog:dev
+        version: 5.0.5(@types/node@26.6.5)(jsdom@30.1.3)(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15))
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
 
 packages:
 

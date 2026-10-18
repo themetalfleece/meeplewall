@@ -1,4 +1,4 @@
-# Build context for the images under infra/. The install resolves the whole workspace lockfile,
+# Build context for the app images (apps/*/Dockerfile). The install resolves the whole workspace lockfile,
 # so every workspace keeps its package.json; everything heavy or secret stays out.
 .git
 .agents

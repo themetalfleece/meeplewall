@@ -8,36 +8,54 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Checks only read the repository.
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          # The release the app images run, and new enough for the agent doc scripts.
+          node-version: 24.22.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       # Prettier in check mode. Without this the shared prettier config is
       # decorative and formatting drifts the first time someone forgets.
       - run: pnpm format
-      # --if-present: a package participates in a gate only when it defines that
-      # script. Phases add lint/typecheck/build/test scripts as their packages land.
-      - run: pnpm -r --if-present lint
-      - run: pnpm -r --if-present typecheck
+      # Build first: lint and typecheck resolve each workspace package through its built dist/
+      # types, so without a build every import from one is an error type.
+      # --if-present: a package participates in a gate only when it defines that script.
       # The web build renders its static pages, which need a site URL; any valid origin will do.
       - run: pnpm -r --if-present build
         env:
           SITE_URL: https://ci.invalid
-      # The packages/db and apps/image-processor suites run against the compose Postgres, so CI
-      # and local dev share one pinned image. Under CI they fail rather than skip when it is
-      # unreachable.
-      - run: docker compose -f infra/docker-compose.yml up -d --wait postgres
+      - run: pnpm -r --if-present lint
+      - run: pnpm -r --if-present typecheck
+      # A schema edit without its generated migration would deploy code the database cannot serve.
+      - name: Check every schema change has a migration
+        run: |
+          pnpm --filter @meeplewall/db generate --name schema_drift
+          drift="$(git status --porcelain -- packages/db/src/migrations)"
+          if [ -n "$drift" ]; then
+            echo "$drift"
+            echo "::error::The schema changed without a migration. Run pnpm --filter @meeplewall/db generate."
+            exit 1
+          fi
+      - run: pnpm validate
+      - run: pnpm test:scripts
+      # The database suites run against the compose Postgres, so CI and local dev share one pinned
+      # image. Under CI they fail rather than skip when it is unreachable.
+      - run: docker compose up -d --wait postgres
       # The storage round trip runs against the compose minio. A job `services:` entry cannot
       # pass minio its `server` command, so the job reuses the compose file and its pinned image.
-      - run: docker compose -f infra/docker-compose.yml up -d --wait minio
-      - run: docker compose -f infra/docker-compose.yml run --rm minio-init
+      - run: docker compose up -d --wait minio
+      - run: docker compose run --rm minio-init
       - run: pnpm -r --if-present test
         env:
           DATABASE_URL: postgres://meeplewall:meeplewall@localhost:5432/meeplewall
@@ -47,6 +65,7 @@ jobs:
           STORAGE_BUCKET: meeplewall
           STORAGE_PUBLIC_BASE_URL: http://localhost:9000/meeplewall
           STORAGE_FORCE_PATH_STYLE: 'true'
-      # Both app images must keep building from a clean checkout.
-      - run: docker build -f infra/Dockerfile.image-processor .
-      - run: docker build -f infra/Dockerfile.web --build-arg SITE_URL=https://ci.invalid .
+      # Every app image must keep building from a clean checkout.
+      - run: docker build -f apps/image-processor/Dockerfile .
+      - run: docker build -f apps/sync-worker/Dockerfile .
+      - run: docker build -f apps/web/Dockerfile --build-arg SITE_URL=https://ci.invalid .

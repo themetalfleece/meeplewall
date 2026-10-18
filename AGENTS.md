@@ -9,7 +9,7 @@ This file is always loaded, so it stays small. Long-form rules live in `.agents/
 | Working on                                            | Read                                          |
 | ----------------------------------------------------- | --------------------------------------------- |
 | Adding or configuring a workspace package, CI         | `.agents/skills/workspace-packages/SKILL.md`  |
-| Postgres, minio, `infra/`                             | `.agents/skills/local-infra/SKILL.md`         |
+| Postgres, minio, `docker-compose.yml`, Dockerfiles    | `.agents/skills/local-infra/SKILL.md`         |
 | Game data, BGG, covers, textures, the 3D box, porting | `.agents/skills/planning-docs/SKILL.md`       |
 | BoardGameGeek API, rate limit, box-size cross-check   | `.agents/skills/boardgamegeek/SKILL.md`       |
 | Comments, docs, any prose                             | `.agents/skills/writing-style/SKILL.md`       |
@@ -54,16 +54,16 @@ Put it in the skill or nested `AGENTS.md` that owns the area. Put it here only i
 
 ## Before you finish
 
-All must pass. CI runs the first five, and formatting is a real gate:
+All must pass, in this order, as CI runs them. Formatting is a real gate:
 
 ```bash
 pnpm format:write && pnpm format
+pnpm build          # first: lint and typecheck read workspace packages' types from dist/
 pnpm lint
 pnpm typecheck
-pnpm build
 pnpm test
 pnpm validate       # agent docs and links
 pnpm test:scripts   # tests for the agent doc scripts
 ```
 
-The last two need Node 24.2 or newer. `pnpm agents:link` repairs the symlinks; on Windows, rerun it after a checkout.
+Never lint before building: a missing `dist/` fails, and a stale one checks against old types. The last two need Node 24.2 or newer. `pnpm agents:link` repairs the symlinks; on Windows, rerun it after a checkout.

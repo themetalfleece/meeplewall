@@ -33,25 +33,44 @@ describe('isOlderThan', () => {
 describe('isSyncAbandoned', () => {
   const longAgo = secondsBefore(SYNC_ABANDONED_AFTER_SECONDS + 1);
 
-  it('is true for a running sync that started too long ago', () => {
-    expect(isSyncAbandoned({ sync: { status: 'running', startedAt: longAgo }, now: NOW })).toBe(
-      true,
-    );
+  it('is true for an unclaimed running sync that started too long ago', () => {
+    expect(
+      isSyncAbandoned({
+        sync: { status: 'running', startedAt: longAgo, lockedUntil: null },
+        now: NOW,
+      }),
+    ).toBe(true);
+  });
+
+  it('is true for an old running sync whose lease ran out', () => {
+    expect(
+      isSyncAbandoned({
+        sync: { status: 'running', startedAt: longAgo, lockedUntil: secondsBefore(1) },
+        now: NOW,
+      }),
+    ).toBe(true);
+  });
+
+  it('is false for an old running sync a worker still holds', () => {
+    const lockedUntil = new Date(NOW.getTime() + 30_000);
+
+    expect(
+      isSyncAbandoned({ sync: { status: 'running', startedAt: longAgo, lockedUntil }, now: NOW }),
+    ).toBe(false);
   });
 
   it('is false for a running sync that started recently', () => {
     const startedAt = secondsBefore(SYNC_ABANDONED_AFTER_SECONDS - 1);
 
-    expect(isSyncAbandoned({ sync: { status: 'running', startedAt }, now: NOW })).toBe(false);
+    expect(
+      isSyncAbandoned({ sync: { status: 'running', startedAt, lockedUntil: null }, now: NOW }),
+    ).toBe(false);
   });
 
-  it('is false for a finished sync however old', () => {
-    expect(isSyncAbandoned({ sync: { status: 'succeeded', startedAt: longAgo }, now: NOW })).toBe(
-      false,
-    );
-    expect(isSyncAbandoned({ sync: { status: 'failed', startedAt: longAgo }, now: NOW })).toBe(
-      false,
-    );
+  it.each(['succeeded', 'failed'] as const)('is false for a %s sync however old', (status) => {
+    expect(
+      isSyncAbandoned({ sync: { status, startedAt: longAgo, lockedUntil: null }, now: NOW }),
+    ).toBe(false);
   });
 });
 

@@ -1,0 +1,32 @@
+{
+  "name": "@meeplewall/sync-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "dev": "node --env-file-if-exists=.env.local src/main.ts"
+  },
+  "devDependencies": {
+    "@meeplewall/config": "workspace:*",
+    "@types/node": "catalog:dev",
+    "eslint": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vite": "catalog:dev",
+    "vitest": "catalog:dev"
+  },
+  "dependencies": {
+    "@meeplewall/boardgamegeek": "workspace:*",
+    "@meeplewall/collection-sync": "workspace:*",
+    "@meeplewall/db": "workspace:*",
+    "@meeplewall/worker-runtime": "workspace:*",
+    "zod": "catalog:"
+  }
+}

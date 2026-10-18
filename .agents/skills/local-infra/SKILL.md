@@ -2,14 +2,14 @@
 name: local-infra
 description: >-
   The local development services. Read before starting Postgres or minio,
-  before editing infra/docker-compose.yml, and before adding or upgrading any
+  before editing docker-compose.yml, and before adding or upgrading any
   container image. Covers how to bring the stack up, what each service stands
   in for, and why every image is pinned to an exact tag.
 ---
 
 # Local infrastructure
 
-`infra/docker-compose.yml` is for local development only. It is not a deployment artifact.
+`docker-compose.yml` is for local development only. It is not a deployment artifact.
 
 | Service    | Stands in for                 | Ports                      |
 | ---------- | ----------------------------- | -------------------------- |
@@ -17,18 +17,20 @@ description: >-
 | `minio`    | Cloudflare R2 (S3-compatible) | `9000` API, `9001` console |
 
 ```bash
-docker compose -f infra/docker-compose.yml up -d postgres minio minio-init
+docker compose up -d postgres minio minio-init
 ```
 
 Both services have healthchecks, so `docker compose ps` reports `healthy` once they are ready. The credentials in the compose file are local-only defaults.
 
 `minio-init` is a one-shot service: it waits for minio to be healthy, creates the `meeplewall` bucket if it is missing and makes its objects publicly readable, matching R2 behind its public URL. It exits once done, so `docker compose ps` does not list it. It reuses the minio image for the `mc` client bundled inside it, so there is no second image to pin. The `STORAGE_*` values in each `.env.example` point at this bucket. CI runs `up -d --wait minio` and then `run --rm minio-init` from the same file.
 
-CI also runs `up -d --wait postgres` for the `packages/db` and `apps/image-processor` suites, so CI and local dev share one pinned Postgres image. If another project already holds port 5432 locally, run the same image on a spare port and point `DATABASE_URL` at it. To let a container reach it, attach it to the compose network with the `postgres` alias: `docker run -d --network meeplewall-dev_default --network-alias postgres -p 5433:5432 -e POSTGRES_USER=meeplewall -e POSTGRES_PASSWORD=meeplewall -e POSTGRES_DB=meeplewall postgres:17.11-trixie`.
+CI also runs `up -d --wait postgres` for the database suites (`packages/db`, `packages/collection-sync`, `apps/image-processor`), so CI and local dev share one pinned Postgres image. If another project already holds port 5432 locally, run the same image on a spare port and point `DATABASE_URL` at it. To let a container reach it, attach it to the compose network with the `postgres` alias: `docker run -d --network meeplewall-dev_default --network-alias postgres -p 5433:5432 -e POSTGRES_USER=meeplewall -e POSTGRES_PASSWORD=meeplewall -e POSTGRES_DB=meeplewall postgres:17.11-trixie`.
 
 ## App images
 
-Each deployable app has an `infra/Dockerfile.<app>`, built from the repo root. Its build context is filtered by the root `.dockerignore`, which keeps out `node_modules`, `dist`, every `.env*` file at any depth and the legacy app's assets. Do not use a per-Dockerfile `<name>.dockerignore`: only BuildKit reads it, and the classic builder then copies the local `node_modules` and the install fails.
+Each deployable app has an `apps/<app>/Dockerfile`, built from the repo root. Its build context is filtered by the root `.dockerignore`, which keeps out `node_modules`, `dist`, every `.env*` file at any depth and the legacy app's assets. Do not use a per-Dockerfile `<name>.dockerignore`: only BuildKit reads it, and the classic builder then copies the local `node_modules` and the install fails.
+
+**When the database suites stall or fail with `ECONNRESET` through a localhost port,** the fault is the Docker Desktop port proxy (a VPN makes it worse), and untouched suites fail the same way. Run the gate in Linux instead: start the stack under its own project (`docker-compose -p <name> ...`, with an override file that sets `ports: !reset []`), stream the source in with `git ls-files -co --exclude-standard | tar -cf - -T -` into a volume, and run `node:24.22.0-trixie-slim` on the project network with `postgres` and `minio` as hostnames. Put the pnpm store outside the volume root, or `pnpm format` scans it. This also reproduces CI's fresh checkout with no `dist/`.
 
 If `docker compose` reports `unknown shorthand flag: 'f'`, the compose CLI plugin is not registered in that shell. Docker Desktop on Windows also ships a standalone `docker-compose` binary that takes the same arguments.
 

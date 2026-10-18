@@ -41,7 +41,9 @@ Anything from outside the type system (an API response, a file, a database row, 
 
 ## CI
 
-`.github/workflows/ci.yml` runs, in order: `pnpm install --frozen-lockfile`, `pnpm format` (Prettier check), then `pnpm -r --if-present lint`, `typecheck`, `build` and `test`, and finally builds each app image under `infra/`. The root `pnpm test` runs the same `test` recursion locally.
+`.github/workflows/ci.yml` runs on Node 24.22.0, the release the app images use, in order: `pnpm install --frozen-lockfile`, `pnpm format` (Prettier check), `pnpm -r --if-present build`, `lint` and `typecheck`, a check that `drizzle-kit generate` finds no schema change without a migration, `pnpm validate` and `pnpm test:scripts`, then `test` against the compose Postgres and minio, and finally builds each app's `Dockerfile`. The root `pnpm test` runs the same `test` recursion locally.
+
+**Build before lint and typecheck.** Every package exports its types from `dist/`, so the type-aware lint rules and `tsc` see each workspace import through its build. On a fresh checkout with no `dist/`, every such import is an error type and `no-unsafe-*` fires on all of it; on a working copy with an old `dist/`, both check against stale types and pass when they should not. Locally, run `pnpm build` before `pnpm lint` and `pnpm typecheck`, every time.
 
 `--if-present` means a package joins a gate only once it defines that script, so a new package does not need stubs. The flip side: a package with no `typecheck` script is silently unchecked. Every new package defines `lint`, `typecheck` and `build`, and adds `test` with its first test.
 

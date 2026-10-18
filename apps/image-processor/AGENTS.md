@@ -9,7 +9,7 @@
 3. `pnpm --filter @meeplewall/image-processor dev` runs `src/main.ts`, applying pending migrations first.
 4. Queue work: set a game's `image_url_raw` to a BGG `original` image URL and insert one `image_jobs` row per kind. The seed games have no image URL, so their jobs fail.
 
-Container: `docker build -f infra/Dockerfile.image-processor .` from the root, then run it on `meeplewall-dev_default` with `postgres` and `minio` as hostnames.
+Container: `docker build -f apps/image-processor/Dockerfile .` from the root, then run it on `meeplewall-dev_default` with `postgres` and `minio` as hostnames.
 
 ## Job lifecycle
 
@@ -20,7 +20,7 @@ Container: `docker build -f infra/Dockerfile.image-processor .` from the root, t
 5. **Revalidate.** `POST {WEB_INTERNAL_URL}/api/internal/revalidate`, `Authorization: Bearer {INTERNAL_REVALIDATE_SECRET}`, body `{ "bggGameId": n }`. A failure is logged, not fatal: the asset is stored.
 6. **Failure.** Any earlier error marks the job `failed` for good, the message in `last_error` (`Source fetch failed with 404`). Re-enqueue to retry.
 
-SIGTERM or SIGINT stops the loop after the job in hand, closes the health server and pool, and exits 0.
+SIGTERM or SIGINT stops the loop after the job in hand, closes the health server and pool, and exits 0. The loop, logger and health server come from `packages/worker-runtime`.
 
 ## Rules
 

@@ -1,3 +1,4 @@
+import { requestCollectionSync } from '@meeplewall/collection-sync';
 import {
   getCollectionByUsername,
   getCollectionEntry,
@@ -9,8 +10,8 @@ import {
 
 import { storagePublicBaseUrl } from './env';
 import { resolveGameImages } from './game-view';
-import { getDatabase, getSyncService } from './services';
-import { needsSync, runStartedSyncAfterResponse, toSyncStatus } from './sync';
+import { getDatabase } from './services';
+import { needsSync, toSyncStatus } from './sync';
 import type { SyncStatus } from './sync-status';
 
 /** One game on a collection grid. */
@@ -48,8 +49,8 @@ function groupByGame(assets: ImageAsset[]): Map<number, ImageAsset[]> {
 }
 
 /**
- * Reads a user's stored collection and, when it is missing or a day old, starts a sync that
- * runs after the response. Never waits on BGG: the client polls the sync status instead.
+ * Reads a user's stored collection and, when it is missing or a day old, queues a sync for the
+ * sync worker. Never waits on BGG: the client polls the sync status instead.
  */
 export async function loadCollectionPage({
   username,
@@ -66,8 +67,7 @@ export async function loadCollectionPage({
   let sync = toSyncStatus({ sync: latestSync, now });
   const fetchedAt = stored?.collection.fetchedAt;
   if (sync.state !== 'running' && needsSync({ fetchedAt, now })) {
-    const request = await getSyncService().requestSync({ username });
-    runStartedSyncAfterResponse({ request, username, source: 'api' });
+    const request = await requestCollectionSync(database, { username, source: 'api' });
     sync = toSyncStatus({ sync: request.sync, now });
   }
 

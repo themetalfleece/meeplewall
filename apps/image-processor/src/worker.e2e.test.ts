@@ -10,9 +10,9 @@ import {
 } from '@meeplewall/db';
 import { eq } from 'drizzle-orm';
 import sharp from 'sharp';
+import { JsonLogger } from '@meeplewall/worker-runtime';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { JsonLogger } from './logger.ts';
 import { createRevalidate } from './revalidate.ts';
 import { StubServer, type StubResponse } from './testing/stub-server.ts';
 import { resolveTestServices, TestServices } from './testing/test-services.ts';

@@ -1,0 +1,7 @@
+.main {
+  display: grid;
+  gap: 24px;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 24px var(--page-gutter) 80px;
+}

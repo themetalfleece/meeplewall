@@ -30,12 +30,24 @@ Facts as of October 2026. Re-probe before trusting one that matters: BGG changes
 - **An unknown id answers 404 with the body `null`.** The client returns `null` for a game and `[]` for versions.
 - **Versions come 50 per page, whatever `showcount` asks for.** `config.numitems` is the total. The legacy pipeline only read page one, so popular games lost editions; the client pages until a short page or the total.
 - **Version dimensions are contributor-entered with no unit.** Some editions are in inches, some in centimetres. A version whose largest side is over 15 is read as centimetres, otherwise as inches (no boxed game is over about 15in).
-- **No endpoint lists a user's whole collection.** `/api/collections` answers 400 without an `objectid`.
+- **No geekdo endpoint lists a user's whole collection.** `/api/collections` answers 400 without an `objectid`. The collection comes from XMLAPI2 (below).
 
 ## What is blocked
 
-- **XMLAPI2 needs a registered application.** `/xmlapi2/*` on both `boardgamegeek.com` and `api.geekdo.com` answers 401 with `WWW-Authenticate: Bearer realm="xml api"`.
+- **XMLAPI2 needs a registered application.** `/xmlapi2/*` on both `boardgamegeek.com` and `api.geekdo.com` answers 401 with `WWW-Authenticate: Bearer realm="xml api"` without its bearer token. We hold one, `BGG_API_TOKEN`, and use XMLAPI2 for the collection only.
 - **The `boardgamegeek.com` HTML pages sit behind Cloudflare Turnstile.** A scripted client, headless Chromium included, gets 403 or a challenge.
+
+## XMLAPI2 collection
+
+`createBggCollectionClient` calls `https://boardgamegeek.com/xmlapi2/collection?username=<name>&subtype=boardgame&excludesubtype=boardgameexpansion&stats=1` with `Authorization: Bearer <token>`.
+
+- **202 means BGG is still building the collection.** Repeat the same request; the client waits 2 seconds, growing to 10, for about two minutes.
+- **An unknown user is a 200**, with `<errors><error><message>Invalid username specified</message></error></errors>`. The client returns `null`.
+- **`subtype=boardgame` alone still lists owned expansions**, hence `excludesubtype`.
+- **The user's rating is `<stats><rating value>`**, `N/A` until rated. It needs `stats=1`.
+- **The collection holds wishlist and previously owned games too.** The client keeps only `own="1"` or `wanttoplay="1"`.
+
+The parser and its fixture follow BGG's documented XML. Re-check them against a live answer whenever `collection.e2e.test.ts` runs with a token.
 
 ## Rate limit
 

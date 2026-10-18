@@ -26,7 +26,10 @@ jobs:
       # script. Phases add lint/typecheck/build/test scripts as their packages land.
       - run: pnpm -r --if-present lint
       - run: pnpm -r --if-present typecheck
+      # The web build renders its static pages, which need a site URL; any valid origin will do.
       - run: pnpm -r --if-present build
+        env:
+          SITE_URL: https://ci.invalid
       # The packages/db and apps/image-processor suites run against the compose Postgres, so CI
       # and local dev share one pinned image. Under CI they fail rather than skip when it is
       # unreachable.
@@ -44,5 +47,6 @@ jobs:
           STORAGE_BUCKET: board-games
           STORAGE_PUBLIC_BASE_URL: http://localhost:9000/board-games
           STORAGE_FORCE_PATH_STYLE: 'true'
-      # The worker image must keep building from a clean checkout.
+      # Both app images must keep building from a clean checkout.
       - run: docker build -f infra/Dockerfile.image-processor .
+      - run: docker build -f infra/Dockerfile.web --build-arg SITE_URL=https://ci.invalid .

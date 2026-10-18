@@ -1,0 +1,12 @@
+.main {
+  display: grid;
+  gap: 16px;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 64px var(--page-gutter);
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-muted);
+}

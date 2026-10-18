@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<items totalitems="4" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse" pubdate="Sat, 17 Oct 2026 09:12:44 +0000">
+	<item objecttype="thing" objectid="363289" subtype="boardgame" collid="133100797">
+		<name sortindex="1">Fantasy Realms: Deluxe Edition</name>
+		<yearpublished>2022</yearpublished>
+		<image>https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__original/img/pic6936185.jpg</image>
+		<thumbnail>https://cf.geekdo-images.com/qPDpO-FbdhpD-CMIR6TtyQ__small/img/pic6936185.jpg</thumbnail>
+		<stats minplayers="3" maxplayers="6" minplaytime="20" maxplaytime="20" playingtime="20" numowned="15000">
+			<rating value="8.5">
+				<usersrated value="4000" />
+				<average value="7.9" />
+			</rating>
+		</stats>
+		<status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2026-01-24 08:15:02" />
+		<numplays>3</numplays>
+	</item>
+	<item objecttype="thing" objectid="178900" subtype="boardgame" collid="133100798">
+		<name sortindex="1">Codenames</name>
+		<stats minplayers="2" maxplayers="8">
+			<rating value="N/A">
+				<usersrated value="90000" />
+			</rating>
+		</stats>
+		<status own="0" prevowned="0" fortrade="0" want="0" wanttoplay="1" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2026-02-01 10:00:00" />
+		<numplays>0</numplays>
+	</item>
+	<item objecttype="thing" objectid="40832" subtype="boardgame" collid="133100799">
+		<name sortindex="1">Celts</name>
+		<stats minplayers="2" maxplayers="4">
+			<rating value="N/A" />
+		</stats>
+		<status own="0" prevowned="1" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="1" wishlistpriority="3" preordered="0" lastmodified="2026-03-05 12:30:00" />
+		<numplays>0</numplays>
+	</item>
+	<item objecttype="thing" objectid="324937" subtype="boardgame" collid="133100800">
+		<name sortindex="1">Beacon Patrol</name>
+		<stats minplayers="1" maxplayers="4">
+			<rating value="7" />
+		</stats>
+		<status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="1" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2026-04-11 18:45:00" />
+		<numplays>12</numplays>
+	</item>
+</items>

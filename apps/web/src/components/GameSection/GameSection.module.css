@@ -1,0 +1,38 @@
+.skeleton {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 40px;
+}
+
+@media (max-width: 820px) {
+  .skeleton {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.box,
+.title,
+.line {
+  border-radius: var(--radius-small);
+  background: var(--color-surface-raised);
+}
+
+.box {
+  aspect-ratio: 1;
+  border-radius: var(--radius-large);
+}
+
+.lines {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.title {
+  width: 70%;
+  height: 2.75rem;
+}
+
+.line {
+  height: 1rem;
+}

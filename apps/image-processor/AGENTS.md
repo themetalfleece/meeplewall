@@ -4,7 +4,7 @@
 
 ## Running it locally
 
-1. Start Postgres and minio (`.agents/skills/local-infra/`). Copy `.env.example` to the root `.env.local` and set `INTERNAL_REVALIDATE_SECRET`. A missing variable stops the worker at startup.
+1. Start Postgres and minio (`.agents/skills/local-infra/`). Copy `apps/image-processor/.env.example` to `.env.local` beside it and set `INTERNAL_REVALIDATE_SECRET` to the value in `apps/web/.env.local`. A missing variable stops the worker at startup.
 2. `pnpm --filter @board-games/image-processor... build` once, so the workspace packages have a `dist/`.
 3. `pnpm --filter @board-games/image-processor dev` runs `src/main.ts`, applying pending migrations first.
 4. Queue work: set a game's `image_url_raw` to a BGG `original` image URL and insert one `image_jobs` row per kind. The seed games have no image URL, so their jobs fail.

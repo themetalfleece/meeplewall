@@ -3,7 +3,7 @@
 .git
 .agents
 .claude
-.env*
+**/.env*
 **/node_modules
 **/dist
 apps/web-legacy/*

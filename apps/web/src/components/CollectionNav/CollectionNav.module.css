@@ -1,0 +1,77 @@
+.nav {
+  display: grid;
+  gap: 12px;
+}
+
+.back {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--color-text);
+}
+
+.position {
+  margin: 0;
+  color: var(--color-text-faint);
+  font-size: 0.8rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badges:empty {
+  display: none;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  font-size: 0.8rem;
+}
+
+.neighbours {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.neighbour {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  text-decoration: none;
+}
+
+.neighbour:hover {
+  border-color: var(--color-border-strong);
+}
+
+.neighbour[rel='next'] {
+  grid-column: 2;
+  text-align: right;
+}
+
+.direction {
+  color: var(--color-text-faint);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.neighbourName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

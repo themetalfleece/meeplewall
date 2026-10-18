@@ -6,9 +6,10 @@ import { collectionSyncs } from '../schema/index.ts';
 import {
   finishCollectionSync,
   getCollectionSync,
+  getLatestCollectionSync,
   startCollectionSync,
 } from './collection-syncs.ts';
-import { findUser } from './users.ts';
+import { ensureUser, findUser } from './users.ts';
 
 const serverUrl = await resolveTestServerUrl();
 
@@ -86,6 +87,41 @@ describe.skipIf(serverUrl === undefined)('collection syncs', () => {
       const { sync } = await start('alice');
 
       expect(await getCollectionSync(database(), { syncId: sync.id })).toEqual(sync);
+    });
+  });
+
+  describe('getLatestCollectionSync', () => {
+    it('returns undefined for an unknown user', async () => {
+      expect(await getLatestCollectionSync(database(), { username: 'nobody' })).toBeUndefined();
+    });
+
+    it('returns undefined for a user that never synced', async () => {
+      await ensureUser(database(), { username: 'alice' });
+
+      expect(await getLatestCollectionSync(database(), { username: 'alice' })).toBeUndefined();
+    });
+
+    it('returns the most recently started sync, matching the username in any case', async () => {
+      const first = await start('alice');
+      await database()
+        .update(collectionSyncs)
+        .set({ startedAt: sql`now() - interval '1 hour'` })
+        .where(eq(collectionSyncs.id, first.sync.id));
+      await finishCollectionSync(database(), {
+        syncId: first.sync.id,
+        outcome: { status: 'succeeded' },
+      });
+      const second = await start('alice');
+
+      expect((await getLatestCollectionSync(database(), { username: 'ALICE' }))?.id).toBe(
+        second.sync.id,
+      );
+    });
+
+    it("ignores another user's syncs", async () => {
+      await start('alice');
+
+      expect(await getLatestCollectionSync(database(), { username: 'bob' })).toBeUndefined();
     });
   });
 

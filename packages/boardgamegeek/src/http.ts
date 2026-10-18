@@ -19,7 +19,7 @@ export class BggHttpError extends Error {
   }
 }
 
-/** BGG answered 200, but the body was not JSON or did not match the expected shape. */
+/** BGG answered 200, but the body did not parse or did not match the expected shape. */
 export class BggResponseError extends Error {
   readonly url: string;
 
@@ -30,7 +30,7 @@ export class BggResponseError extends Error {
   }
 }
 
-function sleep(milliseconds: number): Promise<void> {
+export function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, milliseconds);
   });
@@ -102,24 +102,27 @@ export class PoliteHttpClient {
     url: string;
     schema: Schema;
   }): Promise<z.output<Schema> | null> {
+    const response = await this.get({ url, headers: { Accept: 'application/json' } });
+
+    return this.#read({ url, response, schema });
+  }
+
+  /**
+   * Sends one GET through the throttle, retrying while BGG answers 429 or 503, and returns the
+   * last response unread. `headers` are added to the `User-Agent`.
+   */
+  async get({ url, headers }: { url: string; headers: Record<string, string> }): Promise<Response> {
     for (let attempt = 1; ; attempt += 1) {
-      const response = await this.#send(url);
+      await this.#throttle.waitForSlot();
+      const response = await fetch(url, { headers: { ...headers, 'User-Agent': this.#userAgent } });
 
       if (!RETRYABLE_STATUSES.has(response.status) || attempt === MAX_ATTEMPTS) {
-        return this.#read({ url, response, schema });
+        return response;
       }
 
       await response.body?.cancel();
       await sleep(retryDelayMs({ attempt, retryAfter: response.headers.get('retry-after') }));
     }
-  }
-
-  async #send(url: string): Promise<Response> {
-    await this.#throttle.waitForSlot();
-
-    return fetch(url, {
-      headers: { 'User-Agent': this.#userAgent, Accept: 'application/json' },
-    });
   }
 
   async #read<Schema extends z.ZodType>({

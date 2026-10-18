@@ -26,6 +26,14 @@ export function readFixture({
   return readFileSync(new URL(`./${bggId}/${endpoint}.json`, import.meta.url), 'utf8');
 }
 
+/**
+ * An XMLAPI2 collection in the documented response shape, covering an owned game, a
+ * want-to-play game, a previously owned wishlist game and an unrated one.
+ */
+export function readCollectionFixture(): string {
+  return readFileSync(new URL('./collection.xml', import.meta.url), 'utf8');
+}
+
 const legacyBoxesSchema = z.record(
   z.string(),
   z.object({

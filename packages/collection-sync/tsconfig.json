@@ -1,0 +1,9 @@
+{
+  "extends": "@board-games/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src", "vitest.config.ts"]
+}

@@ -2,8 +2,8 @@
 #
 #   docker build -f infra/Dockerfile.image-processor -t board-games-image-processor .
 #
-# It reads every variable listed under "Image processor" and the DATABASE_URL and STORAGE_* sets
-# in .env.example, and serves GET /healthz on IMAGE_PROCESSOR_HEALTH_PORT.
+# It reads every variable in apps/image-processor/.env.example, and serves GET /healthz on
+# IMAGE_PROCESSOR_HEALTH_PORT.
 
 # Node's current LTS line. Pin the exact release, never a floating tag.
 FROM node:24.22.0-trixie-slim AS build

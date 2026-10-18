@@ -7,6 +7,8 @@ import {
 } from '@aws-sdk/client-s3';
 import { z } from 'zod';
 
+import { publicObjectUrl } from './public-url.js';
+
 const httpUrlSchema = z.url({ protocol: /^https?$/ });
 
 const storageOptionsSchema = z.object({
@@ -77,9 +79,7 @@ class Storage {
 
   /** The URL the object is served from publicly. Makes no request, so it does not check that the object exists. */
   getPublicUrl({ key }: { key: string }): string {
-    const encodedKey = key.split('/').map(encodeURIComponent).join('/');
-
-    return `${this.#publicBaseUrl}/${encodedKey}`;
+    return publicObjectUrl({ publicBaseUrl: this.#publicBaseUrl, key });
   }
 
   /** The object's metadata, or `null` when no object exists under `key`. */

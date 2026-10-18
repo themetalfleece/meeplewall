@@ -13,9 +13,13 @@
   },
   "dependencies": {
     "@board-games/boardgamegeek": "workspace:*",
+    "@board-games/collection-sync": "workspace:*",
     "@board-games/db": "workspace:*",
     "@board-games/renderer": "workspace:*",
     "@board-games/storage": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "clsx": "catalog:",
+    "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:"

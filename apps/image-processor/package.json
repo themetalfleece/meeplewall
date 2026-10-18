@@ -12,7 +12,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "start": "node dist/main.js",
-    "dev": "node --env-file-if-exists=../../.env.local src/main.ts"
+    "dev": "node --env-file-if-exists=.env.local src/main.ts"
   },
   "devDependencies": {
     "@board-games/config": "workspace:*",

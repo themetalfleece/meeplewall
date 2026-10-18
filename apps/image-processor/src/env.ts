@@ -1,8 +1,8 @@
 import type { StorageOptions } from '@board-games/storage';
 import { z } from 'zod';
 
-// The only module that reads process.env. Every variable is required and documented in the repo
-// root .env.example.
+// The only module that reads process.env. Every variable is required and documented in
+// apps/image-processor/.env.example.
 
 const serviceEnvironmentSchema = z.object({
   DATABASE_URL: z.string().min(1),

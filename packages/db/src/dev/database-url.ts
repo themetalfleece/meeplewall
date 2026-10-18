@@ -14,7 +14,9 @@ export function readDatabaseUrl(): string | undefined {
 export function requireDatabaseUrl(): string {
   const databaseUrl = readDatabaseUrl();
   if (databaseUrl === undefined) {
-    throw new Error('DATABASE_URL is not set. Copy .env.example to .env.local at the repo root.');
+    throw new Error(
+      'DATABASE_URL is not set. Copy packages/db/.env.example to packages/db/.env.local.',
+    );
   }
 
   return databaseUrl;

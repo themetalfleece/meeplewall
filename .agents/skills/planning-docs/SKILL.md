@@ -21,7 +21,7 @@ The design and pipeline knowledge lives in the root planning docs. They stay whe
 | `SIDES-PLAN.md`                     | Turning BGG user photos into consistent spine, top, bottom and back faces                       |
 | `PACKAGE-SHAPES.md`                 | Games whose real packaging is not a rectangular box                                             |
 | `apps/web-legacy/scripts/README.md` | Running the legacy Airtable and BGG data pipeline                                               |
-| `.agents/skills/boardgamegeek/`     | The BGG endpoints, their quirks and rate limit, why XMLAPI2 is out, and the box-size method     |
+| `.agents/skills/boardgamegeek/`     | The BGG endpoints, their quirks and rate limit, the XMLAPI2 collection, and the box-size method |
 
 ## Reading them
 

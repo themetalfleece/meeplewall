@@ -11,8 +11,12 @@ injectWorkspacePackages: true
 # keeps its own ranges.
 catalog:
   '@aws-sdk/client-s3': ^3.1152.0
+  '@tanstack/react-query': ^5.104.4
   '@types/pg': ^8.23.1
+  clsx: ^2.1.1
   drizzle-orm: ^0.45.4
+  fast-xml-parser: ^5.11.2
+  next: ^16.4.2
   pg: ^8.23.1
   react: ^19.3.1
   react-dom: ^19.3.1
@@ -45,3 +49,9 @@ catalogs:
 allowBuilds:
   esbuild: true
   sharp: true
+
+# Releases newer than pnpm's minimum release age, admitted because they were the latest stable
+# when added.
+minimumReleaseAgeExclude:
+  - '@tanstack/query-core@5.104.4'
+  - '@tanstack/react-query@5.104.4'

@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { ExtractTablesWithRelations } from 'drizzle-orm';
@@ -8,8 +9,14 @@ import pg from 'pg';
 
 import * as schema from './schema/index.ts';
 
-// Resolves to the package's src/migrations from both src/ and the built dist/.
-const MIGRATIONS_FOLDER = fileURLToPath(new URL('../src/migrations', import.meta.url));
+// Resolves to the package's src/migrations from both src/ and the built dist/. Built with
+// node:path rather than `new URL(..., import.meta.url)`, which bundlers such as Turbopack read
+// as an asset import and fail to resolve.
+const MIGRATIONS_FOLDER = path.join(
+  path.dirname(path.dirname(fileURLToPath(import.meta.url))),
+  'src',
+  'migrations',
+);
 
 /**
  * Opens a long-lived connection pool. Call once per process and share the result.

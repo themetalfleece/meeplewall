@@ -1,6 +1,6 @@
 # packages/storage
 
-`@board-games/storage`: an S3-compatible client for one bucket. Production points it at Cloudflare R2, local dev at the compose minio, through the same code and the same `STORAGE_*` variables in `.env.example`.
+`@board-games/storage`: an S3-compatible client for one bucket. Production points it at Cloudflare R2, local dev at the compose minio, through the same code and the same `STORAGE_*` variables.
 
 ## Rules
 
@@ -13,4 +13,4 @@
 
 ## Tests
 
-`storage.test.ts` covers option validation and URL building offline. `storage.e2e.test.ts` round-trips against the compose minio and skips when the `STORAGE_*` variables are unset or minio is down. `vitest.config.ts` loads `STORAGE_*` from the root `.env.local`, so copying `.env.example` there and starting minio (see `.agents/skills/local-infra/`) is enough to run it. CI starts minio from the same compose file and sets the variables on the test step.
+`storage.test.ts` covers option validation and URL building offline. `storage.e2e.test.ts` round-trips against the compose minio and skips when the `STORAGE_*` variables are unset or minio is down. `vitest.config.ts` loads `STORAGE_*` from this package's `.env.local`, so copying `.env.example` beside it and starting minio (see `.agents/skills/local-infra/`) is enough to run it. CI starts minio from the same compose file and sets the variables on the test step.

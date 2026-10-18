@@ -26,7 +26,27 @@ For libraries that ship no docs inside their package, see `.agents/skills/find-d
 
 **A throw inside `use cache` fails build-time prerendering.** Swallow build-time errors _inside_ the cached function. A caller-side `try`/`catch` runs too late, because the throw happens while the cache entry is being produced.
 
+**Turbopack reads `new URL('...', import.meta.url)` in a workspace package as an asset import** and fails the build when the target is not a module. `serverExternalPackages` does not help, because workspace packages resolve outside `node_modules`. Build such paths with `node:path` and `fileURLToPath(import.meta.url)` instead.
+
+**A module a client component imports must not import a server package, even for one function only server code calls.** The whole module graph lands in the browser bundle, and a package that reaches `postgres` fails the build with `Can't resolve 'fs'`, `'net'` and `'tls'`. Keep the shared contract (schemas, types) in its own module and put the server helper beside the server code.
+
+**`next dev` writes a managed block into the app's `AGENTS.md`; we set `agentRules: false` because the block breaks our writing and git rules.** With the flag off, `next dev` removes the block instead of restoring it.
+
 **Set `crossOrigin: "anonymous"` in `next.config.ts` when chunks are served from a CDN.** Without it, an error thrown inside a CDN-served chunk reaches `window.onerror` as an opaque `"Script error."` with no stack.
+
+## Caching and revalidation
+
+**`revalidateTag` and `revalidatePath` only take effect inside a request**: a route handler or a server action. They queue on the request's store, so a call from detached background work does nothing. A read that a background job changes either stays uncached (Postgres is fast enough) or is expired by a webhook route the job calls.
+
+**`notFound()` inside a `<Suspense>` boundary answers 200.** The prerendered shell has already gone out, so the not-found UI streams in with a 200. Give such pages `robots: { index: false }` in their metadata.
+
+## CSS and prefetching
+
+**Without `experimental.inlineCss`, Chrome logs "preloaded but not used" warnings** for the root `not-found` page's CSS module and for every prefetched route's CSS. The app turns `inlineCss` on.
+
+**Keep links on the default prefetch.** `<Link prefetch>` (full prefetch) still preloads the target route's CSS file, which the page never applies, so the warning returns.
+
+**A CSS module class is `string | undefined`** under `noUncheckedIndexedAccess`. Plain elements accept that; a component prop typed `string` does not, so pass `clsx(styles.name)`.
 
 ## Metadata
 
@@ -45,5 +65,7 @@ Long-running waits stay on the client as polling. Do not hold a server request o
 ## Client data fetching
 
 Use `@tanstack/react-query` (`useQuery`) for all client-side data fetching. Never hand-roll `useEffect` plus `setInterval`.
+
+Give a query seeded with server `initialData` a `staleTime`. Without one it refetches the moment it mounts, repeating the read the server just did.
 
 Always thread `signal` from `queryFn` into the fetch: `queryFn: ({ signal }) => fetcher(query, { signal })`. That is what frees the connection when a query is superseded or unmounted.

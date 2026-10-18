@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 
 import type { DatabaseExecutor } from '../database.ts';
 import {
@@ -50,6 +50,69 @@ export async function getCollectionByUsername(
     .orderBy(asc(collectionItems.sortIndex));
 
   return { user, collection, items };
+}
+
+/** A game's neighbour in a collection's sort order. */
+export interface CollectionNeighbour {
+  bggGameId: number;
+  name: string;
+}
+
+export interface CollectionEntry {
+  user: BggUser;
+  item: CollectionItem;
+  game: BggGame;
+  /** Zero-based place of the game in the collection's sort order. */
+  position: number;
+  itemCount: number;
+  previous: CollectionNeighbour | null;
+  next: CollectionNeighbour | null;
+}
+
+/**
+ * Reads one game of a user's stored collection with its neighbours in sort
+ * order, or undefined when the user, the collection or the game is missing.
+ */
+export async function getCollectionEntry(
+  database: DatabaseExecutor,
+  { username, bggGameId }: { username: string; bggGameId: number },
+): Promise<CollectionEntry | undefined> {
+  const user = await findUser(database, { username });
+  if (user === undefined) {
+    return undefined;
+  }
+
+  const order = await database
+    .select({ bggGameId: collectionItems.bggGameId, name: bggGames.name })
+    .from(collectionItems)
+    .innerJoin(userCollections, eq(collectionItems.collectionId, userCollections.id))
+    .innerJoin(bggGames, eq(collectionItems.bggGameId, bggGames.id))
+    .where(eq(userCollections.userId, user.id))
+    .orderBy(asc(collectionItems.sortIndex));
+  const position = order.findIndex((neighbour) => neighbour.bggGameId === bggGameId);
+  if (position === -1) {
+    return undefined;
+  }
+
+  const [row] = await database
+    .select({ item: collectionItems, game: bggGames })
+    .from(collectionItems)
+    .innerJoin(userCollections, eq(collectionItems.collectionId, userCollections.id))
+    .innerJoin(bggGames, eq(collectionItems.bggGameId, bggGames.id))
+    .where(and(eq(userCollections.userId, user.id), eq(collectionItems.bggGameId, bggGameId)));
+  if (row === undefined) {
+    return undefined;
+  }
+
+  return {
+    user,
+    item: row.item,
+    game: row.game,
+    position,
+    itemCount: order.length,
+    previous: order[position - 1] ?? null,
+    next: order[position + 1] ?? null,
+  };
 }
 
 /** Keeps the first entry for each game. BGG lists a game once per owned copy. */

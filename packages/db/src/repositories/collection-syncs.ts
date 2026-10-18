@@ -1,8 +1,8 @@
-import { and, eq, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, lt, sql } from 'drizzle-orm';
 
 import type { DatabaseExecutor } from '../database.ts';
 import { collectionSyncs, type CollectionSync } from '../schema/index.ts';
-import { ensureUser } from './users.ts';
+import { ensureUser, findUser } from './users.ts';
 
 // Repeats the partial unique index's predicate, so ON CONFLICT can infer that index.
 const RUNNING = sql`${collectionSyncs.status} = 'running'`;
@@ -62,6 +62,26 @@ export async function getCollectionSync(
     .select()
     .from(collectionSyncs)
     .where(eq(collectionSyncs.id, syncId));
+
+  return sync;
+}
+
+/** The most recently started sync of a user's collection, or undefined when none ever ran. */
+export async function getLatestCollectionSync(
+  database: DatabaseExecutor,
+  { username }: { username: string },
+): Promise<CollectionSync | undefined> {
+  const user = await findUser(database, { username });
+  if (user === undefined) {
+    return undefined;
+  }
+
+  const [sync] = await database
+    .select()
+    .from(collectionSyncs)
+    .where(eq(collectionSyncs.userId, user.id))
+    .orderBy(desc(collectionSyncs.startedAt), desc(collectionSyncs.id))
+    .limit(1);
 
   return sync;
 }

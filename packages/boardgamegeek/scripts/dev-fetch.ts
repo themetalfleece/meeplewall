@@ -7,7 +7,9 @@ import { createBggClient, crossCheckBoxSize } from '../src/index.ts';
 const environment = z.object({ BGG_USER_AGENT: z.string().min(1) }).safeParse(process.env);
 
 if (!environment.success) {
-  throw new Error('BGG_USER_AGENT is not set. Copy .env.example to .env.local and fill it in.');
+  throw new Error(
+    'BGG_USER_AGENT is not set. Copy packages/boardgamegeek/.env.example to .env.local beside it.',
+  );
 }
 
 const bggIdArgument = z.coerce.number().int().positive().safeParse(process.argv[2]);

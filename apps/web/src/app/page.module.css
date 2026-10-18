@@ -1,0 +1,32 @@
+.main {
+  display: grid;
+  gap: 56px;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 40px var(--page-gutter) 80px;
+}
+
+.hero {
+  display: grid;
+  gap: 20px;
+  max-width: 720px;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
+.lede {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+.section {
+  display: grid;
+  gap: 16px;
+}
+
+.heading {
+  font-size: 1.4rem;
+}

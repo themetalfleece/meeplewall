@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
-    "dev-fetch": "node --env-file-if-exists=../../.env.local scripts/dev-fetch.ts"
+    "dev-fetch": "node --env-file-if-exists=.env.local scripts/dev-fetch.ts"
   },
   "devDependencies": {
     "@board-games/config": "workspace:*",
@@ -28,6 +28,7 @@
     "vitest": "catalog:dev"
   },
   "dependencies": {
+    "fast-xml-parser": "catalog:",
     "zod": "catalog:"
   }
 }

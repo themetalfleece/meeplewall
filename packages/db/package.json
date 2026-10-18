@@ -19,8 +19,8 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "generate": "drizzle-kit generate",
-    "migrate": "node --env-file-if-exists=../../.env.local scripts/migrate.ts",
-    "seed": "node --env-file-if-exists=../../.env.local scripts/seed.ts"
+    "migrate": "node --env-file-if-exists=.env.local scripts/migrate.ts",
+    "seed": "node --env-file-if-exists=.env.local scripts/seed.ts"
   },
   "devDependencies": {
     "@board-games/config": "workspace:*",

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SEED_COLLECTION, SEED_GAMES, SEED_USERNAME } from '../dev/seed-data.ts';
 import { resolveTestServerUrl, useTestDatabase } from '../dev/test-database.ts';
-import { getCollectionByUsername, upsertCollection } from './collections.ts';
+import { getCollectionByUsername, getCollectionEntry, upsertCollection } from './collections.ts';
 import { upsertGame } from './games.ts';
 import { findUser } from './users.ts';
 
@@ -58,6 +58,77 @@ describe.skipIf(serverUrl === undefined)('collections', () => {
       });
       expect(result?.items.map(({ game }) => game.id)).toEqual(SEED_GAMES.map((game) => game.id));
       expect(result?.items[0]?.item.wantToPlay).toBe(true);
+    });
+  });
+
+  describe('getCollectionEntry', () => {
+    async function seedCollection() {
+      await seedGames();
+      await upsertCollection(database(), {
+        username: SEED_USERNAME,
+        source: 'geekdo',
+        fetchedAt: FETCHED_AT,
+        items: SEED_COLLECTION,
+      });
+    }
+
+    function gameAt(index: number) {
+      const game = SEED_GAMES[index];
+      if (game === undefined) {
+        throw new Error(`The seed data has no game at ${index}`);
+      }
+      return game;
+    }
+
+    it('returns undefined for an unknown user', async () => {
+      expect(
+        await getCollectionEntry(database(), { username: 'nobody', bggGameId: gameAt(0).id }),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined for a game outside the collection', async () => {
+      await seedCollection();
+
+      expect(
+        await getCollectionEntry(database(), { username: SEED_USERNAME, bggGameId: 999_999 }),
+      ).toBeUndefined();
+    });
+
+    it('returns a middle game with both neighbours in sort order', async () => {
+      await seedCollection();
+
+      const entry = await getCollectionEntry(database(), {
+        username: SEED_USERNAME.toUpperCase(),
+        bggGameId: gameAt(1).id,
+      });
+
+      expect(entry).toMatchObject({
+        position: 1,
+        itemCount: SEED_GAMES.length,
+        previous: { bggGameId: gameAt(0).id, name: gameAt(0).name },
+        next: { bggGameId: gameAt(2).id, name: gameAt(2).name },
+      });
+      expect(entry?.game.name).toBe(gameAt(1).name);
+      expect(entry?.user.bggUsername).toBe(SEED_USERNAME);
+    });
+
+    it('has no previous game at the start and no next game at the end', async () => {
+      await seedCollection();
+      const lastIndex = SEED_GAMES.length - 1;
+
+      const first = await getCollectionEntry(database(), {
+        username: SEED_USERNAME,
+        bggGameId: gameAt(0).id,
+      });
+      const last = await getCollectionEntry(database(), {
+        username: SEED_USERNAME,
+        bggGameId: gameAt(lastIndex).id,
+      });
+
+      expect(first?.previous).toBeNull();
+      expect(first?.item.wantToPlay).toBe(true);
+      expect(last?.next).toBeNull();
+      expect(last?.position).toBe(lastIndex);
     });
   });
 

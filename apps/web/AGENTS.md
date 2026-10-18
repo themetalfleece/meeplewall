@@ -9,7 +9,7 @@
 - **Collection reads are not.** `/u/[uId]` and the nav on `/u/[uId]/g/[gId]` read Postgres per request, since syncs finish in another process.
 - **The web app never calls BGG.** A stale or unknown user, or the refresh route, queues a sync with `requestCollectionSync` for `apps/sync-worker`. `SyncWatcher` polls `/api/sync/[uId]` and calls `router.refresh()` when it succeeds.
 - **An unleased sync running past `SYNC_ABANDONED_AFTER_SECONDS` reads as failed.** `toSyncStatus` checks its age and lease, so a sync nobody picked up stops the polling, shows "Try again", and the next visit or refresh reclaims the row.
-- **Not-found inside a streamed boundary answers 200** with the not-found UI and `noindex`: the shell went out first.
+- **Not-found inside a streamed boundary answers 200** with `noindex`: the shell went out first. So 308s go in `src/proxy.ts`.
 
 ## Rules
 

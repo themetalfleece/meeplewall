@@ -82,7 +82,11 @@ describe.skipIf(serverUrl === undefined)('collections', () => {
 
     it('returns undefined for an unknown user', async () => {
       expect(
-        await getCollectionEntry(database(), { username: 'nobody', bggGameId: gameAt(0).id }),
+        await getCollectionEntry(database(), {
+          username: 'nobody',
+          bggGameId: gameAt(0).id,
+          shelf: 'owned',
+        }),
       ).toBeUndefined();
     });
 
@@ -90,7 +94,11 @@ describe.skipIf(serverUrl === undefined)('collections', () => {
       await seedCollection();
 
       expect(
-        await getCollectionEntry(database(), { username: SEED_USERNAME, bggGameId: 999_999 }),
+        await getCollectionEntry(database(), {
+          username: SEED_USERNAME,
+          bggGameId: 999_999,
+          shelf: 'owned',
+        }),
       ).toBeUndefined();
     });
 
@@ -100,6 +108,7 @@ describe.skipIf(serverUrl === undefined)('collections', () => {
       const entry = await getCollectionEntry(database(), {
         username: SEED_USERNAME.toUpperCase(),
         bggGameId: gameAt(1).id,
+        shelf: 'owned',
       });
 
       expect(entry).toMatchObject({
@@ -119,16 +128,63 @@ describe.skipIf(serverUrl === undefined)('collections', () => {
       const first = await getCollectionEntry(database(), {
         username: SEED_USERNAME,
         bggGameId: gameAt(0).id,
+        shelf: 'owned',
       });
       const last = await getCollectionEntry(database(), {
         username: SEED_USERNAME,
         bggGameId: gameAt(lastIndex).id,
+        shelf: 'owned',
       });
 
       expect(first?.previous).toBeNull();
       expect(first?.item.wantToPlay).toBe(true);
       expect(last?.next).toBeNull();
       expect(last?.position).toBe(lastIndex);
+    });
+
+    /** The seed games with the first and third wishlisted rather than owned. */
+    async function seedWishlist() {
+      await seedGames();
+      await upsertCollection(database(), {
+        username: SEED_USERNAME,
+        source: 'geekdo',
+        fetchedAt: FETCHED_AT,
+        items: SEED_COLLECTION.map((item, index) => ({
+          ...item,
+          owned: index % 2 === 1,
+          wishlist: index % 2 === 0,
+        })),
+      });
+    }
+
+    it('counts the position and neighbours on the requested shelf only', async () => {
+      await seedWishlist();
+
+      const entry = await getCollectionEntry(database(), {
+        username: SEED_USERNAME,
+        bggGameId: gameAt(2).id,
+        shelf: 'wishlist',
+      });
+
+      expect(entry).toMatchObject({
+        shelf: 'wishlist',
+        position: 1,
+        itemCount: 2,
+        previous: { bggGameId: gameAt(0).id },
+        next: null,
+      });
+    });
+
+    it('counts a game not on the requested shelf on the first shelf it sits on', async () => {
+      await seedWishlist();
+
+      const entry = await getCollectionEntry(database(), {
+        username: SEED_USERNAME,
+        bggGameId: gameAt(0).id,
+        shelf: 'owned',
+      });
+
+      expect(entry).toMatchObject({ shelf: 'wishlist', position: 0, itemCount: 2 });
     });
   });
 

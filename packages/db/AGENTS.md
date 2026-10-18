@@ -11,12 +11,13 @@
 - **Build file paths with `node:path`, never `new URL('...', import.meta.url)`.** apps/web bundles this package with Turbopack, which reads that pattern as an asset import and fails the build.
 - **Relative imports end in `.ts`.** Node runs the scripts with no build step, and `rewriteRelativeImportExtensions` turns them into `.js` in `dist/`.
 - **An `ON CONFLICT` on a partial unique index repeats the index's `where` predicate**, or Postgres cannot infer the index and the insert fails.
+- **A shelf is one BGG status flag of `collection_items`**, listed in `COLLECTION_SHELVES` (`src/shelves.ts`), the main wall (`owned`) first. A new flag column that should get a shelf goes there too. apps/web maps each shelf to a `?shelf=` slug and label in `src/lib/shelves.ts`, and only owned games reach the main wall and the social image.
 
 ## Changing the schema
 
 1. Edit `src/schema/<table>.ts` (one file per table, re-exported from `src/schema/index.ts`).
 2. `pnpm --filter @meeplewall/db generate --name <what_changed>` writes `src/migrations/<n>_<name>.sql` and its `meta/` snapshot. Commit both, unedited.
-3. `pnpm --filter @meeplewall/db migrate` applies pending migrations to `DATABASE_URL`. Each worker calls `migrateDatabase(database)` at startup; it holds a Postgres advisory lock, so workers booting together never race.
+3. `pnpm --filter @meeplewall/db migrate` applies pending migrations to `DATABASE_URL`. Each worker calls `migrateDatabase(database)` at startup; it holds a Postgres advisory lock, so workers booting together never race. `apps/web` never migrates, so after pulling a new migration, run `migrate` (or start a worker) before `pnpm dev`, or queries fail with `column ... does not exist`.
 
 `pnpm --filter @meeplewall/db seed` loads a fixture user (`seed-user`) and four games. It is idempotent. Both scripts and the tests read `DATABASE_URL` from this package's `.env.local` (copy `.env.example`).
 

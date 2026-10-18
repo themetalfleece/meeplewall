@@ -29,7 +29,20 @@ const BARE = bggGame({ bggId: 7, name: 'Bare Box', imageUrl: null });
 const WORKER = 'sync-worker-test';
 
 function collected(bggId: number, overrides: Partial<CollectedGame> = {}): CollectedGame {
-  return { bggId, owned: true, wantToPlay: false, userRating: null, ...overrides };
+  return {
+    bggId,
+    owned: true,
+    previouslyOwned: false,
+    forTrade: false,
+    wantInTrade: false,
+    wantToPlay: false,
+    wantToBuy: false,
+    wishlist: false,
+    wishlistPriority: null,
+    preordered: false,
+    userRating: null,
+    ...overrides,
+  };
 }
 
 describe.skipIf(serverUrl === undefined)('CollectionSyncService', () => {
@@ -82,7 +95,12 @@ describe.skipIf(serverUrl === undefined)('CollectionSyncService', () => {
         collections: {
           alice: [
             collected(CATAN.bggId, { wantToPlay: true }),
-            collected(AZUL.bggId, { owned: false, userRating: 8.5 }),
+            collected(AZUL.bggId, {
+              owned: false,
+              wishlist: true,
+              wishlistPriority: 2,
+              userRating: 8.5,
+            }),
           ],
         },
       });
@@ -94,7 +112,16 @@ describe.skipIf(serverUrl === undefined)('CollectionSyncService', () => {
       const stored = await getCollectionByUsername(database(), { username: 'alice' });
       expect(stored?.collection).toMatchObject({ source: 'geekdo', itemCount: 2 });
       expect(stored?.items.map(({ game, item }) => [game.name, item])).toEqual([
-        ['Azul', expect.objectContaining({ owned: false, userRating: 8.5, sortIndex: 0 })],
+        [
+          'Azul',
+          expect.objectContaining({
+            owned: false,
+            wishlist: true,
+            wishlistPriority: 2,
+            userRating: 8.5,
+            sortIndex: 0,
+          }),
+        ],
         ['CATAN', expect.objectContaining({ wantToPlay: true, sortIndex: 1 })],
       ]);
     });

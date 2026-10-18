@@ -11,6 +11,7 @@ Everything an AI agent reads about this repo. One copy of each rule, linked into
   roles/<role>/AGENTS.md   who an agent is and which skills it reads
   wrappers/<tool>/         config for one specific tool
   skill-lock.json          where each forked skill came from
+  catalogues.json          which skill lists which package's exports (optional)
 ```
 
 ## The three layers
@@ -93,9 +94,33 @@ To have git check links out as real links in the first place, set `core.symlinks
 
 Point `sourceUrl` and `sourceRefRepo` at the public upstream, and pin `sourceRef` to a commit in that repo: the last one touching `sourcePath` on or before `forkedAt`. Never use a private mirror, because anyone without access to it cannot diff an upgrade.
 
+## Package catalogues
+
+A shared package an agent should search before writing its own code (the UI package, the core package) gets a `## Catalogue` section in the skill that owns it: one bullet per export, opening with the backticked name and a colon. `.agents/catalogues.json` ties each package to its skill:
+
+```json
+{
+  "catalogues": [
+    {
+      "packageDir": "packages/ui",
+      "importName": "@scope/ui",
+      "skill": "ui-primitives"
+    },
+    {
+      "packageDir": "packages/core",
+      "importName": "@scope/core",
+      "skill": "shared-libraries",
+      "barrel": "src/hooks/index.ts"
+    }
+  ]
+}
+```
+
+The validator compares every key of the package's `exports` map, plus every named re-export of the optional `barrel`, against the bullets, in both directions. A repo with no shared packages has no file.
+
 ## What the validator enforces
 
-Frontmatter names match directories and descriptions are long enough to route on. Every skill reaches the root table of contents, and every `.agents/skills/<name>/` path in the tree resolves to a real skill, wherever it is written: a nested `AGENTS.md`, a role, a wrapper, or another skill. Every `AGENTS.md` is under budget. Every link above is a real symlink to its target. No skill name collides with a runtime-supplied one. Rule indexes match their files. Every forked skill has provenance.
+Frontmatter names match directories and descriptions are long enough to route on. Every skill reaches the root table of contents, and every `.agents/skills/<name>/` path in the tree resolves to a real skill, wherever it is written: a nested `AGENTS.md`, a role, a wrapper, or another skill. Every `AGENTS.md` is under budget. Every link above is a real symlink to its target. No skill name collides with a runtime-supplied one. Rule indexes match their files. Every forked skill has provenance. Every catalogued package matches its skill's catalogue.
 
 What it cannot check is whether a sentence is still true. Prose naming a renamed function passes. That is the part the rule above exists for.
 
@@ -108,7 +133,9 @@ These files are the same in every repo that uses this layout. Copy them as they 
 - `.agents/README.md`, `.agents/skill-lock.json`
 - `.agents/roles/**`
 - `.agents/wrappers/claude/settings.json`, `.agents/wrappers/cursor/BUGBOT.md`
-- `.agents/skills/` `writing-style`, `typescript-style`, `react-performance`, `find-docs`, `testing`, `component-structure`, `nextjs`, `package-management`, `env-config`, and every `agent-` skill
+- `.agents/skills/` `writing-style`, `typescript-style`, `react-performance`, `find-docs`, `testing`, `component-structure`, `workspace-structure`, `ui-primitives`, `shared-libraries`, `data-modeling`, `scripts-and-ci`, `analytics`, `nextjs`, `package-management`, `env-config`, and every `agent-` skill
 - `scripts/agent-links.mts`, `scripts/link-agent-config.mts`, `scripts/validate-agent-docs.mts`, and their `.test.mts` files
 
-Everything else is the repo's own: the root `AGENTS.md` (its header, table, project rules and gate), any nested `AGENTS.md`, any project skill, and project-only additions to `BUGBOT.md`. A repo whose stack does not use one of the shared skills may delete it, along with its row in the root table.
+Everything else is the repo's own: the root `AGENTS.md` (its header, table, project rules and gate), any nested `AGENTS.md`, `catalogues.json`, any project skill, and project-only additions to `BUGBOT.md`. A repo whose stack does not use one of the shared skills may delete it, along with its row in the root table.
+
+Two shared skills are templates as well as rules. `ui-primitives` and `shared-libraries` each carry a `## Catalogue` section that the repo replaces with its own package's real entries, and `@scope/` in any shared skill reads as the repo's package scope.

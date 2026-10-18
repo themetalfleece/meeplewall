@@ -185,11 +185,9 @@ export class CollectionSyncService {
     });
     known.sort((first, second) => first.name.localeCompare(second.name, 'en'));
 
-    return known.map(({ entry }, sortIndex) => ({
-      bggGameId: entry.bggId,
-      owned: entry.owned,
-      wantToPlay: entry.wantToPlay,
-      userRating: entry.userRating,
+    return known.map(({ entry: { bggId, ...flags } }, sortIndex) => ({
+      bggGameId: bggId,
+      ...flags,
       sortIndex,
     }));
   }

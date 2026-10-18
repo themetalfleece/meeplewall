@@ -38,7 +38,7 @@ For libraries that ship no docs inside their package, see `.agents/skills/find-d
 
 **`revalidateTag` and `revalidatePath` only take effect inside a request**: a route handler or a server action. They queue on the request's store, so a call from detached background work does nothing. A read that a background job changes either stays uncached (Postgres is fast enough) or is expired by a webhook route the job calls.
 
-**`notFound()` inside a `<Suspense>` boundary answers 200.** The prerendered shell has already gone out, so the not-found UI streams in with a 200. Give such pages `robots: { index: false }` in their metadata.
+**`notFound()` inside a `<Suspense>` boundary answers 200.** The prerendered shell has already gone out, so the not-found UI streams in with a 200. Give such pages `robots: { index: false }` in their metadata. `permanentRedirect()` has the same problem: once the shell is out it can only emit a client-side meta refresh. A redirect that must be a real 308 goes in `proxy.ts`, which runs before rendering on the Node runtime.
 
 ## CSS and prefetching
 
@@ -55,6 +55,12 @@ For libraries that ship no docs inside their package, see `.agents/skills/find-d
 In the root `app/layout.tsx`, always set `metadataBase` from the site URL env var, with no fallback. Social metadata resolution depends on it.
 
 ## Server components and reads
+
+**Pages render on the server; the client is the fallback.** Fetch and render in Server Components, and reach for `"use client"` only for what needs the browser: event handlers, state, effects, browser APIs. Keep that boundary on the smallest leaf, so the page around it stays server-rendered HTML.
+
+**`next/dynamic` in a Server Component does not code-split a Client Component.** Do the dynamic import inside a client component, or the code stays in the first-load bundle.
+
+**A prerendered page reads its query in a client leaf under `Suspense`.** Reading `searchParams` on the server makes the page dynamic. `useSearchParams` in a small client component keeps it static: the fallback is the server HTML, and the leaf swaps in after hydration.
 
 Never self-fetch the app's own `/api/...` URL from a Server Component. Call the server read helper directly and pass the result as client initial data.
 

@@ -14,6 +14,40 @@
   color: var(--color-text-muted);
 }
 
+.shelves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shelf {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.shelf:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.shelf[aria-current='page'] {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.shelfCount {
+  color: var(--color-text-faint);
+}
+
 .titleSkeleton {
   width: min(420px, 70%);
   height: 2.5rem;

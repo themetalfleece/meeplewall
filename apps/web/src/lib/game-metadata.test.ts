@@ -11,13 +11,13 @@ afterEach(() => {
 });
 
 describe('gameMetadata', () => {
-  it('titles a game page and points its canonical URL at /g', async () => {
+  it('titles a game page and points its canonical URL at the slugged /g', async () => {
     loadGame.mockResolvedValue({ name: 'CATAN', description: 'Trade and build.' });
 
     expect(await gameMetadata({ segment: '13', username: null })).toEqual({
       title: 'CATAN',
       description: 'Trade and build.',
-      alternates: { canonical: '/g/13' },
+      alternates: { canonical: '/g/13-catan' },
       openGraph: { title: 'CATAN', type: 'website' },
     });
   });
@@ -25,10 +25,10 @@ describe('gameMetadata', () => {
   it('names the collection in the title but keeps the canonical URL at /g', async () => {
     loadGame.mockResolvedValue({ name: 'CATAN', description: null });
 
-    const metadata = await gameMetadata({ segment: '13', username: 'alice' });
+    const metadata = await gameMetadata({ segment: '13-the-settlers', username: 'alice' });
 
     expect(metadata.title).toBe("CATAN in alice's collection");
-    expect(metadata.alternates?.canonical).toBe('/g/13');
+    expect(metadata.alternates?.canonical).toBe('/g/13-catan');
     expect(metadata.description).toBe('CATAN on BoardGameGeek, as a 3D box.');
   });
 

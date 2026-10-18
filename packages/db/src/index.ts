@@ -13,3 +13,4 @@ export * from './repositories/image-jobs.ts';
 export * from './repositories/refresh-log.ts';
 export * from './repositories/users.ts';
 export * from './schema/index.ts';
+export * from './shelves.ts';

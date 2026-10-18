@@ -3,8 +3,12 @@ import { describe, it } from "node:test";
 import {
   NESTED_BUDGET_BYTES,
   ROOT_BUDGET_BYTES,
+  barrelExportNames,
+  catalogueEntries,
   checkAgentsFile,
+  checkCatalogueConfig,
   checkLink,
+  checkPackageCatalogue,
   checkRuleIndex,
   checkRuntimeCollision,
   checkSkillFrontmatter,
@@ -409,5 +413,165 @@ describe("checkSkillLock", () => {
     assert.match(errors.join(" "), /sourceUrl/);
     assert.match(errors.join(" "), /sourceRef/);
     assert.match(errors.join(" "), /forkedAt/);
+  });
+});
+
+describe("checkCatalogueConfig", () => {
+  const entry = {
+    packageDir: "packages/ui",
+    importName: "@scope/ui",
+    skill: "ui-primitives",
+  };
+
+  it("passes a complete entry for a real skill", () => {
+    assert.deepEqual(
+      checkCatalogueConfig({
+        config: { catalogues: [entry] },
+        skills: ["ui-primitives"],
+      }),
+      []
+    );
+  });
+
+  it("tolerates a config with no catalogues", () => {
+    assert.deepEqual(checkCatalogueConfig({ config: {}, skills: [] }), []);
+  });
+
+  it("flags every missing field", () => {
+    const errors = checkCatalogueConfig({
+      config: { catalogues: [{}] },
+      skills: [],
+    });
+
+    assert.equal(errors.length, 3);
+    assert.match(errors.join(" "), /packageDir/);
+    assert.match(errors.join(" "), /importName/);
+    assert.match(errors.join(" "), /skill/);
+  });
+
+  it("flags a skill that does not exist", () => {
+    const errors = checkCatalogueConfig({
+      config: { catalogues: [entry] },
+      skills: [],
+    });
+
+    assert.match(errors.join(" "), /"ui-primitives", which is not a skill/);
+  });
+});
+
+describe("barrelExportNames", () => {
+  it("reads named re-exports, resolving aliases and skipping types", () => {
+    const source = [
+      'export { useMounted, useMeasure } from "./useMounted";',
+      'export { latest as useLatest } from "./latest";',
+      'export { type MeasureResult } from "./types";',
+    ].join("\n");
+
+    assert.deepEqual(barrelExportNames(source), [
+      "useMounted",
+      "useMeasure",
+      "useLatest",
+    ]);
+  });
+
+  it("returns nothing for a file with no named re-exports", () => {
+    assert.deepEqual(barrelExportNames('export * from "./all";'), []);
+  });
+});
+
+describe("catalogueEntries", () => {
+  it("collects every backticked name a bullet opens with", () => {
+    const markdown = [
+      "## Catalogue",
+      "",
+      "- `Card`, `cardClassName`: a surfaced container.",
+      "- `format/`: codecs.",
+      "- Not an entry, no leading name.",
+    ].join("\n");
+
+    assert.deepEqual(
+      catalogueEntries(markdown),
+      new Set(["Card", "cardClassName", "format"])
+    );
+  });
+
+  it("keeps a nested heading inside the section and stops at a sibling", () => {
+    const markdown = [
+      "## Catalogue",
+      "- `hooks/`: the hooks below.",
+      "### Hooks",
+      "- `useMounted`: true once hydrated.",
+      "## Rules",
+      "- `Box`: not a catalogue entry.",
+    ].join("\n");
+
+    assert.deepEqual(
+      catalogueEntries(markdown),
+      new Set(["hooks", "useMounted"])
+    );
+  });
+
+  it("reads CRLF files the same as LF ones", () => {
+    const markdown = "## Catalogue\r\n- `Card`: a container.\r\n";
+
+    assert.deepEqual(catalogueEntries(markdown), new Set(["Card"]));
+  });
+
+  it("returns null when the skill has no Catalogue section", () => {
+    assert.equal(catalogueEntries("## Rules\n- `Box`: layout."), null);
+  });
+});
+
+describe("checkPackageCatalogue", () => {
+  const markdown = [
+    "## Catalogue",
+    "- `Card`: a container.",
+    "- `useMounted`: true once hydrated.",
+  ].join("\n");
+
+  function check({
+    subpaths = ["./Card"],
+    barrelNames = ["useMounted"],
+    body = markdown,
+  } = {}) {
+    return checkPackageCatalogue({
+      importName: "@scope/ui",
+      skill: "ui-primitives",
+      markdown: body,
+      subpaths,
+      barrelNames,
+    });
+  }
+
+  it("passes when the catalogue and the exports match exactly", () => {
+    assert.deepEqual(check(), []);
+  });
+
+  it("ignores the package root export", () => {
+    assert.deepEqual(check({ subpaths: [".", "./Card"] }), []);
+  });
+
+  it("flags a subpath with no entry", () => {
+    assert.deepEqual(check({ subpaths: ["./Card", "./Modal"] }), [
+      "ui-primitives does not list @scope/ui/Modal; add an entry to its catalogue.",
+    ]);
+  });
+
+  it("flags a barrel export with no entry", () => {
+    assert.deepEqual(check({ barrelNames: ["useMounted", "useMeasure"] }), [
+      "ui-primitives does not list useMeasure from @scope/ui; add an entry to its catalogue.",
+    ]);
+  });
+
+  it("flags an entry the package no longer exports", () => {
+    assert.deepEqual(check({ subpaths: [] }), [
+      "ui-primitives lists Card, which @scope/ui no longer exports; update or remove its catalogue entry.",
+    ]);
+  });
+
+  it("flags a skill with no Catalogue section", () => {
+    assert.deepEqual(check({ body: "## Rules\n" }), [
+      "ui-primitives has no Catalogue section for @scope/ui.",
+    ]);
   });
 });

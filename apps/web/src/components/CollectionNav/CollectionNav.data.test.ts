@@ -1,17 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { collectionBadges } from './CollectionNav.data';
+import { describePosition } from './CollectionNav.data';
 
-describe('collectionBadges', () => {
-  it('lists every flag the user set', () => {
-    expect(collectionBadges({ owned: true, wantToPlay: true, userRating: 8.5 })).toEqual([
-      'Owned',
-      'Want to play',
-      'Rated 8.5',
-    ]);
+describe('describePosition', () => {
+  it('reads as a plain count on the main wall', () => {
+    expect(describePosition({ shelf: 'owned', position: 3, itemCount: 40 })).toBe('3 of 40');
   });
 
-  it('is empty for a game with no flags', () => {
-    expect(collectionBadges({ owned: false, wantToPlay: false, userRating: null })).toEqual([]);
+  it('names any other shelf', () => {
+    expect(describePosition({ shelf: 'wishlist', position: 1, itemCount: 12 })).toBe(
+      '1 of 12 in Wishlist',
+    );
   });
 });

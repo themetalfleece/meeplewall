@@ -5,6 +5,7 @@ import {
   integer,
   pgTable,
   primaryKey,
+  smallint,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -21,7 +22,15 @@ export const collectionItems = pgTable(
       .notNull()
       .references(() => bggGames.id),
     owned: boolean('owned').notNull().default(false),
+    previouslyOwned: boolean('previously_owned').notNull().default(false),
+    forTrade: boolean('for_trade').notNull().default(false),
+    wantInTrade: boolean('want_in_trade').notNull().default(false),
     wantToPlay: boolean('want_to_play').notNull().default(false),
+    wantToBuy: boolean('want_to_buy').notNull().default(false),
+    wishlist: boolean('wishlist').notNull().default(false),
+    /** 1 (must have) to 5 (don't buy this), or null when not wishlisted or unknown. */
+    wishlistPriority: smallint('wishlist_priority'),
+    preordered: boolean('preordered').notNull().default(false),
     userRating: doublePrecision('user_rating'),
     sortIndex: integer('sort_index').notNull(),
   },

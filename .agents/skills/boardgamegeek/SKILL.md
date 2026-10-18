@@ -58,7 +58,9 @@ The `/about` and `/privacy` pages in `apps/web` say what we fetch from BGG and w
 - **An unknown user is a 200**, with `<errors><error><message>Invalid username specified</message></error></errors>`. The client returns `null`.
 - **`subtype=boardgame` alone still lists owned expansions**, hence `excludesubtype`.
 - **The user's rating is `<stats><rating value>`**, `N/A` until rated. It needs `stats=1`.
-- **The collection holds wishlist and previously owned games too.** The client keeps only `own="1"` or `wanttoplay="1"`.
+- **The collection holds wishlist, pre-ordered, for-trade and previously owned games too.** The client reads every `<status>` flag and keeps any entry with one set. It drops rated-only entries, which have none.
+- **A game appears once per copy**, each with its own `collid` and flags. The client merges them into one item per game, OR-ing the flags.
+- **`wishlistpriority` is 1 (must have) to 5 (don't buy this)**, read only when `wishlist="1"`.
 
 The parser and its fixture follow BGG's documented XML. Re-check them against a live answer whenever `collection.e2e.test.ts` runs with a token.
 

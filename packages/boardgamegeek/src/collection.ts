@@ -14,21 +14,15 @@ const MAX_QUEUED_ATTEMPTS = 15;
 const INITIAL_QUEUED_DELAY_MS = 2_000;
 const MAX_QUEUED_DELAY_MS = 10_000;
 
-/** One game in a user's collection, with that user's own flags and rating. */
-export type BggCollectionItem = {
-  bggId: number;
-  owned: boolean;
-  wantToPlay: boolean;
-  /** The user's rating out of 10, or null when they have not rated it. */
-  userRating: number | null;
-};
+/** One game in a user's collection, with that user's own status flags and rating. */
+export type BggCollectionItem = z.output<typeof collectionItemSchema>;
 
 /** Reads whole collections over XMLAPI2, the only BGG API that lists one. */
 export type BggCollectionClient = {
   readonly transport: 'xmlapi2';
   /**
-   * The base games a user owns or wants to play, expansions excluded, or null when BGG has no
-   * user with that name.
+   * The base games in a user's collection with at least one status flag set, one entry per game
+   * and expansions excluded, or null when BGG has no user with that name.
    */
   fetchCollection(options: { username: string }): Promise<BggCollectionItem[] | null>;
 };
@@ -41,18 +35,94 @@ const ratingSchema = z
   .transform((value) => Number(value))
   .transform((value) => (Number.isFinite(value) && value > 0 ? value : null));
 
+/** 1 (must have) to 5 (don't buy this) on wishlist games. Anything else reads as unknown. */
+const wishlistPrioritySchema = z
+  .union([z.string(), z.number()])
+  .optional()
+  .transform((value) => Number(value))
+  .transform((value) => (Number.isInteger(value) && value >= 1 && value <= 5 ? value : null));
+
 const collectionItemSchema = z
   .object({
     objectid: z.union([z.number(), z.string()]).transform(Number).pipe(z.number().int().positive()),
-    status: z.object({ own: flagSchema, wanttoplay: flagSchema }),
+    status: z.object({
+      own: flagSchema,
+      prevowned: flagSchema,
+      fortrade: flagSchema,
+      want: flagSchema,
+      wanttoplay: flagSchema,
+      wanttobuy: flagSchema,
+      wishlist: flagSchema,
+      wishlistpriority: wishlistPrioritySchema,
+      preordered: flagSchema,
+    }),
     stats: z.object({ rating: z.object({ value: ratingSchema }) }).optional(),
   })
-  .transform((item) => ({
-    bggId: item.objectid,
-    owned: item.status.own,
-    wantToPlay: item.status.wanttoplay,
-    userRating: item.stats === undefined ? null : item.stats.rating.value,
+  .transform(({ objectid, status, stats }) => ({
+    bggId: objectid,
+    owned: status.own,
+    previouslyOwned: status.prevowned,
+    forTrade: status.fortrade,
+    wantInTrade: status.want,
+    wantToPlay: status.wanttoplay,
+    wantToBuy: status.wanttobuy,
+    wishlist: status.wishlist,
+    wishlistPriority: status.wishlist ? status.wishlistpriority : null,
+    preordered: status.preordered,
+    /** The user's rating out of 10, or null when they have not rated it. */
+    userRating: stats === undefined ? null : stats.rating.value,
   }));
+
+const STATUS_FLAGS = [
+  'owned',
+  'previouslyOwned',
+  'forTrade',
+  'wantInTrade',
+  'wantToPlay',
+  'wantToBuy',
+  'wishlist',
+  'preordered',
+] as const satisfies readonly (keyof BggCollectionItem)[];
+
+function hasAnyStatus(item: BggCollectionItem): boolean {
+  return STATUS_FLAGS.some((flag) => item[flag]);
+}
+
+/** Folds two entries for one game into one: any flag set on either, and the first known rating. */
+function mergeEntries({
+  first,
+  second,
+}: {
+  first: BggCollectionItem;
+  second: BggCollectionItem;
+}): BggCollectionItem {
+  const merged = { ...first };
+  for (const flag of STATUS_FLAGS) {
+    merged[flag] = first[flag] || second[flag];
+  }
+  if (merged.wishlistPriority === null) {
+    merged.wishlistPriority = second.wishlistPriority;
+  }
+  if (merged.userRating === null) {
+    merged.userRating = second.userRating;
+  }
+
+  return merged;
+}
+
+/**
+ * One entry per game, in first-seen order. BGG lists a game once per copy, so a user can have it
+ * owned once and wishlisted again.
+ */
+function mergeByGame(items: BggCollectionItem[]): BggCollectionItem[] {
+  const byGame = new Map<number, BggCollectionItem>();
+  for (const item of items) {
+    const seen = byGame.get(item.bggId);
+    byGame.set(item.bggId, seen === undefined ? item : mergeEntries({ first: seen, second: item }));
+  }
+
+  return [...byGame.values()];
+}
 
 const collectionDocumentSchema = z.union([
   z.object({
@@ -157,7 +227,8 @@ class XmlApiCollectionClient implements BggCollectionClient {
       return XmlApiCollectionClient.#readErrors({ url, errors: result.data.errors.error });
     }
 
-    return result.data.items.item.filter((item) => item.owned || item.wantToPlay);
+    // Entries with no flag set are games the user only rated, commented on or logged plays of.
+    return mergeByGame(result.data.items.item.filter(hasAnyStatus));
   }
 
   /** BGG reports an unknown user as a 200 with an error message instead of a 404. */

@@ -2,7 +2,12 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { CollectionSection, CollectionSectionSkeleton } from '@/components/CollectionSection';
-import { parseUsername, routes, type UserRouteProps } from '@/lib/route-params';
+import {
+  parseUsername,
+  routes,
+  type RouteSearchParams,
+  type UserRouteProps,
+} from '@/lib/route-params';
 
 import styles from './page.module.css';
 
@@ -19,11 +24,14 @@ export async function generateMetadata({ params }: UserRouteProps): Promise<Meta
   };
 }
 
-export default function CollectionPage({ params }: UserRouteProps) {
+export default function CollectionPage({
+  params,
+  searchParams,
+}: UserRouteProps & RouteSearchParams) {
   return (
     <main className={styles.main}>
       <Suspense fallback={<CollectionSectionSkeleton />}>
-        <CollectionSection params={params} />
+        <CollectionSection params={params} searchParams={searchParams} />
       </Suspense>
     </main>
   );

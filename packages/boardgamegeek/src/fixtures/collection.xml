@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<items totalitems="4" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse" pubdate="Sat, 17 Oct 2026 09:12:44 +0000">
+<items totalitems="6" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse" pubdate="Sat, 17 Oct 2026 09:12:44 +0000">
 	<item objecttype="thing" objectid="363289" subtype="boardgame" collid="133100797">
 		<name sortindex="1">Fantasy Realms: Deluxe Edition</name>
 		<yearpublished>2022</yearpublished>
@@ -39,5 +39,21 @@
 		</stats>
 		<status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="1" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2026-04-11 18:45:00" />
 		<numplays>12</numplays>
+	</item>
+	<item objecttype="thing" objectid="324937" subtype="boardgame" collid="133100801">
+		<name sortindex="1">Beacon Patrol</name>
+		<stats minplayers="1" maxplayers="4">
+			<rating value="N/A" />
+		</stats>
+		<status own="1" prevowned="0" fortrade="1" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2026-04-12 09:00:00" />
+		<numplays>0</numplays>
+	</item>
+	<item objecttype="thing" objectid="423432" subtype="boardgame" collid="133100802">
+		<name sortindex="1">Rated Only</name>
+		<stats minplayers="1" maxplayers="4">
+			<rating value="6" />
+		</stats>
+		<status own="0" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2026-05-01 09:00:00" />
+		<numplays>1</numplays>
 	</item>
 </items>

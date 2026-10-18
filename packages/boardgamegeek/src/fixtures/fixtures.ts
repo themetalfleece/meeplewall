@@ -28,7 +28,8 @@ export function readFixture({
 
 /**
  * An XMLAPI2 collection in the documented response shape, covering an owned game, a
- * want-to-play game, a previously owned wishlist game and an unrated one.
+ * want-to-play game, a previously owned wishlist game, a game listed once per copy and a
+ * rated-only entry with no status flag.
  */
 export function readCollectionFixture(): string {
   return readFileSync(new URL('./collection.xml', import.meta.url), 'utf8');

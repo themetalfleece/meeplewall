@@ -10,7 +10,8 @@ const mocks = vi.hoisted(() => ({
   requestCollectionSync: vi.fn(),
 }));
 
-vi.mock('@meeplewall/db', () => ({
+vi.mock('@meeplewall/db', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@meeplewall/db')>()),
   getCollectionByUsername: mocks.getCollectionByUsername,
   getCollectionEntry: mocks.getCollectionEntry,
   getLatestCollectionSync: mocks.getLatestCollectionSync,
@@ -28,6 +29,18 @@ const { loadCollectionGame, loadCollectionPage, loadCollectionSummary } =
 const NOW = Date.now();
 const FRESH = new Date(NOW - 60_000);
 const STALE = new Date(NOW - 2 * 24 * 3_600_000);
+
+const NO_STATUS = {
+  owned: false,
+  previouslyOwned: false,
+  forTrade: false,
+  wantInTrade: false,
+  wantToPlay: false,
+  wantToBuy: false,
+  wishlist: false,
+  wishlistPriority: null,
+  preordered: false,
+};
 
 function game(id: number, name: string): BggGame {
   return {
@@ -70,10 +83,10 @@ function stored(fetchedAt: Date): CollectionWithItems {
     items: [
       {
         item: {
+          ...NO_STATUS,
           collectionId,
           bggGameId: 1,
           owned: true,
-          wantToPlay: false,
           userRating: 8,
           sortIndex: 0,
         },
@@ -81,10 +94,12 @@ function stored(fetchedAt: Date): CollectionWithItems {
       },
       {
         item: {
+          ...NO_STATUS,
           collectionId,
           bggGameId: 2,
-          owned: false,
           wantToPlay: true,
+          wishlist: true,
+          wishlistPriority: 1,
           userRating: null,
           sortIndex: 1,
         },
@@ -142,7 +157,7 @@ describe('loadCollectionPage', () => {
     mocks.getCollectionByUsername.mockResolvedValue(undefined);
     mocks.requestCollectionSync.mockResolvedValue({ kind: 'started', sync: sync('running') });
 
-    const page = await loadCollectionPage({ username: 'alice' });
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'owned' });
 
     expect(page).toMatchObject({ displayName: 'alice', cards: null, fetchedAt: null });
     expect(page.sync.state).toBe('running');
@@ -157,7 +172,7 @@ describe('loadCollectionPage', () => {
     mocks.getLatestCollectionSync.mockResolvedValue(sync('succeeded'));
     mocks.listImageAssets.mockResolvedValue([THUMB]);
 
-    const page = await loadCollectionPage({ username: 'alice' });
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'owned' });
 
     expect(mocks.requestCollectionSync).not.toHaveBeenCalled();
     expect(page.displayName).toBe('Alice');
@@ -168,29 +183,61 @@ describe('loadCollectionPage', () => {
         name: 'Azul',
         year: 2020,
         thumbUrl: 'https://cdn.example.com/covers/1.abc.thumb.webp',
-        owned: true,
-        wantToPlay: false,
-        userRating: 8,
-      },
-      {
-        bggId: 2,
-        name: 'CATAN',
-        year: 2020,
-        thumbUrl: 'https://cf.geekdo-images.com/2.thumb.jpg',
-        owned: false,
-        wantToPlay: true,
-        userRating: null,
+        badges: [
+          { kind: 'owned', label: 'Owned' },
+          { kind: 'rating', label: 'Rated 8' },
+        ],
       },
     ]);
+  });
+
+  it('keeps wishlist games off the main wall and lists every shelf with a game', async () => {
+    mocks.getCollectionByUsername.mockResolvedValue(stored(FRESH));
+
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'owned' });
+
+    expect(page.cards?.map((card) => card.name)).toEqual(['Azul']);
+    expect(page.shelves).toEqual([
+      { shelf: 'owned', label: 'Owned', count: 1 },
+      { shelf: 'wishlist', label: 'Wishlist', count: 1 },
+      { shelf: 'wantToPlay', label: 'Want to play', count: 1 },
+    ]);
+  });
+
+  it('shows the requested shelf', async () => {
+    mocks.getCollectionByUsername.mockResolvedValue(stored(FRESH));
+
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'wishlist' });
+
+    expect(page.shelf).toBe('wishlist');
+    expect(page.cards).toEqual([
+      expect.objectContaining({
+        name: 'CATAN',
+        badges: [
+          { kind: 'wishlist', label: 'Wishlist: Must have' },
+          { kind: 'wantToPlay', label: 'Want to play' },
+        ],
+      }),
+    ]);
+    expect(mocks.listImageAssets).toHaveBeenCalledWith('database', { bggGameIds: [2] });
+  });
+
+  it('keeps an empty requested shelf in the list', async () => {
+    mocks.getCollectionByUsername.mockResolvedValue(stored(FRESH));
+
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'forTrade' });
+
+    expect(page.cards).toEqual([]);
+    expect(page.shelves.map((tab) => tab.shelf)).toContain('forTrade');
   });
 
   it('keeps showing a stale collection while it starts a refresh', async () => {
     mocks.getCollectionByUsername.mockResolvedValue(stored(STALE));
     mocks.requestCollectionSync.mockResolvedValue({ kind: 'started', sync: sync('running') });
 
-    const page = await loadCollectionPage({ username: 'alice' });
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'owned' });
 
-    expect(page.cards).toHaveLength(2);
+    expect(page.cards).toHaveLength(1);
     expect(page.sync.state).toBe('running');
   });
 
@@ -198,7 +245,7 @@ describe('loadCollectionPage', () => {
     mocks.getCollectionByUsername.mockResolvedValue(undefined);
     mocks.getLatestCollectionSync.mockResolvedValue(sync('running'));
 
-    const page = await loadCollectionPage({ username: 'alice' });
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'owned' });
 
     expect(mocks.requestCollectionSync).not.toHaveBeenCalled();
     expect(page.sync.state).toBe('running');
@@ -210,7 +257,7 @@ describe('loadCollectionPage', () => {
     mocks.getLatestCollectionSync.mockResolvedValue(sync('running', abandonedAt));
     mocks.requestCollectionSync.mockResolvedValue({ kind: 'started', sync: sync('running') });
 
-    const page = await loadCollectionPage({ username: 'alice' });
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'owned' });
 
     expect(mocks.requestCollectionSync).toHaveBeenCalledWith('database', {
       username: 'alice',
@@ -228,7 +275,7 @@ describe('loadCollectionPage', () => {
       retryAfterSeconds: 20,
     });
 
-    const page = await loadCollectionPage({ username: 'alice' });
+    const page = await loadCollectionPage({ username: 'alice', shelf: 'owned' });
 
     expect(page.sync.state).toBe('failed');
   });
@@ -238,7 +285,7 @@ describe('loadCollectionGame', () => {
   it('returns null for a game outside the collection', async () => {
     mocks.getCollectionEntry.mockResolvedValue(undefined);
 
-    expect(await loadCollectionGame({ username: 'alice', bggId: 9 })).toBeNull();
+    expect(await loadCollectionGame({ username: 'alice', bggId: 9, shelf: 'owned' })).toBeNull();
   });
 
   it('returns the overlay with a one-based position and the neighbours', async () => {
@@ -248,17 +295,20 @@ describe('loadCollectionGame', () => {
       user,
       item: first?.item,
       game: first?.game,
+      shelf: 'owned',
       position: 0,
       itemCount: 2,
       previous: null,
       next: { bggGameId: 2, name: 'CATAN' },
     });
 
-    expect(await loadCollectionGame({ username: 'alice', bggId: 1 })).toEqual({
+    expect(await loadCollectionGame({ username: 'alice', bggId: 1, shelf: 'owned' })).toEqual({
       displayName: 'Alice',
-      owned: true,
-      wantToPlay: false,
-      userRating: 8,
+      shelf: 'owned',
+      badges: [
+        { kind: 'owned', label: 'Owned' },
+        { kind: 'rating', label: 'Rated 8' },
+      ],
       position: 1,
       itemCount: 2,
       previous: null,
@@ -267,6 +317,7 @@ describe('loadCollectionGame', () => {
     expect(mocks.getCollectionEntry).toHaveBeenCalledWith('database', {
       username: 'alice',
       bggGameId: 1,
+      shelf: 'owned',
     });
   });
 });
@@ -278,16 +329,13 @@ describe('loadCollectionSummary', () => {
     expect(await loadCollectionSummary({ username: 'alice' })).toBeNull();
   });
 
-  it("summarises the stored collection with BGG's thumbnails and starts no sync", async () => {
+  it("summarises the main wall with BGG's thumbnails and starts no sync", async () => {
     mocks.getCollectionByUsername.mockResolvedValue(stored(STALE));
 
     expect(await loadCollectionSummary({ username: 'alice' })).toEqual({
       displayName: 'Alice',
-      itemCount: 2,
-      coverUrls: [
-        'https://cf.geekdo-images.com/1.thumb.jpg',
-        'https://cf.geekdo-images.com/2.thumb.jpg',
-      ],
+      itemCount: 1,
+      coverUrls: ['https://cf.geekdo-images.com/1.thumb.jpg'],
     });
     expect(mocks.requestCollectionSync).not.toHaveBeenCalled();
   });

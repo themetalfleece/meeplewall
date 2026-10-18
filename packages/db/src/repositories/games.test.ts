@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SEED_GAMES } from '../dev/seed-data.ts';
 import { resolveTestServerUrl, useTestDatabase } from '../dev/test-database.ts';
-import { getGame, listGames, upsertGame } from './games.ts';
+import { getGame, getGameName, listGames, upsertGame } from './games.ts';
 
 const serverUrl = await resolveTestServerUrl();
 
@@ -25,6 +25,18 @@ describe.skipIf(serverUrl === undefined)('games', () => {
       const game = await getGame(database(), { bggId: CATAN.id });
 
       expect(game).toMatchObject({ id: CATAN.id, name: CATAN.name, mechanics: CATAN.mechanics });
+    });
+  });
+
+  describe('getGameName', () => {
+    it('returns undefined for an unknown BGG id', async () => {
+      expect(await getGameName(database(), { bggId: 999_999 })).toBeUndefined();
+    });
+
+    it("returns the stored game's name", async () => {
+      await upsertGame(database(), { game: CATAN });
+
+      expect(await getGameName(database(), { bggId: CATAN.id })).toBe(CATAN.name);
     });
   });
 

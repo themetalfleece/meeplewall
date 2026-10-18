@@ -18,6 +18,7 @@ packages/renderer/public/
 /.agents/wrappers/claude/
 /.agents/skills/agent-*/
 /.agents/skills/component-structure/
+/.agents/skills/data-modeling/
 /.agents/skills/env-config/
 /.agents/skills/find-docs/
 /.agents/skills/nextjs/

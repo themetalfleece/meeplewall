@@ -1,4 +1,7 @@
+import type { CollectionShelf } from '@meeplewall/db';
 import { z } from 'zod';
+
+import { MAIN_SHELF, shelfQuery } from './shelves';
 
 /** BGG usernames are letters, digits, underscores and the odd space, dot or dash. */
 const usernameSchema = z
@@ -6,10 +9,11 @@ const usernameSchema = z
   .trim()
   .regex(/^[A-Za-z0-9_][A-Za-z0-9_ .-]{0,49}$/);
 
-const bggIdSchema = z
-  .string()
-  .regex(/^[1-9][0-9]{0,8}$/)
-  .transform(Number);
+/** A BGG id, optionally followed by a dash and a slug that is never read. */
+const GAME_SEGMENT = /^([1-9][0-9]{0,8})(?:-.*)?$/;
+
+/** Long enough to name any real game, short enough to keep a shared link readable. */
+const SLUG_MAX_LENGTH = 60;
 
 /** `segment` percent-decoded, or null when its escapes are malformed. */
 export function decodeSegment(segment: string): string | null {
@@ -34,19 +38,52 @@ export function parseUsername(segment: string): string | null {
   return decoded === null ? null : validateUsername(decoded);
 }
 
-/** The BGG game id in a `[gId]` segment, or null when it is not a positive integer. */
+/**
+ * The BGG game id in a `[gId]` segment such as `13` or `13-catan`, or null when it does not
+ * start with a positive integer. The slug is ignored, so a stale one still finds the game.
+ */
 export function parseGameId(segment: string): number | null {
-  const result = bggIdSchema.safeParse(segment);
+  const id = GAME_SEGMENT.exec(segment)?.[1];
 
-  return result.success ? result.data : null;
+  return id === undefined ? null : Number(id);
+}
+
+/** `name` as lowercase ASCII words joined by dashes, or empty when no letter or digit survives. */
+export function gameSlug(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .slice(0, SLUG_MAX_LENGTH)
+    .replace(/^-+|-+$/g, '');
+}
+
+export interface GameLink {
+  bggId: number;
+  name: string;
+}
+
+/** The canonical `[gId]` segment for a game: `13-catan`, or just `13` when the slug is empty. */
+export function gameSegment({ bggId, name }: GameLink): string {
+  const slug = gameSlug(name);
+
+  return slug === '' ? String(bggId) : `${bggId}-${slug}`;
 }
 
 /** Path helpers, so every link to a route is built one way. Fixed paths are functions too. */
 export const routes = {
   collection: (username: string) => `/u/${encodeURIComponent(username)}`,
-  collectionGame: ({ username, bggId }: { username: string; bggId: number }) =>
-    `/u/${encodeURIComponent(username)}/g/${bggId}`,
-  game: (bggId: number) => `/g/${bggId}`,
+  collectionShelf: ({ username, shelf }: { username: string; shelf: CollectionShelf }) =>
+    `/u/${encodeURIComponent(username)}${shelfQuery(shelf)}`,
+  /** `shelf` picks the neighbours the game's page links to. */
+  collectionGame: ({
+    username,
+    shelf = MAIN_SHELF,
+    ...game
+  }: GameLink & { username: string; shelf?: CollectionShelf }) =>
+    `/u/${encodeURIComponent(username)}/g/${gameSegment(game)}${shelfQuery(shelf)}`,
+  game: (game: GameLink) => `/g/${gameSegment(game)}`,
   syncStatus: (username: string) => `/api/sync/${encodeURIComponent(username)}`,
   refresh: (username: string) => `/api/refresh/${encodeURIComponent(username)}`,
   about: () => '/about',
@@ -64,6 +101,11 @@ export interface GameRouteProps {
 
 export interface UserGameRouteProps {
   params: Promise<{ uId: string; gId: string }>;
+}
+
+/** The query a page receives, as a promise like its params. */
+export interface RouteSearchParams {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 /** What a route handler's second argument carries. */

@@ -14,6 +14,19 @@ export async function getGame(
   return game;
 }
 
+/** Reads only a stored game's name, for callers that build its URL on every request. */
+export async function getGameName(
+  database: DatabaseExecutor,
+  { bggId }: { bggId: number },
+): Promise<string | undefined> {
+  const [game] = await database
+    .select({ name: bggGames.name })
+    .from(bggGames)
+    .where(eq(bggGames.id, bggId));
+
+  return game?.name;
+}
+
 /** Reads every stored game among `bggIds`, in no particular order. Unknown ids are skipped. */
 export async function listGames(
   database: DatabaseExecutor,

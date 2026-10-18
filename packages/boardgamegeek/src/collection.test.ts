@@ -40,6 +40,39 @@ async function fetchWithFakeTimers(username: string) {
   return result;
 }
 
+/** An entry with every status flag clear and no rating. */
+const NO_STATUS = {
+  owned: false,
+  previouslyOwned: false,
+  forTrade: false,
+  wantInTrade: false,
+  wantToPlay: false,
+  wantToBuy: false,
+  wishlist: false,
+  wishlistPriority: null,
+  preordered: false,
+  userRating: null,
+};
+
+/** A `<status>` element's flag attributes, every one `0` unless overridden. */
+function statusAttributes(overrides: Record<string, string>): string {
+  const flags = {
+    own: '0',
+    prevowned: '0',
+    fortrade: '0',
+    want: '0',
+    wanttoplay: '0',
+    wanttobuy: '0',
+    wishlist: '0',
+    preordered: '0',
+    ...overrides,
+  };
+
+  return Object.entries(flags)
+    .map(([name, value]) => `${name}="${value}"`)
+    .join(' ');
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.useRealTimers();
@@ -58,16 +91,47 @@ describe('createBggCollectionClient', () => {
 });
 
 describe('fetchCollection', () => {
-  it('returns owned and want-to-play games with the user rating', async () => {
+  it('returns every game with a status flag, its flags and the user rating', async () => {
     stubResponses(xml(readCollectionFixture()));
 
     const items = await createClient().fetchCollection({ username: 'themetalfleece' });
 
     expect(items).toEqual([
-      { bggId: 363289, owned: true, wantToPlay: false, userRating: 8.5 },
-      { bggId: 178900, owned: false, wantToPlay: true, userRating: null },
-      { bggId: 324937, owned: true, wantToPlay: true, userRating: 7 },
+      { ...NO_STATUS, bggId: 363289, owned: true, userRating: 8.5 },
+      { ...NO_STATUS, bggId: 178900, wantToPlay: true },
+      { ...NO_STATUS, bggId: 40832, previouslyOwned: true, wishlist: true, wishlistPriority: 3 },
+      { ...NO_STATUS, bggId: 324937, owned: true, forTrade: true, wantToPlay: true, userRating: 7 },
     ]);
+  });
+
+  it('drops entries with no status flag', async () => {
+    stubResponses(xml(readCollectionFixture()));
+
+    const items = await createClient().fetchCollection({ username: 'themetalfleece' });
+
+    expect(items?.map((item) => item.bggId)).not.toContain(423432);
+  });
+
+  it('merges the flags of a game listed once per copy', async () => {
+    stubResponses(xml(readCollectionFixture()));
+
+    const items = await createClient().fetchCollection({ username: 'themetalfleece' });
+
+    expect(items?.filter((item) => item.bggId === 324937)).toEqual([
+      expect.objectContaining({ owned: true, forTrade: true, wantToPlay: true, userRating: 7 }),
+    ]);
+  });
+
+  it('ignores a wishlist priority on a game that is not wishlisted', async () => {
+    stubResponses(
+      xml(
+        `<items totalitems="1"><item objectid="5"><status ${statusAttributes({ own: '1' })} wishlistpriority="2" /></item></items>`,
+      ),
+    );
+
+    const items = await createClient().fetchCollection({ username: 'alice' });
+
+    expect(items).toEqual([{ ...NO_STATUS, bggId: 5, owned: true }]);
   });
 
   it('asks for base games with stats, with the bearer token and user agent', async () => {
@@ -117,7 +181,7 @@ describe('fetchCollection', () => {
     const items = await fetchWithFakeTimers('themetalfleece');
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
   });
 
   it('gives up when BGG keeps the collection queued', async () => {

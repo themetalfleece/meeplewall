@@ -42,6 +42,7 @@ const MIN_DESCRIPTION_LENGTH = 40;
 const SKILLS_DIR = join(REPO_ROOT, ".agents", "skills");
 const ROOT_AGENTS = join(REPO_ROOT, "AGENTS.md");
 const SKILL_LOCK = join(REPO_ROOT, ".agents", "skill-lock.json");
+const CATALOGUES = join(REPO_ROOT, ".agents", "catalogues.json");
 
 /** Frontmatter keys, folded to single-line strings. */
 export type Frontmatter = Record<string, string>;
@@ -56,6 +57,24 @@ export type SkillLockEntry = {
 
 export type SkillLock = {
   skills?: Record<string, SkillLockEntry>;
+};
+
+/**
+ * One entry in `.agents/catalogues.json`: a shared package whose exports a
+ * skill must list, so an agent can look one up before writing its own.
+ */
+export type PackageCatalogue = {
+  /** The package directory, relative to the repo root (`packages/ui`). */
+  packageDir?: string;
+  /** The import specifier, used only in messages (`@scope/ui`). */
+  importName?: string;
+  skill?: string;
+  /** A barrel, relative to the package, whose every value export is listed too. */
+  barrel?: string;
+};
+
+export type CatalogueConfig = {
+  catalogues?: PackageCatalogue[];
 };
 
 type AgentsFile = { path: string; budgetBytes: number };
@@ -301,6 +320,154 @@ export function checkSkillLock({
   return errors;
 }
 
+/** Every catalogue entry names its package, its import and an existing skill. */
+export function checkCatalogueConfig({
+  config,
+  skills,
+}: {
+  config: CatalogueConfig;
+  skills: string[];
+}): string[] {
+  const errors: string[] = [];
+
+  for (const [index, entry] of (config.catalogues ?? []).entries()) {
+    for (const field of ["packageDir", "importName", "skill"] as const) {
+      if (!entry[field]) {
+        errors.push(`catalogues.json entry ${index} is missing "${field}".`);
+      }
+    }
+
+    if (entry.skill && !skills.includes(entry.skill)) {
+      errors.push(
+        `catalogues.json entry ${index} names "${entry.skill}", which is not a skill.`
+      );
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Value names a barrel re-exports through `export { ... }`, aliases resolved
+ * and `type` exports skipped. `export *` and declarations are not read, so a
+ * catalogued barrel sticks to named re-exports.
+ */
+export function barrelExportNames(source: string): string[] {
+  const names: string[] = [];
+
+  for (const match of source.matchAll(/export\s*\{([^}]*)\}/g)) {
+    for (const raw of match[1].split(",")) {
+      const entry = raw.trim();
+      if (!entry || entry.startsWith("type ")) continue;
+
+      const alias = entry.split(/\s+as\s+/).pop();
+      if (alias) names.push(alias);
+    }
+  }
+
+  return names;
+}
+
+/**
+ * Names the bullets of a skill's `Catalogue` section open with, a trailing
+ * slash dropped: `` - `Card`, `cardClassName`: ... `` yields both. The section
+ * runs to the next heading at its own level or above, so a nested heading
+ * stays inside it. `null` when there is no such section.
+ */
+export function catalogueEntries(markdown: string): Set<string> | null {
+  const entries = new Set<string>();
+  let sectionLevel: number | null = null;
+  let found = false;
+
+  for (const line of markdown.replace(/\r\n/g, "\n").split("\n")) {
+    const heading = /^(#+)\s+(.*)$/.exec(line);
+
+    if (heading) {
+      const level = heading[1].length;
+
+      if (heading[2].trim() === "Catalogue") {
+        sectionLevel = level;
+        found = true;
+      } else if (sectionLevel !== null && level <= sectionLevel) {
+        sectionLevel = null;
+      }
+
+      continue;
+    }
+
+    if (sectionLevel === null) continue;
+
+    const bullet = /^- ((?:`[^`]+`(?:, )?)+):/.exec(line);
+    if (!bullet) continue;
+
+    for (const name of bullet[1].matchAll(/`([^`]+)`/g)) {
+      entries.add(name[1].replace(/\/$/, ""));
+    }
+  }
+
+  return found ? entries : null;
+}
+
+/**
+ * A skill's catalogue against the package it lists, in both directions: every
+ * subpath (and every name the catalogued barrel exports) has an entry, and
+ * every entry still names a real export. The second direction catches a
+ * removal or a rename's old name, which would send the next agent looking for
+ * something that is gone.
+ */
+export function checkPackageCatalogue({
+  importName,
+  skill,
+  markdown,
+  subpaths,
+  barrelNames,
+}: {
+  importName: string;
+  skill: string;
+  markdown: string;
+  subpaths: string[];
+  barrelNames: string[];
+}): string[] {
+  const entries = catalogueEntries(markdown);
+
+  if (entries === null) {
+    return [`${skill} has no Catalogue section for ${importName}.`];
+  }
+
+  const errors: string[] = [];
+  const subpathNames = subpaths
+    .map((subpath) => subpath.replace(/^\.\//, ""))
+    .filter((name) => name !== ".");
+
+  for (const name of subpathNames) {
+    if (!entries.has(name)) {
+      errors.push(
+        `${skill} does not list ${importName}/${name}; add an entry to its catalogue.`
+      );
+    }
+  }
+
+  for (const name of barrelNames) {
+    if (!entries.has(name)) {
+      errors.push(
+        `${skill} does not list ${name} from ${importName}; add an entry to its catalogue.`
+      );
+    }
+  }
+
+  const exported = new Set([...subpathNames, ...barrelNames]);
+
+  for (const name of entries) {
+    if (!exported.has(name)) {
+      errors.push(
+        `${skill} lists ${name}, which ${importName} no longer exports; update or remove its catalogue entry.`
+      );
+    }
+  }
+
+  return errors;
+}
+
 // --------------------------------------------------------------------------
 // Filesystem. Reads the tree and feeds the rules above.
 // --------------------------------------------------------------------------
@@ -369,6 +536,62 @@ function listDocFiles(): string[] {
 
 function repoPath(path: string): string {
   return toPosix(relative(REPO_ROOT, path));
+}
+
+/** Checks each catalogued package against its skill. Absent config means none. */
+function checkCatalogues(skills: string[]): string[] {
+  if (!existsSync(CATALOGUES)) return [];
+
+  const config = JSON.parse(
+    readFileSync(CATALOGUES, "utf8")
+  ) as CatalogueConfig;
+  const configErrors = checkCatalogueConfig({ config, skills });
+
+  if (configErrors.length > 0) return configErrors;
+
+  const errors: string[] = [];
+
+  for (const entry of config.catalogues ?? []) {
+    const { packageDir = "", importName = "", skill = "", barrel } = entry;
+    const manifestPath = join(REPO_ROOT, packageDir, "package.json");
+    const skillFile = join(SKILLS_DIR, skill, "SKILL.md");
+
+    // A missing SKILL.md is already reported by the per-skill checks.
+    if (!existsSync(skillFile)) continue;
+
+    if (!existsSync(manifestPath)) {
+      errors.push(
+        `catalogues.json names ${packageDir}, which has no package.json.`
+      );
+      continue;
+    }
+
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+      exports?: Record<string, unknown>;
+    };
+    const barrelPath = barrel ? join(REPO_ROOT, packageDir, barrel) : null;
+
+    if (barrelPath && !existsSync(barrelPath)) {
+      errors.push(
+        `catalogues.json names ${packageDir}/${barrel}, which does not exist.`
+      );
+      continue;
+    }
+
+    errors.push(
+      ...checkPackageCatalogue({
+        importName,
+        skill,
+        markdown: readFileSync(skillFile, "utf8"),
+        subpaths: Object.keys(manifest.exports ?? {}),
+        barrelNames: barrelPath
+          ? barrelExportNames(readFileSync(barrelPath, "utf8"))
+          : [],
+      })
+    );
+  }
+
+  return errors;
 }
 
 function main(): void {
@@ -450,6 +673,8 @@ function main(): void {
     const lock = JSON.parse(readFileSync(SKILL_LOCK, "utf8")) as SkillLock;
     errors.push(...checkSkillLock({ lock, skills }));
   }
+
+  errors.push(...checkCatalogues(skills));
 
   if (errors.length > 0) {
     console.error(

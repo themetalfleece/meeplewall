@@ -1,17 +1,23 @@
 import { requestCollectionSync } from '@meeplewall/collection-sync';
 import {
+  COLLECTION_SHELVES,
   getCollectionByUsername,
   getCollectionEntry,
   getLatestCollectionSync,
+  isOnShelf,
   listImageAssets,
+  type CollectionItem,
   type CollectionNeighbour,
+  type CollectionShelf,
   type ImageAsset,
 } from '@meeplewall/db';
 
+import { collectionBadges, type CollectionBadge } from './collection-badges';
 import { storagePublicBaseUrl } from './env';
 import { resolveGameImages } from './game-view';
 import { getDatabase } from './services';
 import { needsSync, toSyncStatus } from './sync';
+import { MAIN_SHELF, shelfLabel } from './shelves';
 import type { SyncStatus } from './sync-status';
 
 /** One game on a collection grid. */
@@ -20,15 +26,23 @@ export interface CollectionCard {
   name: string;
   year: number | null;
   thumbUrl: string | null;
-  owned: boolean;
-  wantToPlay: boolean;
-  userRating: number | null;
+  badges: CollectionBadge[];
+}
+
+/** A shelf the collection page links to, with how many games sit on it. */
+export interface ShelfTab {
+  shelf: CollectionShelf;
+  label: string;
+  count: number;
 }
 
 export interface CollectionPage {
   /** The username as BGG spells it once a sync has stored it, else as typed in the URL. */
   displayName: string;
-  /** Null until the first sync stores the collection. */
+  shelf: CollectionShelf;
+  /** The main wall, the open shelf and every other shelf with a game on it, in shelf order. */
+  shelves: ShelfTab[];
+  /** The open shelf's games. Null until the first sync stores the collection. */
   cards: CollectionCard[] | null;
   fetchedAt: string | null;
   sync: SyncStatus;
@@ -48,14 +62,30 @@ function groupByGame(assets: ImageAsset[]): Map<number, ImageAsset[]> {
   return byGame;
 }
 
+function shelfTabs({
+  items,
+  shelf,
+}: {
+  items: CollectionItem[];
+  shelf: CollectionShelf;
+}): ShelfTab[] {
+  return COLLECTION_SHELVES.map((candidate) => ({
+    shelf: candidate,
+    label: shelfLabel(candidate),
+    count: items.filter((item) => isOnShelf({ item, shelf: candidate })).length,
+  })).filter((tab) => tab.count > 0 || tab.shelf === MAIN_SHELF || tab.shelf === shelf);
+}
+
 /**
- * Reads a user's stored collection and, when it is missing or a day old, queues a sync for the
- * sync worker. Never waits on BGG: the client polls the sync status instead.
+ * Reads one shelf of a user's stored collection and, when the collection is missing or a day old,
+ * queues a sync for the sync worker. Never waits on BGG: the client polls the sync status instead.
  */
 export async function loadCollectionPage({
   username,
+  shelf,
 }: {
   username: string;
+  shelf: CollectionShelf;
 }): Promise<CollectionPage> {
   const database = getDatabase();
   const [stored, latestSync] = await Promise.all([
@@ -72,15 +102,23 @@ export async function loadCollectionPage({
   }
 
   if (stored === undefined) {
-    return { displayName: username, cards: null, fetchedAt: null, sync };
+    return {
+      displayName: username,
+      shelf,
+      shelves: shelfTabs({ items: [], shelf }),
+      cards: null,
+      fetchedAt: null,
+      sync,
+    };
   }
 
+  const shelved = stored.items.filter(({ item }) => isOnShelf({ item, shelf }));
   const assets = await listImageAssets(database, {
-    bggGameIds: stored.items.map(({ game }) => game.id),
+    bggGameIds: shelved.map(({ game }) => game.id),
   });
   const assetsByGame = groupByGame(assets);
   const publicBaseUrl = storagePublicBaseUrl();
-  const cards = stored.items.map(({ item, game }) => ({
+  const cards = shelved.map(({ item, game }) => ({
     bggId: game.id,
     name: game.name,
     year: game.year,
@@ -89,25 +127,25 @@ export async function loadCollectionPage({
       assets: assetsByGame.get(game.id) ?? [],
       publicBaseUrl,
     }).thumbUrl,
-    owned: item.owned,
-    wantToPlay: item.wantToPlay,
-    userRating: item.userRating,
+    badges: collectionBadges(item),
   }));
 
   return {
     displayName: stored.user.bggUsername,
+    shelf,
+    shelves: shelfTabs({ items: stored.items.map(({ item }) => item), shelf }),
     cards,
     fetchedAt: stored.collection.fetchedAt.toISOString(),
     sync,
   };
 }
 
-/** A game as it sits in one user's collection. */
+/** A game as it sits on one shelf of a user's collection. */
 export interface CollectionGame {
   displayName: string;
-  owned: boolean;
-  wantToPlay: boolean;
-  userRating: number | null;
+  /** The shelf the position and neighbours are counted on. */
+  shelf: CollectionShelf;
+  badges: CollectionBadge[];
   /** One-based, for "3 of 40". */
   position: number;
   itemCount: number;
@@ -115,24 +153,28 @@ export interface CollectionGame {
   next: CollectionNeighbour | null;
 }
 
-/** Reads a game's place in a user's stored collection, or null when it is not in it. */
+/**
+ * Reads a game's place on a shelf of a user's stored collection, or null when it is not in the
+ * collection. A game not on `shelf` is placed on the first shelf it sits on.
+ */
 export async function loadCollectionGame({
   username,
   bggId,
+  shelf,
 }: {
   username: string;
   bggId: number;
+  shelf: CollectionShelf;
 }): Promise<CollectionGame | null> {
-  const entry = await getCollectionEntry(getDatabase(), { username, bggGameId: bggId });
+  const entry = await getCollectionEntry(getDatabase(), { username, bggGameId: bggId, shelf });
   if (entry === undefined) {
     return null;
   }
 
   return {
     displayName: entry.user.bggUsername,
-    owned: entry.item.owned,
-    wantToPlay: entry.item.wantToPlay,
-    userRating: entry.item.userRating,
+    shelf: entry.shelf,
+    badges: collectionBadges(entry.item),
     position: entry.position + 1,
     itemCount: entry.itemCount,
     previous: entry.previous,
@@ -145,6 +187,7 @@ const SUMMARY_COVER_COUNT = 5;
 
 export interface CollectionSummary {
   displayName: string;
+  /** Games on the main wall. */
   itemCount: number;
   /** BGG's own thumbnails, which the social image renderer can read. */
   coverUrls: string[];
@@ -161,10 +204,12 @@ export async function loadCollectionSummary({
     return null;
   }
 
+  const shelved = stored.items.filter(({ item }) => isOnShelf({ item, shelf: MAIN_SHELF }));
+
   return {
     displayName: stored.user.bggUsername,
-    itemCount: stored.items.length,
-    coverUrls: stored.items
+    itemCount: shelved.length,
+    coverUrls: shelved
       .flatMap(({ game }) => (game.thumbUrlRaw === null ? [] : [game.thumbUrlRaw]))
       .slice(0, SUMMARY_COVER_COUNT),
   };

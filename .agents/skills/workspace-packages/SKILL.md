@@ -28,7 +28,7 @@ description: >-
    That config makes `no-explicit-any`, the `no-unsafe-*` family and `consistent-type-assertions: never` errors. Fix the types instead of disabling a rule.
 
 3. Prettier re-exports `@meeplewall/config/prettier`, the same way as the root `prettier.config.mjs`.
-4. Name the scripts `lint`, `typecheck`, `build` and `test`. The test script is `vitest run`; the root `vitest.config.mts` lists every non-legacy workspace as a Vitest project, so `pnpm exec vitest` at the root runs them all. The typecheck script is `tsc --noEmit`. The base emits declarations and source maps on purpose, so a package that builds with `tsc` gets output; emit is switched off per invocation, never in the base.
+4. Name the scripts `lint`, `typecheck`, `build` and `test`. The test script is `vitest run`; the root `vitest.config.mts` lists every workspace under `apps/` and `packages/` as a Vitest project, so `pnpm exec vitest` at the root runs them all. The typecheck script is `tsc --noEmit`. The base emits declarations and source maps on purpose, so a package that builds with `tsc` gets output; emit is switched off per invocation, never in the base.
 5. Add `@meeplewall/config` as a `workspace:*` dev dependency.
 
 ## Import boundary
@@ -59,6 +59,6 @@ New dependencies follow `package-management`. Every third-party entry is a `cata
 
 To give a package a library the catalog already lists, write the `catalog:` reference into its `package.json` by hand and run `pnpm install`. `pnpm add --save-catalog-name=dev eslint` re-resolves the newest release and rewrites the existing catalog range for every package (it moved `typescript` across a major), which is an upgrade, not an addition.
 
-Vitest's `vite` peer binds to whatever copy the workspace already has, which is the legacy app's Vite 5. That is why the root depends on `vite` from `catalog:dev`. Run `pnpm peers check` after adding any tool with a `vite` peer.
+Vitest takes `vite` as a peer, so the root and every workspace that runs Vitest list `vite` from `catalog:dev` beside it. Run `pnpm peers check` after adding any tool with a `vite` peer.
 
 `injectWorkspacePackages: true` is set in `pnpm-workspace.yaml`. Changing a setting that alters the `node_modules` layout makes `pnpm install` purge `node_modules`, and without a TTY it aborts with `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`. Run `pnpm install --config.confirmModulesPurge=false` once.

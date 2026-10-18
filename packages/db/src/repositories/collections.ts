@@ -1,4 +1,4 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 
 import type { DatabaseExecutor } from '../database.ts';
 import {
@@ -13,6 +13,7 @@ import {
   type NewCollectionItem,
   type UserCollection,
 } from '../schema/index.ts';
+import { firstShelfOf, isOnShelf, type CollectionShelf } from '../shelves.ts';
 import { ensureUser, findUser } from './users.ts';
 
 export type CollectionItemInput = Omit<NewCollectionItem, 'collectionId'>;
@@ -62,7 +63,9 @@ export interface CollectionEntry {
   user: BggUser;
   item: CollectionItem;
   game: BggGame;
-  /** Zero-based place of the game in the collection's sort order. */
+  /** The shelf the position and neighbours are counted on. */
+  shelf: CollectionShelf;
+  /** Zero-based place of the game in the shelf's sort order. */
   position: number;
   itemCount: number;
   previous: CollectionNeighbour | null;
@@ -70,12 +73,13 @@ export interface CollectionEntry {
 }
 
 /**
- * Reads one game of a user's stored collection with its neighbours in sort
- * order, or undefined when the user, the collection or the game is missing.
+ * Reads one game of a user's stored collection with its neighbours on `shelf`, or undefined when
+ * the user, the collection or the game is missing. A game not on `shelf` is counted on the first
+ * shelf it sits on instead, so a stale link still lands.
  */
 export async function getCollectionEntry(
   database: DatabaseExecutor,
-  { username, bggGameId }: { username: string; bggGameId: number },
+  { username, bggGameId, shelf }: { username: string; bggGameId: number; shelf: CollectionShelf },
 ): Promise<CollectionEntry | undefined> {
   const user = await findUser(database, { username });
   if (user === undefined) {
@@ -83,35 +87,40 @@ export async function getCollectionEntry(
   }
 
   const order = await database
-    .select({ bggGameId: collectionItems.bggGameId, name: bggGames.name })
+    .select({ item: collectionItems, name: bggGames.name })
     .from(collectionItems)
     .innerJoin(userCollections, eq(collectionItems.collectionId, userCollections.id))
     .innerJoin(bggGames, eq(collectionItems.bggGameId, bggGames.id))
     .where(eq(userCollections.userId, user.id))
     .orderBy(asc(collectionItems.sortIndex));
-  const position = order.findIndex((neighbour) => neighbour.bggGameId === bggGameId);
-  if (position === -1) {
+  const row = order.find(({ item }) => item.bggGameId === bggGameId);
+  if (row === undefined) {
+    return undefined;
+  }
+  const entryShelf = isOnShelf({ item: row.item, shelf }) ? shelf : firstShelfOf(row.item);
+  if (entryShelf === null) {
     return undefined;
   }
 
-  const [row] = await database
-    .select({ item: collectionItems, game: bggGames })
-    .from(collectionItems)
-    .innerJoin(userCollections, eq(collectionItems.collectionId, userCollections.id))
-    .innerJoin(bggGames, eq(collectionItems.bggGameId, bggGames.id))
-    .where(and(eq(userCollections.userId, user.id), eq(collectionItems.bggGameId, bggGameId)));
-  if (row === undefined) {
+  const shelved = order
+    .filter(({ item }) => isOnShelf({ item, shelf: entryShelf }))
+    .map(({ item, name }) => ({ bggGameId: item.bggGameId, name }));
+  const position = shelved.findIndex((neighbour) => neighbour.bggGameId === bggGameId);
+
+  const [game] = await database.select().from(bggGames).where(eq(bggGames.id, bggGameId));
+  if (game === undefined) {
     return undefined;
   }
 
   return {
     user,
     item: row.item,
-    game: row.game,
+    game,
+    shelf: entryShelf,
     position,
-    itemCount: order.length,
-    previous: order[position - 1] ?? null,
-    next: order[position + 1] ?? null,
+    itemCount: shelved.length,
+    previous: shelved[position - 1] ?? null,
+    next: shelved[position + 1] ?? null,
   };
 }
 

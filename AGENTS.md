@@ -16,6 +16,7 @@ This file is always loaded, so it stays small. Long-form rules live in `.agents/
 | Comments, docs, any prose                             | `.agents/skills/writing-style/SKILL.md`       |
 | Any TypeScript                                        | `.agents/skills/typescript-style/SKILL.md`    |
 | A component directory or file layout                  | `.agents/skills/component-structure/SKILL.md` |
+| A class, a value object, a branch on a union          | `.agents/skills/data-modeling/SKILL.md`       |
 | Anything Next.js                                      | `.agents/skills/nextjs/SKILL.md`              |
 | Rendering, memoisation, bundle size                   | `.agents/skills/react-performance/SKILL.md`   |
 | A library API you are unsure of                       | `.agents/skills/find-docs/SKILL.md`           |

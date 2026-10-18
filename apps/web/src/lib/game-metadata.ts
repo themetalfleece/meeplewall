@@ -46,7 +46,7 @@ export async function gameMetadata({
       description: game.description,
       fallback: `${game.name} on BoardGameGeek, as a 3D box.`,
     }),
-    alternates: { canonical: routes.game(bggId) },
+    alternates: { canonical: routes.game({ bggId, name: game.name }) },
     openGraph: { title, type: 'website' },
   };
 }

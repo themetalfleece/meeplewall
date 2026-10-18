@@ -1,6 +1,6 @@
 # packages/collection-sync
 
-`@board-games/collection-sync`: keeps stored collections in step with BGG. `CollectionSyncService` takes a database, a geekdo `BggClient` and a `CollectionProvider` (the XMLAPI2 collection client fits it as is). Framework-agnostic: the app decides where a started sync runs.
+`@meeplewall/collection-sync`: keeps stored collections in step with BGG. `CollectionSyncService` takes a database, a geekdo `BggClient` and a `CollectionProvider` (the XMLAPI2 collection client fits it as is). Framework-agnostic: the app decides where a started sync runs.
 
 ## What a sync does
 

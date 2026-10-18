@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { hostname } from 'node:os';
 
-import { closeDatabase, createDatabase, migrateDatabase } from '@board-games/db';
-import { createStorage } from '@board-games/storage';
+import { closeDatabase, createDatabase, migrateDatabase } from '@meeplewall/db';
+import { createStorage } from '@meeplewall/storage';
 
 import { loadWorkerConfig } from './env.ts';
 import { HealthServer } from './health-server.ts';

@@ -7,7 +7,7 @@ import {
   imageJobs,
   upsertGame,
   type ImageKind,
-} from '@board-games/db';
+} from '@meeplewall/db';
 import { eq } from 'drizzle-orm';
 import sharp from 'sharp';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';

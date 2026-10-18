@@ -1,10 +1,10 @@
 # packages/renderer
 
-`@board-games/renderer`: the framework-agnostic Three.js game box. `mountGameBox({ element, game, options })` from `.` and the `<GameBox>` React wrapper from `./react`. v1 draws the rectangular box only; bags, cylinders, tins and flaps render as boxes.
+`@meeplewall/renderer`: the framework-agnostic Three.js game box. `mountGameBox({ element, game, options })` from `.` and the `<GameBox>` React wrapper from `./react`. v1 draws the rectangular box only; bags, cylinders, tins and flaps render as boxes.
 
 ## Rules
 
-- **The look is tuned against `apps/web-legacy/public/practice/index.html`.** After any change to lighting, material, shader or antialiasing, run `pnpm --filter @board-games/renderer dev` and compare both panes of `dev.html`. `?yaw=<radians>` and `?cam=x,y,z` move both panes together; `?spin` idle-spins the new one.
+- **The look is tuned against `apps/web-legacy/public/practice/index.html`.** After any change to lighting, material, shader or antialiasing, run `pnpm --filter @meeplewall/renderer dev` and compare both panes of `dev.html`. `?yaw=<radians>` and `?cam=x,y,z` move both panes together; `?spin` idle-spins the new one.
 - **Never replace a face uniform object; set its `.value`.** The compiled program keeps the object `onBeforeCompile` handed it, so a new object is never seen.
 - **Every shader chunk the patch targets must exist.** `patchBoxShader` throws when one is missing, and `boxShader.test.ts` runs it against the installed `ShaderLib.physical`, so a three.js upgrade that renames a chunk fails the tests. Keep it that way rather than using a silent `String.replace`.
 - **`GameBoxOptions` are mount-time.** `update` takes only the game. The React wrapper reads options once; a caller remounts with a new `key` to change them.

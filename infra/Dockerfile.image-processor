@@ -1,6 +1,6 @@
 # The image-processor worker. Build from the repo root:
 #
-#   docker build -f infra/Dockerfile.image-processor -t board-games-image-processor .
+#   docker build -f infra/Dockerfile.image-processor -t meeplewall-image-processor .
 #
 # It reads every variable in apps/image-processor/.env.example, and serves GET /healthz on
 # IMAGE_PROCESSOR_HEALTH_PORT.
@@ -12,10 +12,10 @@ RUN corepack enable
 WORKDIR /repo
 COPY . .
 # Installs and builds only the worker and the workspace packages it depends on.
-RUN pnpm install --frozen-lockfile --filter "@board-games/image-processor..."
-RUN pnpm --filter "@board-games/image-processor..." build
+RUN pnpm install --frozen-lockfile --filter "@meeplewall/image-processor..."
+RUN pnpm --filter "@meeplewall/image-processor..." build
 # A self-contained copy with production dependencies only, workspace packages included.
-RUN pnpm --filter @board-games/image-processor deploy --prod /deploy
+RUN pnpm --filter @meeplewall/image-processor deploy --prod /deploy
 
 FROM node:24.22.0-trixie-slim
 ENV NODE_ENV=production

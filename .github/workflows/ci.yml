@@ -40,12 +40,12 @@ jobs:
       - run: docker compose -f infra/docker-compose.yml run --rm minio-init
       - run: pnpm -r --if-present test
         env:
-          DATABASE_URL: postgres://boardgames:boardgames@localhost:5432/boardgames
+          DATABASE_URL: postgres://meeplewall:meeplewall@localhost:5432/meeplewall
           STORAGE_ENDPOINT: http://localhost:9000
           STORAGE_ACCESS_KEY_ID: minioadmin
           STORAGE_SECRET_ACCESS_KEY: minioadmin
-          STORAGE_BUCKET: board-games
-          STORAGE_PUBLIC_BASE_URL: http://localhost:9000/board-games
+          STORAGE_BUCKET: meeplewall
+          STORAGE_PUBLIC_BASE_URL: http://localhost:9000/meeplewall
           STORAGE_FORCE_PATH_STYLE: 'true'
       # Both app images must keep building from a clean checkout.
       - run: docker build -f infra/Dockerfile.image-processor .

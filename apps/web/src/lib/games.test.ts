@@ -1,4 +1,4 @@
-import type { BggGame } from '@board-games/db';
+import type { BggGame } from '@meeplewall/db';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('next/cache', () => ({ cacheLife: mocks.cacheLife, cacheTag: mocks.cacheTag }));
-vi.mock('@board-games/db', () => ({
+vi.mock('@meeplewall/db', () => ({
   getGame: mocks.getGame,
   listImageAssets: mocks.listImageAssets,
 }));

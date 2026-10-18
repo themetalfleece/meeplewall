@@ -1,6 +1,6 @@
 // Shared Prettier config for the whole monorepo.
 //
-//   import config from '@board-games/config/prettier';
+//   import config from '@meeplewall/config/prettier';
 //   export default config;
 
 /** @type {import("prettier").Config} */

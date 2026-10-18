@@ -8,7 +8,7 @@ import { FIXTURE_GAME_IDS, readFixture } from './fixtures/fixtures.ts';
 import type { FixtureEndpoint } from './fixtures/fixtures.ts';
 import { BggHttpError, BggResponseError } from './http.ts';
 
-const USER_AGENT = 'board-games tests';
+const USER_AGENT = 'meeplewall tests';
 
 type Responder = (url: URL) => Response;
 

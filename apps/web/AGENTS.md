@@ -1,6 +1,6 @@
 # apps/web
 
-`@board-games/web`: the Next.js 16 App Router site, a thin wrapper over `packages/*`. Read `.agents/skills/nextjs/` before changing a route, cache or config.
+`@meeplewall/web`: the Next.js 16 App Router site, a thin wrapper over `packages/*`. Read `.agents/skills/nextjs/` before changing a route, cache or config.
 
 ## How the routes render
 
@@ -19,14 +19,14 @@
 - **Params arrive encoded.** Parse them with `parseUsername` and `parseGameId`; build links with `routes`.
 - **The 3D box only gets the processed cover.** BGG's image CDN sends no CORS headers, so `toGameBoxInput` falls back to `public/placeholder-cover.png`, never a BGG URL.
 - **Social images use BGG's original JPEG or PNG.** Their renderer cannot read WebP. `next/og` and the reads are imported inside the image function.
-- **Postgres migrations are not run here.** The image processor applies them at startup, or run `pnpm --filter @board-games/db migrate`.
+- **Postgres migrations are not run here.** The image processor applies them at startup, or run `pnpm --filter @meeplewall/db migrate`.
 
 ## Running it
 
-- `pnpm --filter "@board-games/web..." build` builds the packages and the app. `pnpm --filter @board-games/web dev` serves it.
-- `pnpm --filter @board-games/web start` runs `.next/standalone/apps/web/server.js`. Copy `public` and `.next/static` beside it first, as `infra/Dockerfile.web` does.
+- `pnpm --filter "@meeplewall/web..." build` builds the packages and the app. `pnpm --filter @meeplewall/web dev` serves it.
+- `pnpm --filter @meeplewall/web start` runs `.next/standalone/apps/web/server.js`. Copy `public` and `.next/static` beside it first, as `infra/Dockerfile.web` does.
 - `docker build -f infra/Dockerfile.web --build-arg SITE_URL=<origin> .` from the root.
 
 ## Tests
 
-Vitest, next to each file. `src/lib` tests mock `@board-games/db`, `next/cache` and `next/server`; hook tests render with `react-dom/client` in jsdom.
+Vitest, next to each file. `src/lib` tests mock `@meeplewall/db`, `next/cache` and `next/server`; hook tests render with `react-dom/client` in jsdom.

@@ -9,9 +9,9 @@ import {
   type DatabaseExecutor,
   type ImageJob,
   type ImageKind,
-} from '@board-games/db';
-import { processCover, type EncodedImage } from '@board-games/image-pipeline';
-import type { Storage } from '@board-games/storage';
+} from '@meeplewall/db';
+import { processCover, type EncodedImage } from '@meeplewall/image-pipeline';
+import type { Storage } from '@meeplewall/storage';
 
 import { downloadSource } from './download-source.ts';
 import { describeError, type JsonLogger } from './logger.ts';

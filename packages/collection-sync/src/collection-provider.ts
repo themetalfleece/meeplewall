@@ -1,4 +1,4 @@
-import type { CollectionSource } from '@board-games/db';
+import type { CollectionSource } from '@meeplewall/db';
 
 /** One game in a user's BGG collection, with that user's own flags and rating. */
 export interface CollectedGame {

@@ -1,5 +1,5 @@
 {
-  "name": "@board-games/boardgamegeek",
+  "name": "@meeplewall/boardgamegeek",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -20,7 +20,7 @@
     "dev-fetch": "node --env-file-if-exists=.env.local scripts/dev-fetch.ts"
   },
   "devDependencies": {
-    "@board-games/config": "workspace:*",
+    "@meeplewall/config": "workspace:*",
     "@types/node": "catalog:dev",
     "eslint": "catalog:dev",
     "typescript": "catalog:dev",

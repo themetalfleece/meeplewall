@@ -14,9 +14,9 @@ interface RootLayoutProps {
 export function generateMetadata(): Metadata {
   return {
     metadataBase: siteUrl(),
-    title: { default: 'Board Games', template: '%s | Board Games' },
+    title: { default: 'Meeplewall', template: '%s | Meeplewall' },
     description: 'Board game collections from BoardGameGeek, shelved as 3D boxes.',
-    openGraph: { siteName: 'Board Games', type: 'website' },
+    openGraph: { siteName: 'Meeplewall', type: 'website' },
   };
 }
 

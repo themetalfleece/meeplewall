@@ -13,23 +13,23 @@ description: >-
 ## Layout
 
 - `apps/*`: deployable apps. `apps/web-legacy` is frozen; its own `AGENTS.md` says what may change there.
-- `packages/*`: shared code. `packages/config` (`@board-games/config`) is the shared TypeScript, ESLint and Prettier config.
+- `packages/*`: shared code. `packages/config` (`@meeplewall/config`) is the shared TypeScript, ESLint and Prettier config.
 - Root-level `scripts/` holds repo tooling (the agent doc scripts), not app code.
 
 ## Wiring a new package
 
-1. `tsconfig.json` extends `@board-games/config/tsconfig.base.json`. The base turns on `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride` and `exactOptionalPropertyTypes`. Do not relax them in the package.
+1. `tsconfig.json` extends `@meeplewall/config/tsconfig.base.json`. The base turns on `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride` and `exactOptionalPropertyTypes`. Do not relax them in the package.
 2. `eslint.config.js` re-exports the shared config:
 
    ```js
-   export { default } from '@board-games/config/eslint';
+   export { default } from '@meeplewall/config/eslint';
    ```
 
    That config makes `no-explicit-any`, the `no-unsafe-*` family and `consistent-type-assertions: never` errors. Fix the types instead of disabling a rule.
 
-3. Prettier re-exports `@board-games/config/prettier`, the same way as the root `prettier.config.mjs`.
+3. Prettier re-exports `@meeplewall/config/prettier`, the same way as the root `prettier.config.mjs`.
 4. Name the scripts `lint`, `typecheck`, `build` and `test`. The test script is `vitest run`; the root `vitest.config.mts` lists every non-legacy workspace as a Vitest project, so `pnpm exec vitest` at the root runs them all. The typecheck script is `tsc --noEmit`. The base emits declarations and source maps on purpose, so a package that builds with `tsc` gets output; emit is switched off per invocation, never in the base.
-5. Add `@board-games/config` as a `workspace:*` dev dependency.
+5. Add `@meeplewall/config` as a `workspace:*` dev dependency.
 
 ## Import boundary
 

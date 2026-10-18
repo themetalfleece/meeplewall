@@ -1,6 +1,6 @@
-import type { BggGame, ImageAsset } from '@board-games/db';
-import type { GameBoxInput } from '@board-games/renderer';
-import { publicObjectUrl } from '@board-games/storage';
+import type { BggGame, ImageAsset } from '@meeplewall/db';
+import type { GameBoxInput } from '@meeplewall/renderer';
+import { publicObjectUrl } from '@meeplewall/storage';
 
 /** A square box of a common size, for games whose editions list no dimensions. */
 const FALLBACK_BOX_MM = { width: 296, height: 296, depth: 72 };

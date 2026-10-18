@@ -1,1 +1,1 @@
-export { default } from '@board-games/config/eslint';
+export { default } from '@meeplewall/config/eslint';

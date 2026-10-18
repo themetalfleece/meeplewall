@@ -9,7 +9,7 @@ import type { GameBoxViewerProps } from './GameBoxViewer.types';
 // three.js is most of the game page's JavaScript, so it loads in its own chunk, in the browser
 // only: the canvas needs WebGL and has nothing to server-render.
 const GameBox = dynamic(
-  () => import('@board-games/renderer/react').then((renderer) => renderer.GameBox),
+  () => import('@meeplewall/renderer/react').then((renderer) => renderer.GameBox),
   { ssr: false, loading: BoxPlaceholder },
 );
 

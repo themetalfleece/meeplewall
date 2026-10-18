@@ -1,1 +1,1 @@
-export { default } from '@board-games/config/prettier';
+export { default } from '@meeplewall/config/prettier';

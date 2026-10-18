@@ -1,4 +1,4 @@
-import type { BggClient } from '@board-games/boardgamegeek';
+import type { BggClient } from '@meeplewall/boardgamegeek';
 import {
   enqueueImageJob,
   finishCollectionSync,
@@ -16,7 +16,7 @@ import {
   type DatabaseExecutor,
   type ImageKind,
   type RefreshSource,
-} from '@board-games/db';
+} from '@meeplewall/db';
 
 import type { CollectedGame, CollectionProvider } from './collection-provider.ts';
 import {

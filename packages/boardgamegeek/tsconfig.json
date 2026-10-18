@@ -1,5 +1,5 @@
 {
-  "extends": "@board-games/config/tsconfig.base.json",
+  "extends": "@meeplewall/config/tsconfig.base.json",
   "compilerOptions": {
     "types": ["node"],
     "rewriteRelativeImportExtensions": true,

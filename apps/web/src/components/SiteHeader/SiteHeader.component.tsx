@@ -6,7 +6,7 @@ export function SiteHeader() {
   return (
     <header className={styles.header}>
       <Link href="/" className={styles.brand}>
-        Board Games
+        Meeplewall
       </Link>
       <a className={styles.credit} href="https://boardgamegeek.com" rel="noreferrer">
         Data from BoardGameGeek

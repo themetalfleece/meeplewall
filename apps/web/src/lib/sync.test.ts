@@ -1,5 +1,5 @@
-import { SYNC_ABANDONED_AFTER_SECONDS, type SyncRequest } from '@board-games/collection-sync';
-import type { CollectionSync } from '@board-games/db';
+import { SYNC_ABANDONED_AFTER_SECONDS, type SyncRequest } from '@meeplewall/collection-sync';
+import type { CollectionSync } from '@meeplewall/db';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { IDLE_SYNC_STATUS, syncStatusSchema } from './sync-status';

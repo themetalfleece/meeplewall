@@ -6,7 +6,7 @@ import {
   imageJobs,
   refreshLog,
   upsertGame,
-} from '@board-games/db';
+} from '@meeplewall/db';
 import { eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 

@@ -1,15 +1,15 @@
 # apps/image-processor
 
-`@board-games/image-processor`: the worker that drains `image_jobs`. It downloads a game's cover, renders it with `image-pipeline`, uploads it with `storage`, records the asset with `db`, then asks apps/web to re-render the game's pages.
+`@meeplewall/image-processor`: the worker that drains `image_jobs`. It downloads a game's cover, renders it with `image-pipeline`, uploads it with `storage`, records the asset with `db`, then asks apps/web to re-render the game's pages.
 
 ## Running it locally
 
 1. Start Postgres and minio (`.agents/skills/local-infra/`). Copy `apps/image-processor/.env.example` to `.env.local` beside it and set `INTERNAL_REVALIDATE_SECRET` to the value in `apps/web/.env.local`. A missing variable stops the worker at startup.
-2. `pnpm --filter @board-games/image-processor... build` once, so the workspace packages have a `dist/`.
-3. `pnpm --filter @board-games/image-processor dev` runs `src/main.ts`, applying pending migrations first.
+2. `pnpm --filter @meeplewall/image-processor... build` once, so the workspace packages have a `dist/`.
+3. `pnpm --filter @meeplewall/image-processor dev` runs `src/main.ts`, applying pending migrations first.
 4. Queue work: set a game's `image_url_raw` to a BGG `original` image URL and insert one `image_jobs` row per kind. The seed games have no image URL, so their jobs fail.
 
-Container: `docker build -f infra/Dockerfile.image-processor .` from the root, then run it on `board-games-dev_default` with `postgres` and `minio` as hostnames.
+Container: `docker build -f infra/Dockerfile.image-processor .` from the root, then run it on `meeplewall-dev_default` with `postgres` and `minio` as hostnames.
 
 ## Job lifecycle
 

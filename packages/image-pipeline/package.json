@@ -1,5 +1,5 @@
 {
-  "name": "@board-games/image-pipeline",
+  "name": "@meeplewall/image-pipeline",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -19,7 +19,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@board-games/config": "workspace:*",
+    "@meeplewall/config": "workspace:*",
     "@types/node": "catalog:dev",
     "eslint": "catalog:dev",
     "typescript": "catalog:dev",

@@ -5,7 +5,7 @@ import { createBggCollectionClient } from './collection.ts';
 // A live call to XMLAPI2. It needs a registered application's token, so it skips when
 // BGG_API_TOKEN is unset rather than passing without a request.
 
-const USER_AGENT = 'board-games e2e tests (+https://github.com/themetalfleece/board-games)';
+const USER_AGENT = 'meeplewall e2e tests (+https://meeplewall.com)';
 const token = process.env.BGG_API_TOKEN;
 
 // The suite body runs even when skipped, so the client is built only inside a test.

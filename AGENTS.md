@@ -1,6 +1,6 @@
-# board-games
+# Meeplewall
 
-A gallery of a board game collection rendered as 3D boxes. pnpm workspaces monorepo (`apps/*`, `packages/*`). `apps/web-legacy` is the frozen Vite app, kept as a running reference until the new app lands. `packages/config` holds the shared TypeScript, ESLint and Prettier config.
+Meeplewall: board game collections from BoardGameGeek, rendered as 3D boxes, at meeplewall.com. Prose says Meeplewall; identifiers, package names and slugs say `meeplewall`. pnpm workspaces monorepo (`apps/*`, `packages/*`). `apps/web-legacy` is the frozen Vite app, kept as a running reference until the new app lands. `packages/config` holds the shared TypeScript, ESLint and Prettier config.
 
 This file is always loaded, so it stays small. Long-form rules live in `.agents/skills/`: read one **only when you touch its area**, and before you edit. A workspace with rules of its own has a nested `AGENTS.md`.
 
@@ -37,7 +37,7 @@ These hold everywhere and are checkable from a diff alone.
 - **Always `pnpm`, never `npm` or `yarn`.** The version is pinned by `packageManager` in the root `package.json`.
 - **No `any` and no `as` casts.** Both are lint errors. Parse unknown or external data with a schema (Zod or Valibot) at the boundary and use its inferred type.
 - **`packages/*` never imports `next` or `react-dom/server`.** Those belong to the app layer.
-- **Every workspace except the frozen `apps/web-legacy` extends the shared config**: `tsconfig.json` extends `packages/config/tsconfig.base.json`, and the ESLint and Prettier configs re-export `@board-games/config/eslint` and `@board-games/config/prettier`.
+- **Every workspace except the frozen `apps/web-legacy` extends the shared config**: `tsconfig.json` extends `packages/config/tsconfig.base.json`, and the ESLint and Prettier configs re-export `@meeplewall/config/eslint` and `@meeplewall/config/prettier`.
 - **Pin every container image to an exact tag.** Never `:latest` or another floating tag.
 - **Never use nested ternaries or `switch`.** Extract a function with `if`/`return`; close a dispatch with a `never` tail.
 - **No `../../` imports, no conditional object spread, no inline functions in JSX, no chained `??`.**

@@ -1,6 +1,6 @@
 # packages/boardgamegeek
 
-`@board-games/boardgamegeek`: a typed BoardGameGeek client over BGG's open JSON API at `api.geekdo.com`, a client for the one XMLAPI2 endpoint we use (a user's collection), plus the box-size cross-check that turns a game's editions into one box in centimetres. Framework-agnostic.
+`@meeplewall/boardgamegeek`: a typed BoardGameGeek client over BGG's open JSON API at `api.geekdo.com`, a client for the one XMLAPI2 endpoint we use (a user's collection), plus the box-size cross-check that turns a game's editions into one box in centimetres. Framework-agnostic.
 
 The endpoints, their quirks, the rate limit, what is blocked and the box-size method are in `.agents/skills/boardgamegeek/SKILL.md`. Read it before changing anything here.
 
@@ -17,4 +17,4 @@ The unit tests replay real geekdo responses from `src/fixtures/`, copied from th
 
 `client.e2e.test.ts` calls geekdo live and skips when it is unreachable. `collection.e2e.test.ts` calls XMLAPI2 live and skips when `BGG_API_TOKEN` is unset. `collection.test.ts` replays `src/fixtures/collection.xml`.
 
-`pnpm --filter @board-games/boardgamegeek dev-fetch <bggId>` prints a parsed game, its version count and the cross-checked box. It reads `BGG_USER_AGENT` from this package's `.env.local` (copy `.env.example`) or the shell.
+`pnpm --filter @meeplewall/boardgamegeek dev-fetch <bggId>` prints a parsed game, its version count and the cross-checked box. It reads `BGG_USER_AGENT` from this package's `.env.local` (copy `.env.example`) or the shell.

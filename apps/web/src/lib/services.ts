@@ -1,6 +1,6 @@
-import { createBggClient, createBggCollectionClient } from '@board-games/boardgamegeek';
-import { CollectionSyncService } from '@board-games/collection-sync';
-import { createDatabase, type Database } from '@board-games/db';
+import { createBggClient, createBggCollectionClient } from '@meeplewall/boardgamegeek';
+import { CollectionSyncService } from '@meeplewall/collection-sync';
+import { createDatabase, type Database } from '@meeplewall/db';
 
 import { bggApiToken, bggUserAgent, databaseUrl } from './env';
 import { logError } from './logger';
@@ -17,13 +17,13 @@ interface Services {
 
 declare global {
   // Kept on globalThis so a dev hot reload reuses the pool instead of opening another.
-  var boardGamesServices: Services | undefined;
+  var meeplewallServices: Services | undefined;
 }
 
 function services(): Services {
-  globalThis.boardGamesServices ??= {};
+  globalThis.meeplewallServices ??= {};
 
-  return globalThis.boardGamesServices;
+  return globalThis.meeplewallServices;
 }
 
 function createPool(): Database {

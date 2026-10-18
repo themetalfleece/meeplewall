@@ -1,6 +1,6 @@
 # packages/storage
 
-`@board-games/storage`: an S3-compatible client for one bucket. Production points it at Cloudflare R2, local dev at the compose minio, through the same code and the same `STORAGE_*` variables.
+`@meeplewall/storage`: an S3-compatible client for one bucket. Production points it at Cloudflare R2, local dev at the compose minio, through the same code and the same `STORAGE_*` variables.
 
 ## Rules
 

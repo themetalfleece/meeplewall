@@ -71,7 +71,7 @@ export class TestDatabase {
   }
 
   static async create({ serverUrl }: { serverUrl: string }): Promise<TestDatabase> {
-    const name = `board_games_test_${randomUUID().replaceAll('-', '')}`;
+    const name = `meeplewall_test_${randomUUID().replaceAll('-', '')}`;
     await runServerStatement({ serverUrl, statement: `create database "${name}"` });
 
     const databaseUrl = new URL(serverUrl);

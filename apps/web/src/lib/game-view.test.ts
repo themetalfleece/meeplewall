@@ -1,4 +1,4 @@
-import type { ImageAsset } from '@board-games/db';
+import type { ImageAsset } from '@meeplewall/db';
 import { describe, expect, it } from 'vitest';
 
 import { PLACEHOLDER_COVER_PATH, resolveGameImages, toGameBoxInput } from './game-view';

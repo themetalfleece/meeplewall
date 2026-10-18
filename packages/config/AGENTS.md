@@ -1,6 +1,6 @@
 # packages/config
 
-`@board-games/config`: the TypeScript base, ESLint config and Prettier config every workspace extends. A change here changes every package, so run the whole gate from the repo root.
+`@meeplewall/config`: the TypeScript base, ESLint config and Prettier config every workspace extends. A change here changes every package, so run the whole gate from the repo root.
 
 ## Rules
 

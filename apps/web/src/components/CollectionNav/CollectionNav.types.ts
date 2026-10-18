@@ -1,4 +1,4 @@
-import type { CollectionNeighbour } from '@board-games/db';
+import type { CollectionNeighbour } from '@meeplewall/db';
 
 export interface CollectionNavProps {
   /** The still-encoded `[uId]` and `[gId]` segments. */

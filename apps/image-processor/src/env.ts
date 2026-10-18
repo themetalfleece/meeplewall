@@ -1,4 +1,4 @@
-import type { StorageOptions } from '@board-games/storage';
+import type { StorageOptions } from '@meeplewall/storage';
 import { z } from 'zod';
 
 // The only module that reads process.env. Every variable is required and documented in

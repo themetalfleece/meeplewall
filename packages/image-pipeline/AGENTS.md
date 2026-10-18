@@ -1,6 +1,6 @@
 # packages/image-pipeline
 
-`@board-games/image-pipeline`: pure image-processing functions over Sharp. Bytes in, bytes and colours out. No network, no storage, no database, no `process.env`.
+`@meeplewall/image-pipeline`: pure image-processing functions over Sharp. Bytes in, bytes and colours out. No network, no storage, no database, no `process.env`.
 
 ## API
 

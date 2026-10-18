@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { closeDatabase, createDatabase, migrateDatabase, type Database } from '@board-games/db';
+import { closeDatabase, createDatabase, migrateDatabase, type Database } from '@meeplewall/db';
 import { afterAll, beforeAll, beforeEach } from 'vitest';
 
 /** The compose Postgres from DATABASE_URL, or undefined so the suite skips. CI never skips. */

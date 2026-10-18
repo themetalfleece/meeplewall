@@ -1,6 +1,6 @@
 # The Next.js app as a standalone Node server. Build from the repo root:
 #
-#   docker build -f infra/Dockerfile.web --build-arg SITE_URL=https://example.com -t board-games-web .
+#   docker build -f infra/Dockerfile.web --build-arg SITE_URL=https://meeplewall.com -t meeplewall-web .
 #
 # SITE_URL is needed at build time because static pages are rendered then; give the container the
 # same value. At runtime it reads SITE_URL, DATABASE_URL, STORAGE_PUBLIC_BASE_URL, BGG_USER_AGENT,
@@ -14,9 +14,9 @@ RUN corepack enable
 WORKDIR /repo
 COPY . .
 # Installs and builds only the app and the workspace packages it depends on.
-RUN pnpm install --frozen-lockfile --filter "@board-games/web..."
+RUN pnpm install --frozen-lockfile --filter "@meeplewall/web..."
 ARG SITE_URL
-RUN SITE_URL="$SITE_URL" pnpm --filter "@board-games/web..." build
+RUN SITE_URL="$SITE_URL" pnpm --filter "@meeplewall/web..." build
 
 FROM node:24.22.0-trixie-slim
 ENV NODE_ENV=production

@@ -1,5 +1,5 @@
 {
-  "name": "board-games",
+  "name": "meeplewall",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "engines": {
@@ -18,7 +18,7 @@
     "prepare": "node scripts/link-agent-config.mts || exit 0"
   },
   "devDependencies": {
-    "@board-games/config": "workspace:*",
+    "@meeplewall/config": "workspace:*",
     "prettier": "catalog:dev",
     "vite": "catalog:dev",
     "vitest": "catalog:dev"

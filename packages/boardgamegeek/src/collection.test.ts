@@ -6,7 +6,7 @@ import type { BggCollectionClient } from './collection.ts';
 import { readCollectionFixture } from './fixtures/fixtures.ts';
 import { BggHttpError, BggResponseError } from './http.ts';
 
-const USER_AGENT = 'board-games tests';
+const USER_AGENT = 'meeplewall tests';
 const TOKEN = 'test-token';
 
 function xml(body: string, status = 200): Response {

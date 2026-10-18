@@ -94,7 +94,7 @@ importers:
 
   .:
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:packages/config
       prettier:
@@ -109,20 +109,20 @@ importers:
 
   apps/image-processor:
     dependencies:
-      '@board-games/db':
+      '@meeplewall/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@board-games/image-pipeline':
+      '@meeplewall/image-pipeline':
         specifier: workspace:*
         version: link:../../packages/image-pipeline
-      '@board-games/storage':
+      '@meeplewall/storage':
         specifier: workspace:*
         version: link:../../packages/storage
       zod:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/node':
@@ -155,19 +155,19 @@ importers:
 
   apps/web:
     dependencies:
-      '@board-games/boardgamegeek':
+      '@meeplewall/boardgamegeek':
         specifier: workspace:*
         version: link:../../packages/boardgamegeek
-      '@board-games/collection-sync':
+      '@meeplewall/collection-sync':
         specifier: workspace:*
         version: link:../../packages/collection-sync
-      '@board-games/db':
+      '@meeplewall/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@board-games/renderer':
+      '@meeplewall/renderer':
         specifier: workspace:*
         version: link:../../packages/renderer
-      '@board-games/storage':
+      '@meeplewall/storage':
         specifier: workspace:*
         version: link:../../packages/storage
       '@tanstack/react-query':
@@ -189,7 +189,7 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/node':
@@ -276,7 +276,7 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -297,14 +297,14 @@ importers:
 
   packages/collection-sync:
     dependencies:
-      '@board-games/boardgamegeek':
+      '@meeplewall/boardgamegeek':
         specifier: workspace:*
         version: link:../boardgamegeek
-      '@board-games/db':
+      '@meeplewall/db':
         specifier: workspace:*
         version: link:../db
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -359,7 +359,7 @@ importers:
         specifier: 'catalog:'
         version: 8.23.1
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -387,7 +387,7 @@ importers:
         specifier: 'catalog:'
         version: 0.35.5(@types/node@26.6.5)
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -412,7 +412,7 @@ importers:
         specifier: 'catalog:'
         version: 0.186.1
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../config
       '@types/react':
@@ -455,7 +455,7 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@board-games/config':
+      '@meeplewall/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':

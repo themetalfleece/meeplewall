@@ -1,4 +1,4 @@
-import type { BggClient, BggGame, BggGameVersion } from '@board-games/boardgamegeek';
+import type { BggClient, BggGame, BggGameVersion } from '@meeplewall/boardgamegeek';
 
 import type { CollectedGame, CollectionProvider } from '../collection-provider.ts';
 

@@ -1,5 +1,5 @@
 {
-  "name": "@board-games/db",
+  "name": "@meeplewall/db",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -23,7 +23,7 @@
     "seed": "node --env-file-if-exists=.env.local scripts/seed.ts"
   },
   "devDependencies": {
-    "@board-games/config": "workspace:*",
+    "@meeplewall/config": "workspace:*",
     "@types/node": "catalog:dev",
     "drizzle-kit": "catalog:dev",
     "eslint": "catalog:dev",

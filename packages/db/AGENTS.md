@@ -1,6 +1,6 @@
 # packages/db
 
-`@board-games/db`: the Drizzle schema, migrations and repository helpers over Postgres.
+`@meeplewall/db`: the Drizzle schema, migrations and repository helpers over Postgres.
 
 ## Rules
 
@@ -15,10 +15,10 @@
 ## Changing the schema
 
 1. Edit `src/schema/<table>.ts` (one file per table, re-exported from `src/schema/index.ts`).
-2. `pnpm --filter @board-games/db generate --name <what_changed>` writes `src/migrations/<n>_<name>.sql` and its `meta/` snapshot. Commit both, unedited.
-3. `pnpm --filter @board-games/db migrate` applies pending migrations to `DATABASE_URL`. Apps call `migrateDatabase(database)` at startup.
+2. `pnpm --filter @meeplewall/db generate --name <what_changed>` writes `src/migrations/<n>_<name>.sql` and its `meta/` snapshot. Commit both, unedited.
+3. `pnpm --filter @meeplewall/db migrate` applies pending migrations to `DATABASE_URL`. Apps call `migrateDatabase(database)` at startup.
 
-`pnpm --filter @board-games/db seed` loads a fixture user (`seed-user`) and four games. It is idempotent. Both scripts and the tests read `DATABASE_URL` from this package's `.env.local` (copy `.env.example`).
+`pnpm --filter @meeplewall/db seed` loads a fixture user (`seed-user`) and four games. It is idempotent. Both scripts and the tests read `DATABASE_URL` from this package's `.env.local` (copy `.env.example`).
 
 ## Tests
 

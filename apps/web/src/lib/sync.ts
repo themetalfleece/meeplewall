@@ -3,8 +3,8 @@ import {
   isOlderThan,
   isSyncAbandoned,
   type SyncRequest,
-} from '@board-games/collection-sync';
-import type { CollectionSync, RefreshSource } from '@board-games/db';
+} from '@meeplewall/collection-sync';
+import type { CollectionSync, RefreshSource } from '@meeplewall/db';
 import { after } from 'next/server';
 
 import { logError, logInfo } from './logger';

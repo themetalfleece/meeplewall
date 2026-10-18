@@ -6,8 +6,8 @@ const validOptions: StorageOptions = {
   endpoint: 'http://localhost:9000',
   accessKeyId: 'access-key',
   secretAccessKey: 'secret-key',
-  bucket: 'board-games',
-  publicBaseUrl: 'http://localhost:9000/board-games',
+  bucket: 'meeplewall',
+  publicBaseUrl: 'http://localhost:9000/meeplewall',
   forcePathStyle: true,
 };
 
@@ -62,7 +62,7 @@ describe('getPublicUrl', () => {
     const storage = createStorage(validOptions);
 
     expect(storage.getPublicUrl({ key: 'covers/123.webp' })).toBe(
-      'http://localhost:9000/board-games/covers/123.webp',
+      'http://localhost:9000/meeplewall/covers/123.webp',
     );
   });
 
@@ -78,7 +78,7 @@ describe('getPublicUrl', () => {
     const storage = createStorage(validOptions);
 
     expect(storage.getPublicUrl({ key: 'covers/Ark Nova #1?.webp' })).toBe(
-      'http://localhost:9000/board-games/covers/Ark%20Nova%20%231%3F.webp',
+      'http://localhost:9000/meeplewall/covers/Ark%20Nova%20%231%3F.webp',
     );
   });
 });

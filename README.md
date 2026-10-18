@@ -1,4 +1,8 @@
-# Jason's Board Games
+# Meeplewall
+
+Board game collections from BoardGameGeek, shelved as 3D boxes, at
+**[meeplewall.com](https://meeplewall.com/)**. The rest of this file describes the frozen
+legacy app in `apps/web-legacy`.
 
 A Stripe-Press-style showcase of a ~200-game board-game collection, rendered as
 photorealistic 3D boxes you can browse and open. Live at

@@ -1,5 +1,5 @@
 {
-  "name": "@board-games/web",
+  "name": "@meeplewall/web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,11 +12,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@board-games/boardgamegeek": "workspace:*",
-    "@board-games/collection-sync": "workspace:*",
-    "@board-games/db": "workspace:*",
-    "@board-games/renderer": "workspace:*",
-    "@board-games/storage": "workspace:*",
+    "@meeplewall/boardgamegeek": "workspace:*",
+    "@meeplewall/collection-sync": "workspace:*",
+    "@meeplewall/db": "workspace:*",
+    "@meeplewall/renderer": "workspace:*",
+    "@meeplewall/storage": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "clsx": "catalog:",
     "next": "catalog:",
@@ -25,7 +25,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@board-games/config": "workspace:*",
+    "@meeplewall/config": "workspace:*",
     "@types/node": "catalog:dev",
     "@types/react": "catalog:dev",
     "@types/react-dom": "catalog:dev",

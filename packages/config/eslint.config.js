@@ -2,7 +2,7 @@
 //
 // Consumers re-export it from their own eslint.config.js:
 //
-//   import config from '@board-games/config/eslint';
+//   import config from '@meeplewall/config/eslint';
 //   export default config;
 //
 // The strict-type rules below are ON from day one and are non-negotiable: no

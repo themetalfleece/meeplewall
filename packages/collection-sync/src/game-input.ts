@@ -1,5 +1,5 @@
-import { crossCheckBoxSize, type BggGame, type BggGameVersion } from '@board-games/boardgamegeek';
-import type { GameInput } from '@board-games/db';
+import { crossCheckBoxSize, type BggGame, type BggGameVersion } from '@meeplewall/boardgamegeek';
+import type { GameInput } from '@meeplewall/db';
 
 const MILLIMETRES_PER_CENTIMETRE = 10;
 

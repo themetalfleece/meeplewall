@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
-import { closeDatabase, createDatabase, migrateDatabase, type Database } from '@board-games/db';
-import { createStorage, type Storage } from '@board-games/storage';
+import { closeDatabase, createDatabase, migrateDatabase, type Database } from '@meeplewall/db';
+import { createStorage, type Storage } from '@meeplewall/storage';
 import pg from 'pg';
 
 import { isContinuousIntegration, readServiceConfig, type ServiceConfig } from '../env.ts';

@@ -1,4 +1,4 @@
-import type { CollectionSync } from '@board-games/db';
+import type { CollectionSync } from '@meeplewall/db';
 
 const MILLISECONDS_PER_SECOND = 1_000;
 

@@ -2,31 +2,31 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { on } = vi.hoisted(() => ({ on: vi.fn() }));
 
-vi.mock('@board-games/db', () => ({
+vi.mock('@meeplewall/db', () => ({
   createDatabase: vi.fn(() => ({ $client: { on } })),
 }));
-vi.mock('@board-games/boardgamegeek', () => ({
+vi.mock('@meeplewall/boardgamegeek', () => ({
   createBggClient: vi.fn(() => ({})),
   createBggCollectionClient: vi.fn(() => ({ transport: 'xmlapi2' })),
 }));
-vi.mock('@board-games/collection-sync', () => ({
+vi.mock('@meeplewall/collection-sync', () => ({
   CollectionSyncService: vi.fn(),
 }));
 
-const { createDatabase } = await import('@board-games/db');
-const { createBggCollectionClient } = await import('@board-games/boardgamegeek');
-const { CollectionSyncService } = await import('@board-games/collection-sync');
+const { createDatabase } = await import('@meeplewall/db');
+const { createBggCollectionClient } = await import('@meeplewall/boardgamegeek');
+const { CollectionSyncService } = await import('@meeplewall/collection-sync');
 const { getDatabase, getSyncService } = await import('./services');
 
 beforeEach(() => {
-  globalThis.boardGamesServices = undefined;
+  globalThis.meeplewallServices = undefined;
   vi.stubEnv('DATABASE_URL', 'postgres://localhost/test');
   vi.stubEnv('BGG_USER_AGENT', 'tests');
   vi.stubEnv('BGG_API_TOKEN', 'token');
 });
 
 afterEach(() => {
-  globalThis.boardGamesServices = undefined;
+  globalThis.meeplewallServices = undefined;
   vi.unstubAllEnvs();
   vi.clearAllMocks();
 });

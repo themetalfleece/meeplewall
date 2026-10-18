@@ -112,7 +112,7 @@ export class BoxMaterial {
       patchBoxShader(shader);
     };
     // Every box compiles to the same program, so they share one.
-    this.material.customProgramCacheKey = () => 'board-games-box';
+    this.material.customProgramCacheKey = () => 'meeplewall-box';
   }
 
   /** Points the face projection at new box extents and refits the artwork to them. */

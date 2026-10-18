@@ -5,7 +5,7 @@ import {
   listImageAssets,
   type CollectionNeighbour,
   type ImageAsset,
-} from '@board-games/db';
+} from '@meeplewall/db';
 
 import { storagePublicBaseUrl } from './env';
 import { resolveGameImages } from './game-view';

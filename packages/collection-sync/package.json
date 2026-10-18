@@ -1,5 +1,5 @@
 {
-  "name": "@board-games/collection-sync",
+  "name": "@meeplewall/collection-sync",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -19,11 +19,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@board-games/boardgamegeek": "workspace:*",
-    "@board-games/db": "workspace:*"
+    "@meeplewall/boardgamegeek": "workspace:*",
+    "@meeplewall/db": "workspace:*"
   },
   "devDependencies": {
-    "@board-games/config": "workspace:*",
+    "@meeplewall/config": "workspace:*",
     "@types/node": "catalog:dev",
     "drizzle-orm": "catalog:",
     "eslint": "catalog:dev",

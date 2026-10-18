@@ -1,4 +1,4 @@
-import type { GameBoxInput } from '@board-games/renderer';
+import type { GameBoxInput } from '@meeplewall/renderer';
 
 export interface GameBoxViewerProps {
   game: GameBoxInput;

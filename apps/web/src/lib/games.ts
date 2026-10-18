@@ -1,5 +1,5 @@
-import { getGame, listImageAssets } from '@board-games/db';
-import type { GameBoxInput } from '@board-games/renderer';
+import { getGame, listImageAssets } from '@meeplewall/db';
+import type { GameBoxInput } from '@meeplewall/renderer';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { gameCacheTag } from './cache-tags';

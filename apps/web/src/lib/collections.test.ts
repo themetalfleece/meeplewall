@@ -1,5 +1,5 @@
-import { SYNC_ABANDONED_AFTER_SECONDS } from '@board-games/collection-sync';
-import type { BggGame, CollectionSync, CollectionWithItems, ImageAsset } from '@board-games/db';
+import { SYNC_ABANDONED_AFTER_SECONDS } from '@meeplewall/collection-sync';
+import type { BggGame, CollectionSync, CollectionWithItems, ImageAsset } from '@meeplewall/db';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   runStartedSyncAfterResponse: vi.fn(),
 }));
 
-vi.mock('@board-games/db', () => ({
+vi.mock('@meeplewall/db', () => ({
   getCollectionByUsername: mocks.getCollectionByUsername,
   getCollectionEntry: mocks.getCollectionEntry,
   getLatestCollectionSync: mocks.getLatestCollectionSync,

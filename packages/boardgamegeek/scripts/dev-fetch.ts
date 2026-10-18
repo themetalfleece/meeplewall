@@ -1,5 +1,5 @@
 // Fetches one game live and prints what the client parsed, plus the box size it cross-checks.
-// Usage: pnpm --filter @board-games/boardgamegeek dev-fetch <bggId>
+// Usage: pnpm --filter @meeplewall/boardgamegeek dev-fetch <bggId>
 import { z } from 'zod';
 
 import { createBggClient, crossCheckBoxSize } from '../src/index.ts';

@@ -6,7 +6,7 @@
 #
 # Both services expose healthchecks so `up` reports `healthy` once ready.
 # minio-init runs once, creates the public-read bucket, then exits.
-name: board-games-dev
+name: meeplewall-dev
 
 # Pulled from quay.io because MinIO's Docker Hub namespace no longer exists.
 # This is the newest community image they published; later source releases
@@ -18,15 +18,15 @@ services:
     image: postgres:17.11-trixie
     restart: unless-stopped
     environment:
-      POSTGRES_USER: boardgames
-      POSTGRES_PASSWORD: boardgames
-      POSTGRES_DB: boardgames
+      POSTGRES_USER: meeplewall
+      POSTGRES_PASSWORD: meeplewall
+      POSTGRES_DB: meeplewall
     ports:
       - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U boardgames -d boardgames']
+      test: ['CMD-SHELL', 'pg_isready -U meeplewall -d meeplewall']
       interval: 5s
       timeout: 5s
       retries: 12
@@ -60,8 +60,8 @@ services:
     command:
       - >-
         mc alias set local http://minio:9000 minioadmin minioadmin &&
-        mc mb --ignore-existing local/board-games &&
-        mc anonymous set download local/board-games
+        mc mb --ignore-existing local/meeplewall &&
+        mc anonymous set download local/meeplewall
 
 volumes:
   postgres-data:

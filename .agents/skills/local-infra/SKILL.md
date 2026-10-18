@@ -22,9 +22,9 @@ docker compose -f infra/docker-compose.yml up -d postgres minio minio-init
 
 Both services have healthchecks, so `docker compose ps` reports `healthy` once they are ready. The credentials in the compose file are local-only defaults.
 
-`minio-init` is a one-shot service: it waits for minio to be healthy, creates the `board-games` bucket if it is missing and makes its objects publicly readable, matching R2 behind its public URL. It exits once done, so `docker compose ps` does not list it. It reuses the minio image for the `mc` client bundled inside it, so there is no second image to pin. The `STORAGE_*` values in each `.env.example` point at this bucket. CI runs `up -d --wait minio` and then `run --rm minio-init` from the same file.
+`minio-init` is a one-shot service: it waits for minio to be healthy, creates the `meeplewall` bucket if it is missing and makes its objects publicly readable, matching R2 behind its public URL. It exits once done, so `docker compose ps` does not list it. It reuses the minio image for the `mc` client bundled inside it, so there is no second image to pin. The `STORAGE_*` values in each `.env.example` point at this bucket. CI runs `up -d --wait minio` and then `run --rm minio-init` from the same file.
 
-CI also runs `up -d --wait postgres` for the `packages/db` and `apps/image-processor` suites, so CI and local dev share one pinned Postgres image. If another project already holds port 5432 locally, run the same image on a spare port and point `DATABASE_URL` at it. To let a container reach it, attach it to the compose network with the `postgres` alias: `docker run -d --network board-games-dev_default --network-alias postgres -p 5433:5432 -e POSTGRES_USER=boardgames -e POSTGRES_PASSWORD=boardgames -e POSTGRES_DB=boardgames postgres:17.11-trixie`.
+CI also runs `up -d --wait postgres` for the `packages/db` and `apps/image-processor` suites, so CI and local dev share one pinned Postgres image. If another project already holds port 5432 locally, run the same image on a spare port and point `DATABASE_URL` at it. To let a container reach it, attach it to the compose network with the `postgres` alias: `docker run -d --network meeplewall-dev_default --network-alias postgres -p 5433:5432 -e POSTGRES_USER=meeplewall -e POSTGRES_PASSWORD=meeplewall -e POSTGRES_DB=meeplewall postgres:17.11-trixie`.
 
 ## App images
 

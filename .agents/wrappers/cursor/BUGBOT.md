@@ -39,7 +39,7 @@ Browser automation uses Chrome. A Playwright `channel: "msedge"` (or any Edge la
 - **`pnpm` only.** An `npm` or `yarn` command, or a `package-lock.json` or `yarn.lock`, is a violation.
 - **No `any` and no `as` casts.** External data is parsed with Zod or Valibot at the boundary, never cast.
 - **`packages/*` never imports `next` or `react-dom/server`.**
-- **A workspace's `tsconfig.json` (except `apps/web-legacy`) extends `packages/config/tsconfig.base.json`**, and its ESLint and Prettier configs re-export `@board-games/config`. A new package also defines `lint`, `typecheck` and `build` scripts, or CI silently skips it.
+- **A workspace's `tsconfig.json` (except `apps/web-legacy`) extends `packages/config/tsconfig.base.json`**, and its ESLint and Prettier configs re-export `@meeplewall/config`. A new package also defines `lint`, `typecheck` and `build` scripts, or CI silently skips it.
 - **`noEmit` never goes in `packages/config/tsconfig.base.json`.** Typecheck scripts pass `--noEmit` instead.
 - **Container images are pinned to an exact tag.** `:latest` or a bare major such as `postgres:17` is a violation.
 - **Code in `apps/web-legacy/src/` and `apps/web-legacy/scripts/` is frozen.** A hand edit to a source file there is a violation. Output of the `data` pipeline (`src/data/games.json`, `public/covers/`, `public/textures/`, caches and reports under `scripts/`) is data and may change.

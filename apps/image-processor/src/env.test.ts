@@ -5,12 +5,12 @@ import { parseWorkerConfig } from './env.ts';
 const SECRET = 'a-revalidate-secret-of-at-least-32-chars';
 
 const validEnvironment = {
-  DATABASE_URL: 'postgres://boardgames:boardgames@localhost:5432/boardgames',
+  DATABASE_URL: 'postgres://meeplewall:meeplewall@localhost:5432/meeplewall',
   STORAGE_ENDPOINT: 'http://localhost:9000',
   STORAGE_ACCESS_KEY_ID: 'access-key',
   STORAGE_SECRET_ACCESS_KEY: 'secret-key',
-  STORAGE_BUCKET: 'board-games',
-  STORAGE_PUBLIC_BASE_URL: 'http://localhost:9000/board-games',
+  STORAGE_BUCKET: 'meeplewall',
+  STORAGE_PUBLIC_BASE_URL: 'http://localhost:9000/meeplewall',
   STORAGE_FORCE_PATH_STYLE: 'true',
   WEB_INTERNAL_URL: 'http://localhost:3000',
   INTERNAL_REVALIDATE_SECRET: SECRET,
@@ -42,8 +42,8 @@ describe('parseWorkerConfig', () => {
         endpoint: 'http://localhost:9000',
         accessKeyId: 'access-key',
         secretAccessKey: 'secret-key',
-        bucket: 'board-games',
-        publicBaseUrl: 'http://localhost:9000/board-games',
+        bucket: 'meeplewall',
+        publicBaseUrl: 'http://localhost:9000/meeplewall',
         forcePathStyle: true,
       },
       webInternalUrl: 'http://localhost:3000',

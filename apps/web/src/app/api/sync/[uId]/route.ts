@@ -1,4 +1,4 @@
-import { getLatestCollectionSync } from '@board-games/db';
+import { getLatestCollectionSync } from '@meeplewall/db';
 
 import { jsonError, NO_STORE_HEADERS } from '@/lib/responses';
 import { parseUsername, type UserRouteContext } from '@/lib/route-params';

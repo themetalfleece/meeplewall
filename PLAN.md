@@ -359,7 +359,7 @@ The originals in `public/covers/` are the source of truth; only
 ## 7. Proposed File Structure
 
 ```
-board-games/
+meeplewall/
 ├─ PLAN.md
 ├─ index.html
 ├─ package.json

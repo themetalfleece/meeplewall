@@ -7,7 +7,7 @@ import { FIXTURE_GAME_IDS } from './fixtures/fixtures.ts';
 // Live calls against api.geekdo.com. Skips when BGG is unreachable, so an offline machine
 // reports skipped rather than green.
 
-const USER_AGENT = 'board-games e2e tests (+https://github.com/themetalfleece/board-games)';
+const USER_AGENT = 'meeplewall e2e tests (+https://meeplewall.com)';
 
 async function isGeekdoReachable(): Promise<boolean> {
   try {
